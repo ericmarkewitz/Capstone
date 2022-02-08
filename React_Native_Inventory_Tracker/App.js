@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image, SafeAreaView, Button } from "react-native";
+import { openDatabase } from 'react-native-sqlite-storage';
 
 export default function App() {
   console.log("App executed");
@@ -7,12 +8,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <Text>Inventory Tracking App</Text>
-      <Text>Sections</Text>
-
-      <Button
-        color= "coral"
-        title= "Click Me"
-        onPress={() => alert('Section Selected')}/>
+      <Text></Text>
 
       <Image
         source={{
@@ -22,7 +18,12 @@ export default function App() {
         }}
       />
 
-      <Text>Open up App.js to start working on your app!</Text>
+      <Text></Text>
+
+      <Button
+        color= "coral"
+        title= "Add A New Section"
+        onPress={() => alert('Section Selected')}/>
 
       <StatusBar style="auto" />
     </SafeAreaView>
