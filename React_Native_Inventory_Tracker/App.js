@@ -1,8 +1,9 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList } from "react-native";
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableHighlight } from "react-native";
 import { openDatabase } from 'react-native-sqlite-storage';
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
+//import { TouchableHighlight } from "react-native-web";
 //npm install react-navigation
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
       <Stack.Navigator initialRouteName = "Home">
         <Stack.Screen name = "Home" component = {HomeScreen} />
         <Stack.Screen name = "Food" component = {FoodScreen} />
+        <Stack.Screen name = "FoodPic" component = {FoodPicScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -35,11 +37,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: 'bold',
     backgroundColor: 'rgba(153,204,255,1.0)',
+    fontSize: 30,
+    borderWidth: 1,
+    borderColor: "darkgrey",
   },
   item: {
     //padding: 10,
-    //fontSize: 18,
-    //height: 44,
+    borderWidth: 1,
+    borderColor: "darkgrey",
+    fontSize: 30,
+    color: "slategray",
   },
 });
 
@@ -81,17 +88,44 @@ function FoodScreen({ navigation }){
         color= "coral"
         title= "Return Home"
         onPress={() => navigation.navigate('Home')}/>
+        
 
       <SectionList
       sections={[
         {title: 'P', data: ['Peas','Pickles']},
         {title: 'N', data: ['Nuts']},
       ]}
-      renderItem = {({item}) => <Text style = {styles.item}> {item} </Text>}
-      renderSectionHeader = {({section}) => <Text style = {styles.sectionHeader}> {section.title} </Text> }
       keyExtractor = { (item, index) => index }
+      renderItem = {({item, index, separators}) => 
+        <TouchableHighlight
+          activeOpacity={0.6}
+          underlayColor={"#DDDDDD"}
+          onPress={() => navigation.navigate('FoodPic')}
+          >
+        <View>
+          <Text style = {styles.item} > {item} </Text>
+        </View>
+        </TouchableHighlight>
+      }
+      
+      renderSectionHeader = {({section}) => <Text style = {styles.sectionHeader}> {section.title} </Text> }
+      
       />
 
     </View>
   )
+}
+
+function FoodPicScreen(){
+  return(
+    <View style={styles.container}>
+      <Text>Food!</Text>
+      <Image
+        source={{
+          width: 200,
+          height: 300,
+          uri: "https://www.usu.edu/today/images/stories/xl/food-preservation-UST.jpg",
+        }} />
+    </View>
+  );
 }
