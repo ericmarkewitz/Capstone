@@ -1,23 +1,42 @@
+import React, { useState } from 'react';
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableHighlight } from "react-native";
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableHighlight, TextInput } from "react-native";
 import { openDatabase } from 'react-native-sqlite-storage';
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 //import { TouchableHighlight } from "react-native-web";
 //npm install react-navigation
 
+
+
+
 export default function App() {
   console.log("App executed");
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName = "Home">
-        <Stack.Screen name = "Home" component = {HomeScreen} />
-        <Stack.Screen name = "Food" component = {FoodScreen} />
-        <Stack.Screen name = "FoodPic" component = {FoodPicScreen} />
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="INVENTORY TRACKING APP" component={HomeScreen} />
+        <Stack.Screen name="Food" component={FoodScreen} />
+        <Stack.Screen name="FoodPic" component={FoodPicScreen} />
+        <Stack.Screen name="AddItems" component={AddItems} />
+
       </Stack.Navigator>
+
     </NavigationContainer>
+
   );
 }
+
+const textBox = StyleSheet.create({
+  input: {
+    borderColor: "gray",
+    width: "100%",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+  },
+});
+
 
 const Stack = createNativeStackNavigator();
 
@@ -50,12 +69,12 @@ const styles = StyleSheet.create({
   },
 });
 
-function HomeScreen({ navigation }){
+function HomeScreen({ navigation }) {
+  const [section, setText] = useState('');
   return (
     <SafeAreaView style={styles.container}>
-      <Text>Inventory Tracking App</Text>
-      <Text></Text>
-
+      <Text>Welcome to the inventory tracking App!</Text>
+      <Text>Click below to add items or view your items...</Text>
       <Image
         source={{
           width: 200,
@@ -64,60 +83,75 @@ function HomeScreen({ navigation }){
         }}
       />
 
-      <Button
-        color= "coral"
-        title= "Add A New Section"
-        onPress={() => alert('Section Selected')}/>
 
       <Button
-        color= "coral"
-        title= "View food items"
-        onPress={() => navigation.navigate('Food')}/>
+        color="coral"
+        title="Add A New Section"
+        onPress={() => navigation.navigate('AddItems')}
+      />
+      <View style={textBox.container}>
+        <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE SECTION
+          style={textBox.input}
+          placeholder="Add section name here"
+          onChangeText={(section) => setText(section)}
+          defaultValue={section}
+        />
+      </View>
 
-      <StatusBar style="auto" />
-    </SafeAreaView>
+      < Button
+        color="coral"
+        title="View food items"
+        onPress={() => navigation.navigate('Food')
+        } />
+
+      < StatusBar style="auto" />
+
+    </SafeAreaView >
+
   );
 }
 
-function FoodScreen({ navigation }){
-  return(
+
+
+function FoodScreen({ navigation }) {
+  return (
     <View style={styles.container}>
       <Text>Food Screen</Text>
 
       <Button
-        color= "coral"
-        title= "Return Home"
-        onPress={() => navigation.navigate('Home')}/>
-        
+        color="coral"
+        title="Return Home"
+        onPress={() => navigation.navigate('Home')} />
+
 
       <SectionList
-      sections={[
-        {title: 'P', data: ['Peas','Pickles']},
-        {title: 'N', data: ['Nuts']},
-      ]}
-      keyExtractor = { (item, index) => index }
-      renderItem = {({item, index, separators}) => 
-        <TouchableHighlight
-          activeOpacity={0.6}
-          underlayColor={"#DDDDDD"}
-          onPress={() => navigation.navigate('FoodPic')}
+        sections={[
+          { title: 'P', data: ['Peas', 'Pickles'] },
+          { title: 'N', data: ['Nuts'] },
+        ]}
+        keyExtractor={(item, index) => index}
+        renderItem={({ item, index, separators }) =>
+          <TouchableHighlight
+            activeOpacity={0.6}
+            underlayColor={"#DDDDDD"}
+            onPress={() => navigation.navigate('FoodPic')}
           >
-        <View>
-          <Text style = {styles.item} > {item} </Text>
-        </View>
-        </TouchableHighlight>
-      }
-      
-      renderSectionHeader = {({section}) => <Text style = {styles.sectionHeader}> {section.title} </Text> }
-      
+            <View>
+              <Text style={styles.item} > {item} </Text>
+            </View>
+          </TouchableHighlight>
+        }
+
+        renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
+
       />
 
     </View>
   )
 }
 
-function FoodPicScreen(){
-  return(
+function FoodPicScreen() {
+  return (
     <View style={styles.container}>
       <Text>Food!</Text>
       <Image
@@ -126,6 +160,21 @@ function FoodPicScreen(){
           height: 300,
           uri: "https://www.usu.edu/today/images/stories/xl/food-preservation-UST.jpg",
         }} />
+    </View>
+  );
+}
+
+function AddItems({ navigation }) {
+  return (
+    <View style={styles.container}>
+      <Text>ADD AN ITEM</Text>
+
+      <Button
+        color="coral"
+        title="Add"
+        onPress={() => console.log('the name of the item is: ' + nameOfItem)}
+      />
+
     </View>
   );
 }
