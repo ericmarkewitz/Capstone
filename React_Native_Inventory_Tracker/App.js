@@ -19,6 +19,7 @@ export default function App() {
         <Stack.Screen name="Food" component={FoodScreen} />
         <Stack.Screen name="FoodPic" component={FoodPicScreen} />
         <Stack.Screen name="AddItems" component={AddItems} />
+        <Stack.Screen name="Pantry" component={Pantry} />
 
       </Stack.Navigator>
 
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     color: "slategray",
   },
   text: {
-      
+
   }
 });
 
@@ -83,14 +84,11 @@ function HomeScreen({ navigation }) {
 
 
           <Text>Welcome to the inventory tracking App!</Text>
-          <Text>Click below to add items or view your items...</Text>
+          <Text>Click below to add new sections or view existing ones...</Text>
+          <Text></Text>
+          <Text></Text>
 
 
-          <Button
-            color="#0437A0"
-            title="Add A New Section"
-            onPress={() => navigation.navigate('AddItems')}
-          />
           <View style={textBox.container}>
             <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE SECTION
               style={textBox.input}
@@ -99,12 +97,24 @@ function HomeScreen({ navigation }) {
               defaultValue={section}
             />
           </View>
+          <Button
+            color="#0437A0"
+            title="Add A New Section"
+            onPress={() => console.log("Now add a new section")}
+          />
 
+          <Text></Text>
+          <Text></Text>
+          <Text></Text>
+          <Text></Text>
+
+          <View style ={{backgroundColor: "#B8B5A3", borderRadius: 5}}>
           < Button
             color="#0437A0"
-            title="View food items"
-            onPress={() => navigation.navigate('Food')
+            title="Pantry"
+            onPress={() => navigation.navigate('Pantry')
             } />
+          </View>
 
           < StatusBar style="auto" />
 
@@ -117,6 +127,12 @@ function HomeScreen({ navigation }) {
 
 function FoodScreen({ navigation }) {
   return (
+      <ImageBackground
+          source={require('./assets/cart.jpg')}
+          style={{width: '100%', height: '100%'}}
+      >
+
+
     <View style={styles.container}>
       <Text>Food Screen</Text>
 
@@ -149,6 +165,7 @@ function FoodScreen({ navigation }) {
       />
 
     </View>
+    </ImageBackground>
   )
 }
 
@@ -172,8 +189,12 @@ function AddItems({ navigation }) {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
   return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{width: '100%', height: '100%'}}
+    >
     <View style={styles.container}>
-      <Text>ADD AN ITEM</Text>
+      <Text>Add to Groceries</Text>
       <View style={toggleStyles.container}>
         <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
           style={textBox.input}
@@ -211,13 +232,46 @@ function AddItems({ navigation }) {
 
       <Button
         color="coral"
-        title="Add Item to inventory"
+        title="Add Item to Inventory"
         onPress={() => console.log('the name of the item is: ' + nameOfItem + quantity)}
       />
     </View>
-
+    </ImageBackground>
   );
 }
+
+function Pantry({ navigation }) {
+  const [nameOfItem, setText] = useState('');
+  const [quantity, setTextQuan] = useState('');
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{width: '100%', height: '100%'}}
+    >
+    <View style={styles.container}>
+
+    < Button
+      color="#0437A0"
+      title="View Inventory"
+      onPress={() => navigation.navigate('Food')
+      } />
+
+    <Button
+      style ={{borderRadius: 20}}
+      color="#0437A0"
+      title="Add A New Item"
+      onPress={() => navigation.navigate('AddItems')}
+    />
+
+    </View>
+    </ImageBackground>
+  );
+}
+
+
+
 
 const toggleStyles = StyleSheet.create({
   container: {
