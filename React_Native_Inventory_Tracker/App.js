@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableHighlight, TextInput, Switch } from "react-native";
-import { openDatabase } from 'react-native-sqlite-storage';
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableHighlight, TextInput, Switch, ImageBackground } from "react-native";
+import { openDatabase, SQLite} from 'react-native-sqlite-storage';
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 //import { TouchableHighlight } from "react-native-web";
@@ -43,7 +43,7 @@ const Stack = createNativeStackNavigator();
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "aliceblue",
+    //backgroundColor: "aliceblue",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -67,47 +67,49 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: "slategray",
   },
+  text: {
+      
+  }
 });
 
 function HomeScreen({ navigation }) {
   const [section, setText] = useState('');
   return (
-    <SafeAreaView style={styles.container}>
-      <Text>Welcome to the inventory tracking App!</Text>
-      <Text>Click below to add items or view your items...</Text>
-      <Image
-        source={{
-          width: 200,
-          height: 300,
-          uri: "https://picsum.photos/200/300",
-        }}
-      />
+    <ImageBackground
+        source={require('./assets/cart.jpg')}
+        style={{width: '100%', height: '100%'}}
+    >
+        <SafeAreaView style={styles.container}>
 
 
-      <Button
-        color="coral"
-        title="Add A New Section"
-        onPress={() => navigation.navigate('AddItems')}
-      />
-      <View style={textBox.container}>
-        <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE SECTION
-          style={textBox.input}
-          placeholder="Add section name here"
-          onChangeText={(section) => setText(section)}
-          defaultValue={section}
-        />
-      </View>
+          <Text>Welcome to the inventory tracking App!</Text>
+          <Text>Click below to add items or view your items...</Text>
 
-      < Button
-        color="coral"
-        title="View food items"
-        onPress={() => navigation.navigate('Food')
-        } />
 
-      < StatusBar style="auto" />
+          <Button
+            color="#0437A0"
+            title="Add A New Section"
+            onPress={() => navigation.navigate('AddItems')}
+          />
+          <View style={textBox.container}>
+            <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE SECTION
+              style={textBox.input}
+              placeholder="Add section name here"
+              onChangeText={(section) => setText(section)}
+              defaultValue={section}
+            />
+          </View>
 
-    </SafeAreaView >
+          < Button
+            color="#0437A0"
+            title="View food items"
+            onPress={() => navigation.navigate('Food')
+            } />
 
+          < StatusBar style="auto" />
+
+        </SafeAreaView >
+    </ImageBackground>
   );
 }
 
@@ -121,7 +123,7 @@ function FoodScreen({ navigation }) {
       <Button
         color="coral"
         title="Return Home"
-        onPress={() => navigation.navigate('Home')} />
+        onPress={() => navigation.navigate('INVENTORY TRACKING APP')} />
 
 
       <SectionList
