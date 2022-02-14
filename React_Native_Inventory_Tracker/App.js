@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableHighlight, TextInput } from "react-native";
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableHighlight, TextInput, Switch } from "react-native";
 import { openDatabase } from 'react-native-sqlite-storage';
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
@@ -165,16 +165,61 @@ function FoodPicScreen() {
 }
 
 function AddItems({ navigation }) {
+  const [nameOfItem, setText] = useState('');
+  const [quantity, setTextQuan] = useState('');
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
   return (
     <View style={styles.container}>
       <Text>ADD AN ITEM</Text>
+      <View style={toggleStyles.container}>
+        <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+          style={textBox.input}
+          placeholder="Add name of Item"
+          onChangeText={(nameOfItem) => setText(nameOfItem)}
+          defaultValue={nameOfItem}
+        />
+        <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+          style={textBox.input}
+          placeholder="Add quantity"
+          onChangeText={(quantity) => setTextQuan(quantity)}
+          defaultValue={quantity}
+        />
+        <Switch
+          trackColor={{ false: "#767577", true: "#81b0ff" }}
+          thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+          onValueChange={toggleSwitch}
+          value={isEnabled}
+        />
+        <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+          style={textBox.input}
+          placeholder="Add expiration date"
+          onChangeText={(quantity) => setTextQuan(quantity)} //CHANGE TO A NEW VAR
+          defaultValue={quantity}
+        />
+
+        <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+          style={textBox.input}
+          placeholder="Add additional info"
+          onChangeText={(quantity) => setTextQuan(quantity)} //CHANGE TO A NEW VAR
+          defaultValue={quantity}
+        />
+
+      </View>
 
       <Button
         color="coral"
-        title="Add"
-        onPress={() => console.log('the name of the item is: ' + nameOfItem)}
+        title="Add Item to inventory"
+        onPress={() => console.log('the name of the item is: ' + nameOfItem + quantity)}
       />
-
     </View>
+
   );
 }
+
+const toggleStyles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    justifyContent: "center"
+  }
+});
