@@ -4,6 +4,9 @@ import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, Touch
 import { openDatabase, SQLite} from 'react-native-sqlite-storage';
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
+//import WelcomeScreen from "./screens/WelcomeScreen";
+
+
 //import { TouchableHighlight } from "react-native-web";
 //npm install react-navigation
 
@@ -20,7 +23,6 @@ export default function App() {
         <Stack.Screen name="FoodPic" component={FoodPicScreen} />
         <Stack.Screen name="AddItems" component={AddItems} />
         <Stack.Screen name="Pantry" component={Pantry} />
-
       </Stack.Navigator>
 
     </NavigationContainer>
@@ -28,23 +30,11 @@ export default function App() {
   );
 }
 
-const textBox = StyleSheet.create({
-  input: {
-    borderColor: "gray",
-    width: "100%",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-  },
-});
-
-
 const Stack = createNativeStackNavigator();
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //backgroundColor: "aliceblue",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -68,9 +58,13 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: "slategray",
   },
-  text: {
-
-  }
+  input: {
+    borderColor: "gray",
+    width: "100%",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+  },
 });
 
 function HomeScreen({ navigation }) {
@@ -80,6 +74,10 @@ function HomeScreen({ navigation }) {
         source={require('./assets/cart.jpg')}
         style={{width: '100%', height: '100%'}}
     >
+
+
+
+
         <SafeAreaView style={styles.container}>
 
 
@@ -89,20 +87,20 @@ function HomeScreen({ navigation }) {
           <Text></Text>
 
 
-          <View style={textBox.container}>
+          <View style={styles.container}>
             <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE SECTION
-              style={textBox.input}
+              style={styles.input}
               placeholder="Add section name here"
               onChangeText={(section) => setText(section)}
               defaultValue={section}
             />
-          </View>
+
           <Button
             color="#0437A0"
             title="Add A New Section"
             onPress={() => console.log("Now add a new section")}
           />
-
+          </View>
           <Text></Text>
           <Text></Text>
           <Text></Text>
@@ -197,13 +195,13 @@ function AddItems({ navigation }) {
       <Text>Add to Groceries</Text>
       <View style={toggleStyles.container}>
         <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
-          style={textBox.input}
+          style={styles.input}
           placeholder="Add name of Item"
           onChangeText={(nameOfItem) => setText(nameOfItem)}
           defaultValue={nameOfItem}
         />
         <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
-          style={textBox.input}
+          style={styles.input}
           placeholder="Add quantity"
           onChangeText={(quantity) => setTextQuan(quantity)}
           defaultValue={quantity}
@@ -215,14 +213,14 @@ function AddItems({ navigation }) {
           value={isEnabled}
         />
         <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
-          style={textBox.input}
+          style={styles.input}
           placeholder="Add expiration date"
           onChangeText={(quantity) => setTextQuan(quantity)} //CHANGE TO A NEW VAR
           defaultValue={quantity}
         />
 
         <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
-          style={textBox.input}
+          style={styles.input}
           placeholder="Add additional info"
           onChangeText={(quantity) => setTextQuan(quantity)} //CHANGE TO A NEW VAR
           defaultValue={quantity}
