@@ -17,7 +17,11 @@ export default function App() {
   console.log("App executed");
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Home"
+        screenOptions={{
+          headerStyle: { backgroundColor: 'rgba(255,180,0,1.0)' }
+        }}  
+      >
         <Stack.Screen name="INVENTORY TRACKING APP" component={HomeScreen} />
         <Stack.Screen name="Food" component={FoodScreen} />
         <Stack.Screen name="FoodPic" component={FoodPicScreen} />
