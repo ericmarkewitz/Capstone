@@ -1,32 +1,25 @@
 import React, { useState } from 'react';
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableHighlight, TextInput, Switch, ImageBackground, Alert } from "react-native";
-import { openDatabase, SQLite} from 'react-native-sqlite-storage';
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground } from "react-native";
+import { openDatabase, SQLite } from 'react-native-sqlite-storage';
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 //import WelcomeScreen from "./screens/WelcomeScreen";
-
-
 //import { TouchableHighlight } from "react-native-web";
 //npm install react-navigation
-
-
-
 
 export default function App() {
   console.log("App executed");
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home"
-        screenOptions={{
-          headerStyle: { backgroundColor: 'rgba(255,180,0,1.0)' }
-        }}  
-      >
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="INVENTORY TRACKING APP" component={HomeScreen} />
         <Stack.Screen name="Food" component={FoodScreen} />
         <Stack.Screen name="FoodPic" component={FoodPicScreen} />
         <Stack.Screen name="AddItems" component={AddItems} />
         <Stack.Screen name="Pantry" component={Pantry} />
+        <Stack.Screen name="AddSection" component={AddSection} />
+
       </Stack.Navigator>
 
     </NavigationContainer>
@@ -36,15 +29,229 @@ export default function App() {
 
 const Stack = createNativeStackNavigator();
 
+function HomeScreen({ navigation }) {
+  const [section, setText] = useState('');
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <SafeAreaView style={styles.container}>
+        <View style={styles.pantryButton}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('AddSection') }}>
+            <Text style={styles.text}>ADD NEW SECTION</Text>
+            <Image source={require("./assets/newSection.png")} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.pantryButton}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Pantry') }}>
+            <Text style={styles.text}>VIEW PANTRY</Text>
+            <Image source={require("./assets/pantry.png")} />
+          </TouchableOpacity>
+        </View>
+        < StatusBar style="auto" />
+
+      </SafeAreaView >
+    </ImageBackground>
+  );
+}
+
+
+
+function FoodScreen({ navigation }) {
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+
+
+      <View style={styles.container}>
+        <Text>Food Screen</Text>
+
+        <Button
+          color="coral"
+          title="Return Home"
+          onPress={() => navigation.navigate('INVENTORY TRACKING APP')} />
+
+
+        <SectionList
+          sections={[
+            { title: 'P', data: ['Peas', 'Pickles'] },
+            { title: 'N', data: ['Nuts'] },
+          ]}
+          keyExtractor={(item, index) => index}
+          renderItem={({ item, index, separators }) =>
+            <TouchableHighlight
+              activeOpacity={0.6}
+              underlayColor={"#DDDDDD"}
+              onPress={() => navigation.navigate('FoodPic')}
+            >
+              <View>
+                <Text style={styles.item} > {item} </Text>
+              </View>
+            </TouchableHighlight>
+          }
+
+          renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
+
+        />
+
+      </View>
+    </ImageBackground>
+  )
+}
+
+function FoodPicScreen() {
+  return (
+    <View style={styles.container}>
+      <Text>Food!</Text>
+      <Image
+        source={{
+          width: 200,
+          height: 300,
+          uri: "https://www.usu.edu/today/images/stories/xl/food-preservation-UST.jpg",
+        }} />
+    </View>
+  );
+}
+
+function AddSection({ navigation }) {
+  const [nameOfItem, setText] = useState('');
+  const [quantity, setTextQuan] = useState('');
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+    </ImageBackground>
+  );
+}
+
+
+function AddItems({ navigation }) {
+  const [nameOfItem, setText] = useState('');
+  const [quantity, setTextQuan] = useState('');
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <View style={styles.container}>
+        <Text>Add to Groceries</Text>
+        <View style={toggleStyles.container}>
+          <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+            style={styles.input}
+            placeholder="Add name of Item"
+            onChangeText={(nameOfItem) => setText(nameOfItem)}
+            defaultValue={nameOfItem}
+          />
+          <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+            style={styles.input}
+            placeholder="Add quantity"
+            onChangeText={(quantity) => setTextQuan(quantity)}
+            defaultValue={quantity}
+          />
+          <Switch
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+            onValueChange={toggleSwitch}
+            value={isEnabled}
+          />
+          <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+            style={styles.input}
+            placeholder="Add expiration date"
+            onChangeText={(quantity) => setTextQuan(quantity)} //CHANGE TO A NEW VAR
+            defaultValue={quantity}
+          />
+
+          <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+            style={styles.input}
+            placeholder="Add additional info"
+            onChangeText={(quantity) => setTextQuan(quantity)} //CHANGE TO A NEW VAR
+            defaultValue={quantity}
+          />
+
+        </View>
+
+        <Button
+          color="coral"
+          title="Add Item to Inventory"
+          onPress={() => console.log('the name of the item is: ' + nameOfItem + quantity)}
+        />
+      </View>
+    </ImageBackground>
+  );
+}
+
+function Pantry({ navigation }) {
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <SafeAreaView style={styles.container}>
+        <View style={styles.pantryButton}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Food') }}>
+            <Text style={styles.text}>VIEW INVENTORY</Text>
+            <Image source={require("./assets/ViewPantry.png")} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.pantryButton}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('AddItems') }}>
+            <Text style={styles.text}>ADD A NEW ITEM</Text>
+            <Image source={require("./assets/plusButton.png")} />
+          </TouchableOpacity>
+        </View>
+        < StatusBar style="auto" />
+
+      </SafeAreaView >
+    </ImageBackground>
+
+  );
+}
+
+
+
+//STYLES 
+
+
+const toggleStyles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    justifyContent: "center"
+  }
+});
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  listContainer: {
+  pantryButton: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+
+  button: {
+    backgroundColor: '#859a9b',
+    borderRadius: 20,
+    padding: 10,
+    marginBottom: 20,
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+
   },
   sectionHeader: {
     //paddingTop: 2,
@@ -73,257 +280,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
   },
-  textBox: {
-    height: 150,
-    width: 200,
-    margin: 12,
-    borderWidth: 1,
-    borderColor: "darkgrey",
-    padding: 10,
-    textAlignVertical: "top"
-  },
-});
-
-function HomeScreen({ navigation }) {
-  const [section, setText] = useState('');
-  return (
-    <ImageBackground
-        source={require('./assets/cart.jpg')}
-        style={{width: '100%', height: '100%'}}
-    >
-
-
-
-
-        <SafeAreaView style={styles.container}>
-
-
-          <Text>Welcome to the inventory tracking App!</Text>
-          <Text>Click below to add new sections or view existing ones...</Text>
-          <Text></Text>
-          <Text></Text>
-
-
-          <View style={styles.container}>
-            <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE SECTION
-              style={styles.input}
-              placeholder="Add section name here"
-              onChangeText={(section) => setText(section)}
-              defaultValue={section}
-            />
-
-          <Button
-            color="#0437A0"
-            title="Add A New Section"
-            onPress={() => console.log("Now add a new section")}
-          />
-          </View>
-          <Text></Text>
-          <Text></Text>
-          <Text></Text>
-          <Text></Text>
-
-          <View style ={{backgroundColor: "#B8B5A3", borderRadius: 5}}>
-          < Button
-            color="#0437A0"
-            title="Pantry"
-            onPress={() => navigation.navigate('Pantry')
-            } />
-          </View>
-
-          < StatusBar style="auto" />
-
-        </SafeAreaView >
-    </ImageBackground>
-  );
-}
-
-
-
-function FoodScreen({ navigation }) {
-  return (
-      <ImageBackground
-          source={require('./assets/cart.jpg')}
-          style={{width: '100%', height: '100%'}}
-      >
-
-
-    <View style={styles.container}>
-      <Text>Food Screen</Text>
-
-      <Button
-        color="coral"
-        title="Return Home"
-        onPress={() => navigation.navigate('INVENTORY TRACKING APP')} />
-
-
-      <SectionList
-        sections={[
-          { title: 'P', data: ['Peas', 'Pickles'] },
-          { title: 'N', data: ['Nuts'] },
-        ]}
-        keyExtractor={(item, index) => index}
-        renderItem={({ item, index, separators }) =>
-          <TouchableHighlight
-            activeOpacity={0.6}
-            underlayColor={"#DDDDDD"}
-            onPress={() => navigation.push('FoodPic', {name: item} )}
-          >
-            <View>
-              <Text style={styles.item} > {item} </Text>
-            </View>
-          </TouchableHighlight>
-        }
-
-        renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
-
-      />
-
-    </View>
-    </ImageBackground>
-  )
-}
-
-function FoodPicScreen({route, navigation}) {
-  const { name } = route.params;
-  return (
-    <View style={styles.listContainer}>
-      <Text> {JSON.stringify(name)} </Text>
-      <Image
-        source={{
-          width: 200,
-          height: 300,
-          uri: "https://www.usu.edu/today/images/stories/xl/food-preservation-UST.jpg",
-        }} />
-      <Button
-        color= "#0437A0"
-        title = "Replace image"
-        onPress={() => 
-          Alert.alert(
-            "This box does nothing",
-            "",
-            [
-              {
-                text: "cancel",
-              },
-              {
-                text: "OK",
-              }
-            ]
-          )
-        }
-      />
-      <Text>
-        Quantity:
-          <TextInput
-            placeholder= "LOL"
-          />
-      </Text>
-      <Text>
-        Expiration Date: 
-      </Text>
-      <TextInput //TODO: NOT PERSISTENT YET
-        style = {styles.textBox}
-        placeholder="Add notes here"
-      />
-    </View>
-
-  );
-}
-
-function AddItems({ navigation }) {
-  const [nameOfItem, setText] = useState('');
-  const [quantity, setTextQuan] = useState('');
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{width: '100%', height: '100%'}}
-    >
-    <View style={styles.container}>
-      <Text>Add to Groceries</Text>
-      <View style={toggleStyles.container}>
-        <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
-          style={styles.input}
-          placeholder="Add name of Item"
-          onChangeText={(nameOfItem) => setText(nameOfItem)}
-          defaultValue={nameOfItem}
-        />
-        <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
-          style={styles.input}
-          placeholder="Add quantity"
-          onChangeText={(quantity) => setTextQuan(quantity)}
-          defaultValue={quantity}
-        />
-        <Switch
-          trackColor={{ false: "#767577", true: "#81b0ff" }}
-          thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-          onValueChange={toggleSwitch}
-          value={isEnabled}
-        />
-        <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
-          style={styles.input}
-          placeholder="Add expiration date"
-          onChangeText={(quantity) => setTextQuan(quantity)} //CHANGE TO A NEW VAR
-          defaultValue={quantity}
-        />
-
-        <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
-          style={styles.input}
-          placeholder="Add additional info"
-          onChangeText={(quantity) => setTextQuan(quantity)} //CHANGE TO A NEW VAR
-          defaultValue={quantity}
-        />
-
-      </View>
-
-      <Button
-        color="coral"
-        title="Add Item to Inventory"
-        onPress={() => console.log('the name of the item is: ' + nameOfItem + quantity)}
-      />
-    </View>
-    </ImageBackground>
-  );
-}
-
-function Pantry({ navigation }) {
-  const [nameOfItem, setText] = useState('');
-  const [quantity, setTextQuan] = useState('');
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{width: '100%', height: '100%'}}
-    >
-    <View style={styles.container}>
-
-    < Button
-      color="#0437A0"
-      title="View Inventory"
-      onPress={() => navigation.navigate('Food')
-      } />
-
-    <Button
-      style ={{borderRadius: 20}}
-      color="#0437A0"
-      title="Add A New Item"
-      onPress={() => navigation.navigate('AddItems')}
-    />
-
-    </View>
-    </ImageBackground>
-  );
-}
-
-
-
-
-const toggleStyles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    justifyContent: "center"
+  text: {
+    textAlign: 'center',
+    fontSize: 14,
+    fontFamily: 'Avenir',
+    fontWeight: 'bold',
+    color: 'black',
   }
 });
