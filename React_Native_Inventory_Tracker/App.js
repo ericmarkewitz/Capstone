@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableHighlight, TextInput, Switch, ImageBackground } from "react-native";
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableHighlight, TextInput, Switch, ImageBackground, Alert } from "react-native";
 import { openDatabase, SQLite} from 'react-native-sqlite-storage';
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
@@ -42,6 +42,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  listContainer: {
+    flex: 1,
+    alignItems: "center",
+  },
   sectionHeader: {
     //paddingTop: 2,
     //paddingLeft: 10,
@@ -68,6 +72,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
+  },
+  textBox: {
+    height: 150,
+    width: 200,
+    margin: 12,
+    borderWidth: 1,
+    borderColor: "darkgrey",
+    padding: 10,
+    textAlignVertical: "top"
   },
 });
 
@@ -154,7 +167,7 @@ function FoodScreen({ navigation }) {
           <TouchableHighlight
             activeOpacity={0.6}
             underlayColor={"#DDDDDD"}
-            onPress={() => navigation.navigate('FoodPic')}
+            onPress={() => navigation.push('FoodPic', {name: item} )}
           >
             <View>
               <Text style={styles.item} > {item} </Text>
@@ -171,17 +184,50 @@ function FoodScreen({ navigation }) {
   )
 }
 
-function FoodPicScreen() {
+function FoodPicScreen({route, navigation}) {
+  const { name } = route.params;
   return (
-    <View style={styles.container}>
-      <Text>Food!</Text>
+    <View style={styles.listContainer}>
+      <Text> {JSON.stringify(name)} </Text>
       <Image
         source={{
           width: 200,
           height: 300,
           uri: "https://www.usu.edu/today/images/stories/xl/food-preservation-UST.jpg",
         }} />
+      <Button
+        color= "#0437A0"
+        title = "Replace image"
+        onPress={() => 
+          Alert.alert(
+            "This box does nothing",
+            "",
+            [
+              {
+                text: "cancel",
+              },
+              {
+                text: "OK",
+              }
+            ]
+          )
+        }
+      />
+      <Text>
+        Quantity:
+          <TextInput
+            placeholder= "LOL"
+          />
+      </Text>
+      <Text>
+        Expiration Date: 
+      </Text>
+      <TextInput //TODO: NOT PERSISTENT YET
+        style = {styles.textBox}
+        placeholder="Add notes here"
+      />
     </View>
+
   );
 }
 
