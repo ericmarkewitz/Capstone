@@ -12,6 +12,6 @@ insert into Jars values (3, 'medium', 'wide');
 insert into Jars values (4, 'large', 'regular');
 insert into Jars values (5, 'large', 'wide');
 insert into CannedGoods values (2,0);
-insert into CannedGoods values (0,0);
 insert into CannedGoods values (0,1);
-insert into CannedGoods values (0,1);
+insert into CannedGoods values (0,2);
+insert into CannedGoods values (0,3);
