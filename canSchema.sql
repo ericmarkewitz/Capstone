@@ -14,10 +14,9 @@ create table Storage(
 );
 
 create table Shelves(
-    shelfID integer,
+    shelfID integer primary key,
     locationID integer,
     shelfName text,
-    primary key (shelfID, locationID),
     foreign key (locationID) references Storage (locationID)
 );
 
