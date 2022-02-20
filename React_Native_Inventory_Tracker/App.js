@@ -15,7 +15,7 @@ export default function App() {
       <Stack.Navigator initialRouteName="Home"
         screenOptions={{
           headerStyle: { backgroundColor: 'rgba(255,180,0,1.0)' }
-        }}  
+        }}
       >
         <Stack.Screen name="INVENTORY TRACKING APP" component={HomeScreen} />
         <Stack.Screen name="Food" component={FoodScreen} />
@@ -90,7 +90,7 @@ function FoodScreen({ navigation }) {
             <TouchableHighlight
               activeOpacity={0.6}
               underlayColor={"#DDDDDD"}
-              onPress={() => navigation.push('FoodPic', {name: item} )}
+              onPress={() => navigation.push('FoodPic', { name: item })}
             >
               <View>
                 <Text style={styles.item} > {item} </Text>
@@ -107,7 +107,7 @@ function FoodScreen({ navigation }) {
   )
 }
 
-function FoodPicScreen({route, navigation}) {
+function FoodPicScreen({ route, navigation }) {
   const { name } = route.params;
   return (
     <View style={styles.listContainer}>
@@ -119,9 +119,9 @@ function FoodPicScreen({route, navigation}) {
           uri: "https://www.usu.edu/today/images/stories/xl/food-preservation-UST.jpg",
         }} />
       <Button
-        color= "#0437A0"
-        title = "Replace image"
-        onPress={() => 
+        color="#0437A0"
+        title="Replace image"
+        onPress={() =>
           Alert.alert(
             "This box does nothing",
             "",
@@ -138,18 +138,18 @@ function FoodPicScreen({route, navigation}) {
       />
       <Text>
         Quantity:
-          <TextInput
-            placeholder= " Enter Amount"
-          />
+        <TextInput
+          placeholder=" Enter Amount"
+        />
       </Text>
       <Text>
-        Expiration Date: 
-          <TextInput
-            placeholder= " Enter Date"
-          />
+        Expiration Date:
+        <TextInput
+          placeholder=" Enter Date"
+        />
       </Text>
       <TextInput //TODO: NOT PERSISTENT YET
-        style = {styles.textBox}
+        style={styles.textBox}
         placeholder="Add notes here"
       />
     </View>
@@ -171,10 +171,11 @@ function AddSection({ navigation }) {
   );
 }
 
-
 function AddItems({ navigation }) {
   const [nameOfItem, setText] = useState('');
   const [quantity, setTextQuan] = useState('');
+  const [expirationDate, setExpDate] = useState('');
+
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
   return (
@@ -183,7 +184,9 @@ function AddItems({ navigation }) {
       style={{ width: '100%', height: '100%' }}
     >
       <View style={styles.container}>
-        <Text>Add to Groceries</Text>
+        <View style={styles.button}>
+          <Text style={styles.textAddItems}>ADD ITEMS TO YOUR PANTRY</Text>
+        </View>
         <View style={toggleStyles.container}>
           <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
             style={styles.input}
@@ -191,6 +194,7 @@ function AddItems({ navigation }) {
             onChangeText={(nameOfItem) => setText(nameOfItem)}
             defaultValue={nameOfItem}
           />
+
           <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
             style={styles.input}
             placeholder="Add quantity"
@@ -200,14 +204,14 @@ function AddItems({ navigation }) {
           <Switch
             trackColor={{ false: "#767577", true: "#81b0ff" }}
             thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
+            onValueChange={console.log('value changes')}
             value={isEnabled}
           />
           <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
             style={styles.input}
             placeholder="Add expiration date"
-            onChangeText={(quantity) => setTextQuan(quantity)} //CHANGE TO A NEW VAR
-            defaultValue={quantity}
+            onChangeText={(expirationDate) => setExpDate(expirationDate)} //CHANGE TO A NEW VAR
+            defaultValue={expirationDate}
           />
 
           <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
@@ -221,6 +225,7 @@ function AddItems({ navigation }) {
 
         <Button
           color="coral"
+          backgroundColor="darkgrey"
           title="Add Item to Inventory"
           onPress={() => console.log('the name of the item is: ' + nameOfItem + quantity)}
         />
@@ -228,6 +233,7 @@ function AddItems({ navigation }) {
     </ImageBackground>
   );
 }
+
 
 function Pantry({ navigation }) {
   return (
@@ -295,6 +301,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,
     shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    marginBottom: 60,
 
   },
   sectionHeader: {
@@ -317,6 +325,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
+    justifyContent: 'flex-end',
+    marginBottom: 30,
   },
   text: {
     textAlign: 'center',
@@ -334,4 +344,12 @@ const styles = StyleSheet.create({
     padding: 10,
     textAlignVertical: "top",
   },
+  textAddItems: {
+    textAlignVertical: 'top',
+    textAlign: 'center',
+    fontSize: 14,
+    fontFamily: 'Avenir',
+    fontWeight: 'bold',
+    color: 'black',
+  }
 });
