@@ -56,7 +56,7 @@ function HomeScreen({ navigation }) {
         <View style={styles.pantryButton}>
           <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Canning') }}>
             <Text style={styles.text}>VIEW CANNING</Text>
-            <Image source={require("./assets/pantry.png")} />
+            <Image source={require("./assets/can.png")} />
           </TouchableOpacity>
         </View>
 
