@@ -16,18 +16,15 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Keep the splash screen visible while we fetch resources
-        await SplashScreen.preventAutoHideAsync();
-        // Pre-load fonts, make any API calls you need to do here
-        await Font.loadAsync({
+        await SplashScreen.preventAutoHideAsync(); //keep screen visible while resources load
+        await Font.loadAsync({ //load font
           Avenir: require("./assets/fonts/Avenir.otf")
         });
         //await new Promise(resolve => setTimeout(resolve, 1500)); //force splash screen to stay on for 1.5 seconds
       } catch (e) {
         console.warn(e);
       } finally {
-        // Tell the application to render
-        setAppIsReady(true);
+        setAppIsReady(true); //advance
       }
     }
     prepare();
