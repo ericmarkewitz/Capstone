@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert } from "react-native";
 //import { openDatabase, SQLite } from 'react-native-sqlite-storage';
-import * as SQLite from 'expo-sqlite';
+//import * as SQLite from 'expo-sqlite';
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 //import { OpenDatabase } from "./screens/OpenDatabase.js"
@@ -291,9 +291,9 @@ async function openDatabase(pathToDatabaseFile){
 
 
 
-function Canning({ navigation }){
+function Canning({ navigation }) {
   //const db = connect('./sql/canning.sqlite');
-  
+
   /*const db = openDatabase('./sql/canning.db');
   
   
@@ -306,33 +306,33 @@ function Canning({ navigation }){
     });
   }, []); */
 
-  return(
-        //<OpenDatabase />;
+  return (
+    //<OpenDatabase />;
 
 
-        <ImageBackground
-          source={require('./assets/cart.jpg')}
-          style={{ width: '100%', height: '100%' }}
-        >
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
 
-            <SafeAreaView style={styles.container}>
-            <View style={styles.text}>
-
-
-            <Text>const mystring = 'hello'</Text>
-
-            <Text>mystring</Text>
-
-            <Text>hi</Text>
-            <Text>myString</Text>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.text}>
 
 
+          <Text>const mystring = 'hello'</Text>
+
+          <Text>mystring</Text>
+
+          <Text>hi</Text>
+          <Text>myString</Text>
 
 
-            </View>
-            </SafeAreaView >
-        </ImageBackground>
-    );
+
+
+        </View>
+      </SafeAreaView >
+    </ImageBackground>
+  );
 }
 
 
