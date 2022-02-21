@@ -1,15 +1,51 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState  } from 'react';
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert } from "react-native";
-import * as SQLite from 'expo-sqlite';
+import * as SQLite from 'expo-sqlite'; //expo install expo-sqlite
+import * as SplashScreen from 'expo-splash-screen'; //expo install expo-splash-screen
+import * as Font from 'expo-font'; //expo install expo-font
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 //import { TouchableHighlight } from "react-native-web";
 
 
 export default function App() {
+
+  //Splash screen + loading
+  const [appIsReady, setAppIsReady] = useState(false);
+  useEffect(() => {
+    async function prepare() {
+      try {
+        // Keep the splash screen visible while we fetch resources
+        await SplashScreen.preventAutoHideAsync();
+        // Pre-load fonts, make any API calls you need to do here
+        await Font.loadAsync({
+          Avenir: require("./assets/fonts/Avenir.otf")
+        });
+        //await new Promise(resolve => setTimeout(resolve, 1500)); //force splash screen to stay on for 1.5 seconds
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        // Tell the application to render
+        setAppIsReady(true);
+      }
+    }
+    prepare();
+  }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
+  }
+  
   console.log("App executed");
   return (
+    <><View onLayout={onLayoutRootView}></View>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home"
         screenOptions={{
@@ -25,8 +61,7 @@ export default function App() {
         <Stack.Screen name="AddSection" component={AddSection} />
 
       </Stack.Navigator>
-
-    </NavigationContainer>
+    </NavigationContainer></>
 
   );
 }

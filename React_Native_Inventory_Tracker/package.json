@@ -23,7 +23,9 @@
     "react-navigation": "^4.4.4",
     "expo-file-system": "~13.1.4",
     "expo-asset": "~8.4.6",
-    "expo-sqlite": "~10.1.0"
+    "expo-sqlite": "~10.1.0",
+    "expo-splash-screen": "~0.14.1",
+    "expo-font": "~10.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"
