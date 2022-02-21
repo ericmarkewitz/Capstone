@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert } from "react-native";
-import { openDatabase, SQLite } from 'react-native-sqlite-storage';
+//import { openDatabase, SQLite } from 'react-native-sqlite-storage';
+import * as SQLite from 'expo-sqlite';
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
+//import { OpenDatabase } from "./screens/OpenDatabase.js"
+//import connect, {sql} from '@databases/expo';
+
 //import WelcomeScreen from "./screens/WelcomeScreen";
 //import { TouchableHighlight } from "react-native-web";
 //npm install react-navigation
@@ -22,6 +26,7 @@ export default function App() {
         <Stack.Screen name="FoodPic" component={FoodPicScreen} />
         <Stack.Screen name="AddItems" component={AddItems} />
         <Stack.Screen name="Pantry" component={Pantry} />
+        <Stack.Screen name="Canning" component={Canning} />
         <Stack.Screen name="AddSection" component={AddSection} />
 
       </Stack.Navigator>
@@ -45,6 +50,13 @@ function HomeScreen({ navigation }) {
           <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('AddSection') }}>
             <Text style={styles.text}>ADD NEW SECTION</Text>
             <Image source={require("./assets/newSection.png")} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.pantryButton}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Canning') }}>
+            <Text style={styles.text}>VIEW CANNING</Text>
+            <Image source={require("./assets/pantry.png")} />
           </TouchableOpacity>
         </View>
 
@@ -263,9 +275,68 @@ function Pantry({ navigation }) {
   );
 }
 
+/*
+async function openDatabase(pathToDatabaseFile){
+  if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+    await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+  }
+  await FileSystem.downloadAsync(
+    Asset.fromModule(require(pathToDatabaseFile)).uri,
+    FileSystem.documentDirectory + './sql/canning.db'
+  );
+  return SQLite.openDatabase('canning.db');
+}*/
 
 
-//STYLES 
+
+
+
+function Canning({ navigation }){
+  //const db = connect('./sql/canning.sqlite');
+  
+  /*const db = openDatabase('./sql/canning.db');
+  
+  
+  useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "INSERT INTO Storage (locationID, locationName) VALUES (?,?);", 
+        [1, "FirstLocation"]
+      );
+    });
+  }, []); */
+
+  return(
+        //<OpenDatabase />;
+
+
+        <ImageBackground
+          source={require('./assets/cart.jpg')}
+          style={{ width: '100%', height: '100%' }}
+        >
+
+            <SafeAreaView style={styles.container}>
+            <View style={styles.text}>
+
+
+            <Text>const mystring = 'hello'</Text>
+
+            <Text>mystring</Text>
+
+            <Text>hi</Text>
+            <Text>myString</Text>
+
+
+
+
+            </View>
+            </SafeAreaView >
+        </ImageBackground>
+    );
+}
+
+
+//STYLES
 
 
 const toggleStyles = StyleSheet.create({
