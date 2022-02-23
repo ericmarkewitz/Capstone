@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState  } from 'react';
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert } from "react-native";
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, TouchableWithoutFeedback } from "react-native";
 import * as SQLite from 'expo-sqlite'; //expo install expo-sqlite
 import * as SplashScreen from 'expo-splash-screen'; //expo install expo-splash-screen
 import * as Font from 'expo-font'; //expo install expo-font
@@ -197,15 +197,62 @@ function FoodPicScreen({ route, navigation }) {
 }
 
 function AddSection({ navigation }) {
-  const [nameOfItem, setText] = useState('');
-  const [quantity, setTextQuan] = useState('');
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const [sectionName, setText] = useState('');
+  const [expDate, setExpDate] = useState('');
+  const [outStock, setOutStock] = useState('');
+  const [location, setLocation] = useState('');
+  const [addSection, setAddSection] = useState('');
+
+
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
+       <View style={toggleStyles.container}>
+       <View style={styles.button}>
+          <Text>Enter Section Information</Text>
+        </View>
+        <TextInput
+            style={styles.inputAddSection}
+            placeholder="Section Name" //ENTER NAME OF CATGEORY
+            onChangeText={(sectionName) => setText(sectionName)}
+            defaultValue={sectionName}
+          />
+          <View style={toggleStyles.container}>
+            <Text style={styles.textAddItems}>Section {sectionName} will be sorted by</Text>
+            <Text>{outStock}</Text>
+            <Text>{expDate}</Text>
+            <Text>{location}</Text>
+          </View>
+          <View style={toggleStyles.container}>
+            <Text style={styles.textAddItems}>Select Sorting Options</Text>
+          </View>
+          <Button
+            color="coral"
+            backgroundColor="darkgrey"
+            title="Out of Stock"
+            onPress={(outStock) => setOutStock('Out of Stock')}
+          />
+          <Button
+            color="coral"
+            backgroundColor="darkgrey"
+            title="About to Expire"
+            onPress={(expDate) => setExpDate('About to Expire')}
+          />
+          <Button
+            color="coral"
+            backgroundColor="darkgrey"
+            title="Location"
+            onPress={(location) => setLocation('Location')}
+          /> 
+          <Button
+            color="coral"
+            backgroundColor="darkgrey"
+            title="Submit"
+            onPress={() => console.log('the section' +sectionName+'has been added.')}
+          />
+      </View>
     </ImageBackground>
   );
 }
@@ -426,5 +473,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir',
     fontWeight: 'bold',
     color: 'black',
-  }
+  },
+  inputAddSection: {
+    borderColor: "gray",
+    width: "60%",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    justifyContent: 'flex-end',
+    marginBottom: 30,
+    marginTop: 100,
+  },
 });
