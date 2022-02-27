@@ -24,8 +24,10 @@ create table Batch(
     batchID integer primary key,
     product text,
     datePlaced text check (datePlaced glob '[0-9][0-9]/[0-9][0-9]/[0-9][0-9]'),
+    expDate text check (expDate glob '[0-9][0-9]/[0-9][0-9]/[0-9][0-9]'),
     shelfID integer, 
     quantity integer check (quantity >= 0),
+    notes text,
     foreign key (shelfID) references Shelves(shelfID)
 );
 

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState  } from 'react';
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, TouchableWithoutFeedback } from "react-native";
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, TouchableWithoutFeedback } from "react-native";
 import * as SQLite from 'expo-sqlite'; //expo install expo-sqlite
 import * as SplashScreen from 'expo-splash-screen'; //expo install expo-splash-screen
 import * as Font from 'expo-font'; //expo install expo-font
@@ -8,6 +8,39 @@ import { createNativeStackNavigator, NativeStackView } from "@react-navigation/n
 import { NavigationContainer } from "@react-navigation/native";
 //import { TouchableHighlight } from "react-native-web";
 
+const db = SQLite.openDatabase('Deeb'); //if app wont load after a reload change the name of the db (no clue why this happens)
+
+function setupDB(){
+
+  db.exec([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false, () =>
+    console.log('Foreign keys turned on')
+  );
+
+  db.transaction(tx => {
+    /*
+    tx.executeSql('drop table if exists CannedGoods');
+    tx.executeSql('drop table if exists Jars');
+    tx.executeSql('drop table if exists Batch');
+    tx.executeSql('drop table if exists Shelves');
+    tx.executeSql('drop table if exists Storage');
+    */
+    tx.executeSql('create table if not exists Storage(locationID integer primary key,locationName text);');
+    tx.executeSql('create table if not exists Shelves(shelfID integer primary key,locationID integer,shelfName text,foreign key (locationID) references Storage (locationID));');
+    tx.executeSql('create table if not exists Batch(batchID integer primary key,product text,datePlaced text check (datePlaced glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),expDate text check (expDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),shelfID integer, quantity integer check (quantity >= 0), notes text,foreign key (shelfID) references Shelves(shelfID));');
+    tx.executeSql('create table if not exists Jars(jarID integer primary key,size text,mouth text check (mouth = \'regular\' or mouth = \'wide\'));');
+    tx.executeSql('create table if not exists CannedGoods(jarID integer,batchID integer,primary key (jarID, batchID),foreign key (jarID) references Jars(jarID),foreign key (batchID) references Batch(batchID));');
+    
+    //dummy data
+    tx.executeSql('insert into Storage values (0, \'Pantry\');');
+    tx.executeSql('insert into Shelves values (0, 0, \'Shelf A\');');
+    tx.executeSql('insert into Batch values (0, \'Pickles\', \'02/18/22\',\'05/27/22\', 0, 4,\'green\');');
+    tx.executeSql('insert into Batch values (1, \'Peas\', \'01/17/22\',\'03/18/23\', 0, 12,\'also green\');');
+    tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\');');
+    tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\');');
+    
+    
+  })
+}
 
 export default function App() {
 
@@ -20,6 +53,7 @@ export default function App() {
         await Font.loadAsync({ //load font
           Avenir: require("./assets/fonts/Avenir.otf")
         });
+        await setupDB();
         //await new Promise(resolve => setTimeout(resolve, 1500)); //force splash screen to stay on for 1.5 seconds
       } catch (e) {
         console.warn(e);
@@ -51,7 +85,7 @@ export default function App() {
       >
         <Stack.Screen name="INVENTORY TRACKING APP" component={HomeScreen} />
         <Stack.Screen name="Food" component={FoodScreen} />
-        <Stack.Screen name="FoodPic" component={FoodPicScreen} />
+        <Stack.Screen name="Item" component={FoodPicScreen} />
         <Stack.Screen name="AddItems" component={AddItems} />
         <Stack.Screen name="Pantry" component={Pantry} />
         <Stack.Screen name="Canning" component={Canning} />
@@ -102,7 +136,24 @@ function HomeScreen({ navigation }) {
 
 
 
-function FoodScreen({ navigation }) {
+function FoodScreen({ route, navigation }) {
+  const { shelfID } = route.params;
+  //let [IDs, setIDs] = useState(0), [products, setProducts] = useState(1);
+  let [items, setItems] = useState([]);
+    db.transaction((tx) => {
+      tx.executeSql(
+        'select batchID, product from batch natural join shelves where shelfID = '+shelfID+';',
+        [],
+        (tx, results) => {
+          var temp = [];
+          for (var i = 0; i < results.rows.length; i++){
+            temp.push(results.rows.item(i));
+          }
+          setItems(temp);
+          
+        }
+      )
+    });
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -119,20 +170,17 @@ function FoodScreen({ navigation }) {
           onPress={() => navigation.navigate('INVENTORY TRACKING APP')} />
 
 
-        <SectionList
-          sections={[
-            { title: 'P', data: ['Peas', 'Pickles'] },
-            { title: 'N', data: ['Nuts'] },
-          ]}
+        <FlatList
+          data = {items}
           keyExtractor={(item, index) => index}
-          renderItem={({ item, index, separators }) =>
+          renderItem={({ item, index, separators }) => 
             <TouchableHighlight
               activeOpacity={0.6}
               underlayColor={"#DDDDDD"}
-              onPress={() => navigation.push('FoodPic', { name: item })}
+              onPress={() => navigation.push('Item', { id: item.batchID })}
             >
               <View>
-                <Text style={styles.item} > {item} </Text>
+                <Text style={styles.item} > {item.product} </Text>
               </View>
             </TouchableHighlight>
           }
@@ -147,10 +195,23 @@ function FoodScreen({ navigation }) {
 }
 
 function FoodPicScreen({ route, navigation }) {
-  const { name } = route.params;
+  const { id } = route.params;
+  //var name, datePlaced, expDate, notes, quantity;
+  //details[0].product = "jajaja"
+  let [details, setDetails] = useState([]);
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select product,datePlaced,expDate,notes,quantity from batch where batchID = '+id+';',
+      [],
+      (tx, results) => {
+        setDetails(results.rows.item(0));
+      }
+    )
+  });
+  //const [text, onChangeText] = React.useState(details.notes);
   return (
     <View style={styles.listContainer}>
-      <Text> {JSON.stringify(name)} </Text>
+      <Text> {details.product} </Text>
       <Image
         source={{
           width: 200,
@@ -174,22 +235,15 @@ function FoodPicScreen({ route, navigation }) {
             ]
           )
         }
-      />
-      <Text>
-        Quantity:
-        <TextInput
-          placeholder=" Enter Amount"
-        />
-      </Text>
-      <Text>
-        Expiration Date:
-        <TextInput
-          placeholder=" Enter Date"
-        />
-      </Text>
-      <TextInput //TODO: NOT PERSISTENT YET
+      /> 
+      <Text>Quantity: {details.quantity}</Text> 
+      <Text>Date added: {details.datePlaced}</Text>
+      <Text>Expiration Date: {details.expDate}</Text>
+      <TextInput //TODO: cant edit any of these
+        //value = {text}
+        //onChangeText = {onChangeText}
+        value = {details.notes}
         style={styles.textBox}
-        placeholder="Add notes here"
       />
     </View>
 
@@ -329,7 +383,7 @@ function Pantry({ navigation }) {
     >
       <SafeAreaView style={styles.container}>
         <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Food') }}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Food',{ shelfID: 0 }) }}> 
             <Text style={styles.text}>VIEW INVENTORY</Text>
             <Image source={require("./assets/ViewPantry.png")} />
           </TouchableOpacity>
@@ -351,14 +405,6 @@ function Pantry({ navigation }) {
 
 
 function Canning({ navigation }) {
-
-
-  const db = SQLite.openDatabase('canDB');
-
-  db.exec([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false, () =>
-    console.log('Foreign keys turned on')
-  );
-
 
   return (
     <ImageBackground
@@ -436,10 +482,14 @@ const styles = StyleSheet.create({
     borderColor: "darkgrey",
   },
   item: {
+    textAlign: "auto",
+    backgroundColor: "white",
     borderWidth: 1,
     borderColor: "darkgrey",
     fontSize: 30,
-    color: "slategray",
+    color: "black",
+    height: 75,
+    width: 400,
   },
   input: {
     borderColor: "gray",
@@ -465,6 +515,7 @@ const styles = StyleSheet.create({
     borderColor: "darkgrey",
     padding: 10,
     textAlignVertical: "top",
+    color: "black",
   },
   textAddItems: {
     textAlignVertical: 'top',

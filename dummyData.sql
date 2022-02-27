@@ -1,10 +1,10 @@
 insert into Storage values (0, 'Pantry');
 insert into Shelves values (0, 0, 'Shelf A');
 insert into Shelves values (1, 0, 'Shelf B');
-insert into Batch values (0, 'Pickles', '02/18/22', 0, 4);
-insert into Batch values (1, 'Peas', '01/17/22', 0, 12);
-insert into Batch values (2, 'Walnuts', '01/11/22', 0, 123);
-insert into Batch values (3, 'Peanuts', '12/04/21', 0, 456);
+insert into Batch values (0, 'Pickles', '02/18/22','05/27/22', 0, 4, 'green');
+insert into Batch values (1, 'Peas', '01/17/22','03/18/23', 0, 12, 'also green');
+insert into Batch values (2, 'Walnuts', '01/11/22','03/23/22', 0, 123, '');
+insert into Batch values (3, 'Peanuts', '12/04/21','03/04/22', 0, 456, '');
 insert into Jars values (0, 'small', 'regular');
 insert into Jars values (1, 'small', 'wide');
 insert into Jars values (2, 'medium', 'regular');
