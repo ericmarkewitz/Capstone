@@ -38,7 +38,15 @@ function setupDB(){
     tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\');');
     tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\');');
     
-    
+    tx.executeSql('insert into Jars values (0, \'16oz\', \'regular\');');
+    tx.executeSql('insert into Jars values (1, \'20oz\', \'wide\');');
+    tx.executeSql('insert into Jars values (2, \'48oz\', \'regular\');');
+    tx.executeSql('insert into Jars values (3, \'12oz\', \'wide\');');
+
+    //tx.executeSql('insert into CannedGoods values (0, 0);');
+    //tx.executeSql('insert into CannedGoods values (1, 1);');
+    //tx.executeSql('insert into CannedGoods values (2, 2);');
+    //tx.executeSql('insert into CannedGoods values (3, 3);');
   })
 }
 
@@ -403,33 +411,54 @@ function Pantry({ navigation }) {
   );
 }
 
-
 function Canning({ navigation }) {
-
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-
-      <SafeAreaView style={styles.container}>
-        <View style={styles.text}>
-
-
-          <Text>const mystring = 'hello'</Text>
-
-          <Text>mystring</Text>
-
-          <Text>hi</Text>
-          <Text>myString</Text>
+    let [cans, setCans] = useState([]);
+    db.transaction((tx) => {
+        tx.executeSql(
+          'SELECT batchID, product FROM Batch;',
+          [],
+          (tx, results) => {
+            var temp = [];
+            for (var i = 0; i < results.rows.length; i++){
+              temp.push(results.rows.item(i));
+            }
+            setCans(temp);
+          }
+        )
+    });
 
 
-
-
-        </View>
-      </SafeAreaView >
-    </ImageBackground>
-  );
+    return (
+      <ImageBackground
+        source={require('./assets/cart.jpg')}
+        style={{ width: '100%', height: '100%' }}
+      >
+        <SafeAreaView style={styles.container}>
+          <View>
+            <Text>HI</Text>
+          </View>
+          <FlatList
+            data = {cans}
+            keyExtractor={(item, index) => index}
+            renderItem={({ item, index, separator }) =>
+              <TouchableHighlight
+                activeOpacity={0.6}
+                underlayColor={"darkgrey"}
+                onPress={() => console.log('Item Pressed')}
+              >
+                <View>
+                  <Text></Text>
+                  <Text style={styles.item}> Batch {item.batchID} - {item.product}</Text>
+                </View>
+              </TouchableHighlight>
+            }
+          />
+          <View>
+            <Text>Add Canned Item</Text>
+          </View>
+        </SafeAreaView >
+      </ImageBackground>
+    );
 }
 
 
@@ -534,5 +563,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginBottom: 30,
     marginTop: 100,
+  },
+  cannedItem: {
+    alignItems: "center",
+    backgroundColor: "darkgrey",
+    padding: 10
   },
 });
