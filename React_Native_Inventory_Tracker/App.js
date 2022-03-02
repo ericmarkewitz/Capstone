@@ -97,6 +97,7 @@ export default function App() {
           <Stack.Screen name="Pantry" component={Pantry} />
           <Stack.Screen name="Canning" component={Canning} />
           <Stack.Screen name="AddSection" component={AddSection} />
+          <Stack.Screen name="EmptyJar" component={EmptyJar} />
         </Stack.Navigator>
       </NavigationContainer></>
   );
@@ -467,6 +468,11 @@ function Canning({ navigation }) {
         <View>
           <Text>HI</Text>
         </View>
+        <View style={styles.pantryButton}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('EmptyJar') }}>
+            <Text style={styles.text}>View Empty Jars</Text>
+          </TouchableOpacity>
+        </View>
         <FlatList
           data={cans}
           keyExtractor={(item, index) => index}
@@ -491,6 +497,50 @@ function Canning({ navigation }) {
           onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
         />
       </SafeAreaView >
+    </ImageBackground>
+  );
+}
+
+function EmptyJar({ navigation, route }) {
+  let [jars, setJars] = useState([]);
+    db.transaction((tx) => {
+      tx.executeSql(
+        'select size, mouth, count(mouth) as count from jars where jarID NOT IN (SELECT jarID FROM jars Natural JOIN CannedGoods) GROUP BY size;',
+        [],
+        (tx, results) => {
+          var temp = [];
+          for (var i = 0; i < results.rows.length; i++){
+            temp.push(results.rows.item(i));
+          }
+          setJars(temp);
+          
+        }
+      )
+    });
+    const NoEmptyJarsMessage = ({ item }) => {
+      return (
+        // Flat List Item
+        <Text style={styles.emptyList } onPress={() => getItem(item)}>
+          All jars are currently in use
+        </Text>
+      );
+    };
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <View><Text style={styles.item}>Size - Mouth - #</Text></View>
+      <FlatList
+            data = {jars}
+            ListEmptyComponent={NoEmptyJarsMessage}
+            renderItem = {({item, index, separators}) =>
+             <View>
+               <Text></Text>
+               <Text style={styles.item}>{item.size} - {item.mouth} - {item.count}</Text>
+             </View>
+          }
+      />
     </ImageBackground>
   );
 }
@@ -627,5 +677,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 10,
     right: 10,
+  },
+  emptyList: {
+    top: 100,
+    padding: 10,
+    fontSize: 18,
+    textAlign: "center",
+    backgroundColor: "#303838"
   }
 });
