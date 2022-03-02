@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState  } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, TouchableWithoutFeedback } from "react-native";
 import * as SQLite from 'expo-sqlite'; //expo install expo-sqlite
@@ -7,11 +7,12 @@ import * as Font from 'expo-font'; //expo install expo-font
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 //import { TouchableHighlight } from "react-native-web";
+import FloatingButton from './FloatingButton';
 
 const db = SQLite.openDatabase('Deeb'); //if app wont load after a reload change the name of the db (no clue why this happens)
+const Stack = createNativeStackNavigator();
 
-function setupDB(){
-
+function setupDB() {
   db.exec([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false, () =>
     console.log('Foreign keys turned on')
   );
@@ -29,7 +30,7 @@ function setupDB(){
     tx.executeSql('create table if not exists Batch(batchID integer primary key,product text,datePlaced text check (datePlaced glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),expDate text check (expDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),shelfID integer, quantity integer check (quantity >= 0), notes text,foreign key (shelfID) references Shelves(shelfID));');
     tx.executeSql('create table if not exists Jars(jarID integer primary key,size text,mouth text check (mouth = \'regular\' or mouth = \'wide\'));');
     tx.executeSql('create table if not exists CannedGoods(jarID integer,batchID integer,primary key (jarID, batchID),foreign key (jarID) references Jars(jarID),foreign key (batchID) references Batch(batchID));');
-    
+
     //dummy data
     tx.executeSql('insert into Storage values (0, \'Pantry\');');
     tx.executeSql('insert into Shelves values (0, 0, \'Shelf A\');');
@@ -37,7 +38,7 @@ function setupDB(){
     tx.executeSql('insert into Batch values (1, \'Peas\', \'01/17/22\',\'03/18/23\', 0, 12,\'also green\');');
     tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\');');
     tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\');');
-    
+
     tx.executeSql('insert into Jars values (0, \'16oz\', \'regular\');');
     tx.executeSql('insert into Jars values (1, \'20oz\', \'wide\');');
     tx.executeSql('insert into Jars values (2, \'48oz\', \'regular\');');
@@ -51,7 +52,6 @@ function setupDB(){
 }
 
 export default function App() {
-
   //Splash screen + loading
   const [appIsReady, setAppIsReady] = useState(false);
   useEffect(() => {
@@ -81,32 +81,32 @@ export default function App() {
   if (!appIsReady) {
     return null;
   }
-  
   console.log("App executed");
   return (
     <><View onLayout={onLayoutRootView}></View>
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home"
-        screenOptions={{
-          headerStyle: { backgroundColor: 'rgba(255,180,0,1.0)' }
-        }}
-      >
-        <Stack.Screen name="INVENTORY TRACKING APP" component={HomeScreen} />
-        <Stack.Screen name="Food" component={FoodScreen} />
-        <Stack.Screen name="Item" component={FoodPicScreen} />
-        <Stack.Screen name="AddItems" component={AddItems} />
-        <Stack.Screen name="Pantry" component={Pantry} />
-        <Stack.Screen name="Canning" component={Canning} />
-        <Stack.Screen name="AddSection" component={AddSection} />
-
-      </Stack.Navigator>
-    </NavigationContainer></>
-
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Home"
+          screenOptions={{
+            headerStyle: { backgroundColor: 'rgba(255,180,0,1.0)' }
+          }}
+        >
+          <Stack.Screen name="INVENTORY TRACKING APP" component={HomeScreen} />
+          <Stack.Screen name="Food" component={FoodScreen} />
+          <Stack.Screen name="Item" component={FoodPicScreen} />
+          <Stack.Screen name="AddItems" component={AddItems} />
+          <Stack.Screen name="Pantry" component={Pantry} />
+          <Stack.Screen name="Canning" component={Canning} />
+          <Stack.Screen name="AddSection" component={AddSection} />
+        </Stack.Navigator>
+      </NavigationContainer></>
   );
 }
-
-const Stack = createNativeStackNavigator();
-
+/**
+ * Displays the homescreeen of the app to the user, the homescreen shows an add new section button, a view canning
+ * button and a view pantry button. Each of the buttons take you to a new screen 
+ * @param {} param0 
+ * @returns 
+ */
 function HomeScreen({ navigation }) {
   const [section, setText] = useState('');
   return (
@@ -125,7 +125,7 @@ function HomeScreen({ navigation }) {
         <View style={styles.pantryButton}>
           <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Canning') }}>
             <Text style={styles.text}>VIEW CANNING</Text>
-            <Image source={require("./assets/can.png")} />
+            <Image style={styles.cannedItem} source={require("./assets/can.png")} />
           </TouchableOpacity>
         </View>
 
@@ -143,45 +143,43 @@ function HomeScreen({ navigation }) {
 }
 
 
-
+/**
+ * The foodScreen shows the user a list of all the items that are shownin the database. The list is sorted
+ * in alphabetical order and displayed. When the user clicks on an item it displays the information about the item
+ * @param {} param0 
+ * @returns 
+ */
 function FoodScreen({ route, navigation }) {
   const { shelfID } = route.params;
   //let [IDs, setIDs] = useState(0), [products, setProducts] = useState(1);
   let [items, setItems] = useState([]);
-    db.transaction((tx) => {
-      tx.executeSql(
-        'select batchID, product from batch natural join shelves where shelfID = '+shelfID+';',
-        [],
-        (tx, results) => {
-          var temp = [];
-          for (var i = 0; i < results.rows.length; i++){
-            temp.push(results.rows.item(i));
-          }
-          setItems(temp);
-          
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select batchID, product from batch natural join shelves where shelfID = ' + shelfID + ';',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++) {
+          temp.push(results.rows.item(i));
         }
-      )
-    });
+        setItems(temp);
+
+      }
+    )
+  });
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
-
-
       <View style={styles.container}>
-        <Text>Food Screen</Text>
-
-        <Button
-          color="coral"
-          title="Return Home"
-          onPress={() => navigation.navigate('INVENTORY TRACKING APP')} />
-
-
+        <View styel={styles.pantryButton}>
+          <Text style={styles.textAddItems}>YOUR PANTRY:</Text>
+        </View>
         <FlatList
-          data = {items}
+          data={items}
           keyExtractor={(item, index) => index}
-          renderItem={({ item, index, separators }) => 
+          renderItem={({ item, index, separators }) =>
             <TouchableHighlight
               activeOpacity={0.6}
               underlayColor={"#DDDDDD"}
@@ -192,12 +190,13 @@ function FoodScreen({ route, navigation }) {
               </View>
             </TouchableHighlight>
           }
-
           renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
-
         />
-
       </View>
+      <FloatingButton //This button takes ther user to the homepage 
+        style={styles.floatinBtn}
+        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+      />
     </ImageBackground>
   )
 }
@@ -209,7 +208,7 @@ function FoodPicScreen({ route, navigation }) {
   let [details, setDetails] = useState([]);
   db.transaction((tx) => {
     tx.executeSql(
-      'select product,datePlaced,expDate,notes,quantity from batch where batchID = '+id+';',
+      'select product,datePlaced,expDate,notes,quantity from batch where batchID = ' + id + ';',
       [],
       (tx, results) => {
         setDetails(results.rows.item(0));
@@ -243,17 +242,22 @@ function FoodPicScreen({ route, navigation }) {
             ]
           )
         }
-      /> 
-      <Text>Quantity: {details.quantity}</Text> 
+      />
+      <Text>Quantity: {details.quantity}</Text>
       <Text>Date added: {details.datePlaced}</Text>
       <Text>Expiration Date: {details.expDate}</Text>
       <TextInput //TODO: cant edit any of these
         //value = {text}
         //onChangeText = {onChangeText}
-        value = {details.notes}
+        value={details.notes}
         style={styles.textBox}
       />
+      <FloatingButton //This button takes ther user to the homepage 
+        style={styles.floatinBtn}
+        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+      />
     </View>
+
 
   );
 }
@@ -271,50 +275,55 @@ function AddSection({ navigation }) {
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
-       <View style={toggleStyles.container}>
-       <View style={styles.button}>
+      <View style={toggleStyles.container}>
+        <View style={styles.button}>
           <Text>Enter Section Information</Text>
         </View>
         <TextInput
-            style={styles.inputAddSection}
-            placeholder="Section Name" //ENTER NAME OF CATGEORY
-            onChangeText={(sectionName) => setText(sectionName)}
-            defaultValue={sectionName}
-          />
-          <View style={toggleStyles.container}>
-            <Text style={styles.textAddItems}>Section {sectionName} will be sorted by</Text>
-            <Text>{outStock}</Text>
-            <Text>{expDate}</Text>
-            <Text>{location}</Text>
-          </View>
-          <View style={toggleStyles.container}>
-            <Text style={styles.textAddItems}>Select Sorting Options</Text>
-          </View>
-          <Button
-            color="coral"
-            backgroundColor="darkgrey"
-            title="Out of Stock"
-            onPress={(outStock) => setOutStock('Out of Stock')}
-          />
-          <Button
-            color="coral"
-            backgroundColor="darkgrey"
-            title="About to Expire"
-            onPress={(expDate) => setExpDate('About to Expire')}
-          />
-          <Button
-            color="coral"
-            backgroundColor="darkgrey"
-            title="Location"
-            onPress={(location) => setLocation('Location')}
-          /> 
-          <Button
-            color="coral"
-            backgroundColor="darkgrey"
-            title="Submit"
-            onPress={() => console.log('the section' +sectionName+'has been added.')}
-          />
+          style={styles.inputAddSection}
+          placeholder="Section Name" //ENTER NAME OF CATGEORY
+          onChangeText={(sectionName) => setText(sectionName)}
+          defaultValue={sectionName}
+        />
+        <View style={toggleStyles.container}>
+          <Text style={styles.textAddItems}>Section {sectionName} will be sorted by</Text>
+          <Text>{outStock}</Text>
+          <Text>{expDate}</Text>
+          <Text>{location}</Text>
+        </View>
+        <View style={toggleStyles.container}>
+          <Text style={styles.textAddItems}>Select Sorting Options</Text>
+        </View>
+        <Button
+          color="coral"
+          backgroundColor="darkgrey"
+          title="Out of Stock"
+          onPress={(outStock) => setOutStock('Out of Stock')}
+        />
+        <Button
+          color="coral"
+          backgroundColor="darkgrey"
+          title="About to Expire"
+          onPress={(expDate) => setExpDate('About to Expire')}
+        />
+        <Button
+          color="coral"
+          backgroundColor="darkgrey"
+          title="Location"
+          onPress={(location) => setLocation('Location')}
+        />
+        <Button
+          color="coral"
+          backgroundColor="darkgrey"
+          title="Submit"
+          onPress={() => console.log('the section' + sectionName + 'has been added.')}
+        />
+
       </View>
+      <FloatingButton //This button takes ther user to the homepage 
+        style={styles.floatinBtn}
+        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+      />
     </ImageBackground>
   );
 }
@@ -322,8 +331,8 @@ function AddSection({ navigation }) {
 function AddItems({ navigation }) {
   const [nameOfItem, setText] = useState('');
   const [quantity, setTextQuan] = useState('');
-  const [expirationDate, setExpDate] = useState('');
-
+  const [expDate, setExpDate] = useState('');
+  const [addntInfo, setaddntInfo] = useState('');
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
   return (
@@ -332,56 +341,70 @@ function AddItems({ navigation }) {
       style={{ width: '100%', height: '100%' }}
     >
       <View style={styles.container}>
-        <View style={styles.button}>
+        <View styel={styles.pantryButton}>
           <Text style={styles.textAddItems}>ADD ITEMS TO YOUR PANTRY</Text>
         </View>
         <View style={toggleStyles.container}>
-          <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+          <TextInput //Stores the name of an item in nameOfItem
             style={styles.input}
             placeholder="Add name of Item"
             onChangeText={(nameOfItem) => setText(nameOfItem)}
             defaultValue={nameOfItem}
           />
-
-          <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+          <TextInput //stores the quantitiy of an item in quantity
             style={styles.input}
             placeholder="Add quantity"
             onChangeText={(quantity) => setTextQuan(quantity)}
             defaultValue={quantity}
           />
-          <Switch
+          <Text style={styles.textAddExpiration}>Would you like to add</Text>
+          <Text style={styles.textAddExpiration}> an expiration date?</Text>
+          <Switch //toggle switch, if on then 
+            style={toggleStyles.space}
             trackColor={{ false: "#767577", true: "#81b0ff" }}
             thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-            onValueChange={console.log('value changes')}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleSwitch}
             value={isEnabled}
           />
-          <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+          <TextInput //stores the expiration date in expDate
             style={styles.input}
             placeholder="Add expiration date"
-            onChangeText={(expirationDate) => setExpDate(expirationDate)} //CHANGE TO A NEW VAR
-            defaultValue={expirationDate}
+            onChangeText={(expDate) => setExpDate(expDate)}
+            defaultValue={expDate}
           />
-
-          <TextInput //THIS STORES THE INPUT THAT THE USER WRITES IN THE VARIABLE NAMEOFITEM
+          <TextInput //stores additional info in addntInfo
             style={styles.input}
             placeholder="Add additional info"
-            onChangeText={(quantity) => setTextQuan(quantity)} //CHANGE TO A NEW VAR
-            defaultValue={quantity}
+            onChangeText={(addntInfo) => setaddntInfo(addntInfo)}
+            defaultValue={addntInfo}
           />
-
         </View>
-
-        <Button
-          color="coral"
-          backgroundColor="darkgrey"
-          title="Add Item to Inventory"
-          onPress={() => console.log('the name of the item is: ' + nameOfItem + quantity)}
-        />
+        <View style={styles.pantryButton}>
+          <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
+            style={styles.button}
+            onPress={() => { console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) }}>
+            <Text style={styles.textForAddItems}>ADD ITEM TO INVENTORY</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+      <FloatingButton //This button takes ther user to the homepage 
+        style={styles.floatinBtn}
+        onPress={() => navigation.navigate('INVENTORY TRACKING')}
+      />
     </ImageBackground>
   );
 }
-
+/**
+ * This determines if the toggle is switched to true or false
+ */
+function toggleTF() {
+  if (isEnabled == true) {
+    //then remember the expriation date
+  } else {
+    //do not remeber the expriation date 
+  }
+}
 
 function Pantry({ navigation }) {
   return (
@@ -391,7 +414,7 @@ function Pantry({ navigation }) {
     >
       <SafeAreaView style={styles.container}>
         <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Food',{ shelfID: 0 }) }}> 
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Food', { shelfID: 0 }) }}>
             <Text style={styles.text}>VIEW INVENTORY</Text>
             <Image source={require("./assets/ViewPantry.png")} />
           </TouchableOpacity>
@@ -402,63 +425,74 @@ function Pantry({ navigation }) {
             <Text style={styles.text}>ADD A NEW ITEM</Text>
             <Image source={require("./assets/plusButton.png")} />
           </TouchableOpacity>
+
         </View>
         < StatusBar style="auto" />
 
       </SafeAreaView >
+      <FloatingButton //This button takes ther user to the homepage 
+        style={styles.floatinBtn}
+        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+      />
     </ImageBackground>
+
 
   );
 }
 
+
 function Canning({ navigation }) {
-    let [cans, setCans] = useState([]);
-    db.transaction((tx) => {
-        tx.executeSql(
-          'SELECT batchID, product FROM Batch;',
-          [],
-          (tx, results) => {
-            var temp = [];
-            for (var i = 0; i < results.rows.length; i++){
-              temp.push(results.rows.item(i));
-            }
-            setCans(temp);
+  let [cans, setCans] = useState([]);
+  db.transaction((tx) => {
+    tx.executeSql(
+      'SELECT batchID, product FROM Batch;',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++) {
+          temp.push(results.rows.item(i));
+        }
+        setCans(temp);
+      }
+    )
+  });
+
+
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <SafeAreaView style={styles.container}>
+        <View>
+          <Text>HI</Text>
+        </View>
+        <FlatList
+          data={cans}
+          keyExtractor={(item, index) => index}
+          renderItem={({ item, index, separator }) =>
+            <TouchableHighlight
+              activeOpacity={0.6}
+              underlayColor={"darkgrey"}
+              onPress={() => console.log('Item Pressed')}
+            >
+              <View>
+                <Text></Text>
+                <Text style={styles.item}> Batch {item.batchID} - {item.product}</Text>
+              </View>
+            </TouchableHighlight>
           }
-        )
-    });
-
-
-    return (
-      <ImageBackground
-        source={require('./assets/cart.jpg')}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <SafeAreaView style={styles.container}>
-          <View>
-            <Text>HI</Text>
-          </View>
-          <FlatList
-            data = {cans}
-            keyExtractor={(item, index) => index}
-            renderItem={({ item, index, separator }) =>
-              <TouchableHighlight
-                activeOpacity={0.6}
-                underlayColor={"darkgrey"}
-                onPress={() => console.log('Item Pressed')}
-              >
-                <View>
-                  <Text></Text>
-                  <Text style={styles.item}> Batch {item.batchID} - {item.product}</Text>
-                </View>
-              </TouchableHighlight>
-            }
-          />
-          <View>
-            <Text>Add Canned Item</Text>
-          </View>
-        </SafeAreaView >
-      </ImageBackground>
-    );
+        />
+        <View>
+          <Text>Add Canned Item</Text>
+        </View>
+        <FloatingButton //This button takes ther user to the homepage 
+          style={styles.floatinBtn}
+          onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+        />
+      </SafeAreaView >
+    </ImageBackground>
+  );
 }
 
 
@@ -468,8 +502,12 @@ function Canning({ navigation }) {
 const toggleStyles = StyleSheet.create({
   container: {
     alignItems: "center",
-    justifyContent: "center"
-  }
+    justifyContent: "center",
+    marginBottom: 50,
+  },
+  space: {
+    margin: 20,
+  },
 });
 
 const styles = StyleSheet.create({
@@ -488,7 +526,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center',
   },
-
   button: {
     backgroundColor: '#859a9b',
     borderRadius: 20,
@@ -512,13 +549,12 @@ const styles = StyleSheet.create({
   },
   item: {
     textAlign: "auto",
-    backgroundColor: "white",
-    borderWidth: 1,
+    borderWidth: 5,
     borderColor: "darkgrey",
     fontSize: 30,
     color: "black",
     height: 75,
-    width: 400,
+    width: 300,
   },
   input: {
     borderColor: "gray",
@@ -536,6 +572,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
   },
+  textForAddItems: {
+    textAlign: 'center',
+    fontSize: 14,
+
+    fontFamily: 'Avenir',
+    fontWeight: 'bold',
+    color: 'black',
+  },
   textBox: {
     height: 150,
     width: 200,
@@ -547,6 +591,15 @@ const styles = StyleSheet.create({
     color: "black",
   },
   textAddItems: {
+    textAlignVertical: 'top',
+    textAlign: 'center',
+    fontSize: 14,
+    padding: 10,
+    fontFamily: 'Avenir',
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  textAddExpiration: {
     textAlignVertical: 'top',
     textAlign: 'center',
     fontSize: 14,
@@ -569,4 +622,10 @@ const styles = StyleSheet.create({
     backgroundColor: "darkgrey",
     padding: 10
   },
+  floatinBtn: {
+    color: 'grey',
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+  }
 });
