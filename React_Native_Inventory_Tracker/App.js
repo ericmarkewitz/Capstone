@@ -143,6 +143,30 @@ function HomeScreen({ navigation }) {
   );
 }
 
+function selectBatch(shelfID){
+  let [items, setItems] = useState([]);
+  useEffect(() => {
+    let isUnfin = true;
+    db.transaction((tx) => {
+      tx.executeSql(
+        'select batchID, product from batch natural join shelves where shelfID = ?;',
+        [shelfID],
+        (tx, results) => {
+          if (isUnfin){
+            var temp = [];
+            for (var i = 0; i < results.rows.length; i++) {
+              temp.push(results.rows.item(i));
+            }
+            setItems(temp);
+          }
+  
+        }
+      )
+    });
+    return () => isUnfin = false; 
+  });
+  return items;
+}
 
 /**
  * The foodScreen shows the user a list of all the items that are shownin the database. The list is sorted
@@ -152,22 +176,9 @@ function HomeScreen({ navigation }) {
  */
 function FoodScreen({ route, navigation }) {
   const { shelfID } = route.params;
-  //let [IDs, setIDs] = useState(0), [products, setProducts] = useState(1);
-  let [items, setItems] = useState([]);
-  db.transaction((tx) => {
-    tx.executeSql(
-      'select batchID, product from batch natural join shelves where shelfID = ' + shelfID + ';',
-      [],
-      (tx, results) => {
-        var temp = [];
-        for (var i = 0; i < results.rows.length; i++) {
-          temp.push(results.rows.item(i));
-        }
-        setItems(temp);
 
-      }
-    )
-  });
+  var items = selectBatch(shelfID);
+
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -202,21 +213,62 @@ function FoodScreen({ route, navigation }) {
   )
 }
 
-function FoodPicScreen({ route, navigation }) {
-  const { id } = route.params;
-  //var name, datePlaced, expDate, notes, quantity;
-  //details[0].product = "jajaja"
+function getDetails(batchID){
   let [details, setDetails] = useState([]);
+  useEffect(() => {
+    let isUnfin = true;
+    db.transaction((tx) => {
+      tx.executeSql(
+        'select product,datePlaced,expDate,notes,quantity from batch where batchID = ?;',
+        [batchID],
+        (tx, results) => {
+          if (isUnfin){
+            setDetails(results.rows.item(0));
+            isUnfin = true;
+          }
+  
+        }
+      )
+    });
+    return () => isUnfin = false; 
+  });
+  return details;
+}
+
+function updateDetails(notes,quantity,batchID) {
+  console.log("Notes: "+notes);
+  console.log("Quantity: "+quantity);
   db.transaction((tx) => {
     tx.executeSql(
-      'select product,datePlaced,expDate,notes,quantity from batch where batchID = ' + id + ';',
-      [],
-      (tx, results) => {
-        setDetails(results.rows.item(0));
-      }
+      'update Batch set notes = ?, quantity = ? where batchID = ?;',
+      [notes, quantity, batchID],
     )
   });
-  //const [text, onChangeText] = React.useState(details.notes);
+  return(
+  Alert.alert(
+    "Updated",
+    "",
+    [
+      {
+        text: "OK",
+      }
+    ]
+  )
+  );
+}
+
+function FoodPicScreen({ route, navigation }) {
+  const { id } = route.params;
+  var isFin = false;
+  var details = getDetails(id);
+
+  const [notes, onChangeNotes] = React.useState(details.notes);
+  const [quan, onChangeQuan] = React.useState(details.quantity);
+  //const [added, onChangeAdded] = React.useState(details.datePlaced);
+  //const [exp, onChangeExp] = React.useState(details.expDate);
+
+
+
   return (
     <View style={styles.listContainer}>
       <Text> {details.product} </Text>
@@ -244,14 +296,34 @@ function FoodPicScreen({ route, navigation }) {
           )
         }
       />
-      <Text>Quantity: {details.quantity}</Text>
+
+      <View style = {styles.row}>
+        <Text >Quantity: </Text>
+        <TextInput
+            placeholder= {details.quantity+''}
+            placeholderTextColor= "black"
+            value = {quan}
+            onChangeText = {onChangeQuan}
+            keyboardType= "numeric"
+            style = {styles.borderText}
+        ></TextInput>
+      </View>
+      
       <Text>Date added: {details.datePlaced}</Text>
       <Text>Expiration Date: {details.expDate}</Text>
-      <TextInput //TODO: cant edit any of these
-        //value = {text}
-        //onChangeText = {onChangeText}
-        value={details.notes}
-        style={styles.textBox}
+      <TextInput //TODO: have current values not be placeholders updating dates (right now pressing update without changing the fields sets them to undefined)
+        placeholder = {details.notes}
+        placeholderTextColor = "black"
+        value = {notes}
+        onChangeText = {onChangeNotes}
+        style = {styles.textBox}
+      />
+      <Button
+        color="#0437A0"
+        title="Update"
+        onPress={() =>
+          updateDetails(notes, quan, id)
+        }
       />
       <FloatingButton //This button takes ther user to the homepage 
         style={styles.floatinBtn}
@@ -684,5 +756,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     backgroundColor: "#303838"
+  },
+  row: {
+    flexDirection: "row",
+  },
+  borderText: {
+    borderWidth: 1,
+    borderColor: "darkgrey",
+    justifyContent: 'center',
+    textAlign: 'center',
+
   }
 });
