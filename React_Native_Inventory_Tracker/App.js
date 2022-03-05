@@ -149,7 +149,7 @@ function selectBatch(shelfID){
     let isUnfin = true;
     db.transaction((tx) => {
       tx.executeSql(
-        'select batchID, product from batch natural join shelves where shelfID = ?;',
+        'select batchID,product,datePlaced,expDate,notes,quantity from batch natural join shelves where shelfID = ?;',
         [shelfID],
         (tx, results) => {
           if (isUnfin){
@@ -178,7 +178,6 @@ function FoodScreen({ route, navigation }) {
   const { shelfID } = route.params;
 
   var items = selectBatch(shelfID);
-
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -195,7 +194,7 @@ function FoodScreen({ route, navigation }) {
             <TouchableHighlight
               activeOpacity={0.6}
               underlayColor={"#DDDDDD"}
-              onPress={() => navigation.push('Item', { id: item.batchID })}
+              onPress={() => navigation.push('Item', { details: item })} 
             >
               <View>
                 <Text style={styles.item} > {item.product} </Text>
@@ -211,28 +210,6 @@ function FoodScreen({ route, navigation }) {
       />
     </ImageBackground>
   )
-}
-
-function getDetails(batchID){
-  let [details, setDetails] = useState([]);
-  useEffect(() => {
-    let isUnfin = true;
-    db.transaction((tx) => {
-      tx.executeSql(
-        'select product,datePlaced,expDate,notes,quantity from batch where batchID = ?;',
-        [batchID],
-        (tx, results) => {
-          if (isUnfin){
-            setDetails(results.rows.item(0));
-            isUnfin = true;
-          }
-  
-        }
-      )
-    });
-    return () => isUnfin = false; 
-  });
-  return details;
 }
 
 function updateDetails(notes,quantity,batchID) {
@@ -258,16 +235,12 @@ function updateDetails(notes,quantity,batchID) {
 }
 
 function FoodPicScreen({ route, navigation }) {
-  const { id } = route.params;
-  var isFin = false;
-  var details = getDetails(id);
+  const { details } = route.params;
 
   const [notes, onChangeNotes] = React.useState(details.notes);
-  const [quan, onChangeQuan] = React.useState(details.quantity);
+  const [quan, onChangeQuan] = React.useState(details.quantity+'');
   //const [added, onChangeAdded] = React.useState(details.datePlaced);
   //const [exp, onChangeExp] = React.useState(details.expDate);
-
-
 
   return (
     <View style={styles.listContainer}>
@@ -300,8 +273,6 @@ function FoodPicScreen({ route, navigation }) {
       <View style = {styles.row}>
         <Text >Quantity: </Text>
         <TextInput
-            placeholder= {details.quantity+''}
-            placeholderTextColor= "black"
             value = {quan}
             onChangeText = {onChangeQuan}
             keyboardType= "numeric"
@@ -311,9 +282,7 @@ function FoodPicScreen({ route, navigation }) {
       
       <Text>Date added: {details.datePlaced}</Text>
       <Text>Expiration Date: {details.expDate}</Text>
-      <TextInput //TODO: have current values not be placeholders updating dates (right now pressing update without changing the fields sets them to undefined)
-        placeholder = {details.notes}
-        placeholderTextColor = "black"
+      <TextInput //TODO: allow changing of dateAdded and expDate
         value = {notes}
         onChangeText = {onChangeNotes}
         style = {styles.textBox}
@@ -322,7 +291,7 @@ function FoodPicScreen({ route, navigation }) {
         color="#0437A0"
         title="Update"
         onPress={() =>
-          updateDetails(notes, quan, id)
+          updateDetails(notes, quan, details.batchID)
         }
       />
       <FloatingButton //This button takes ther user to the homepage 
