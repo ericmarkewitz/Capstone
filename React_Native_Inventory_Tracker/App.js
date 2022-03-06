@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen'; //expo install expo-splash-s
 import * as Font from 'expo-font'; //expo install expo-font
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
+import DateTimePicker from '@react-native-community/datetimepicker'; //npm install @react-native-community/datetimepicker
 //import { TouchableHighlight } from "react-native-web";
 import FloatingButton from './FloatingButton';
 
@@ -143,6 +144,7 @@ function HomeScreen({ navigation }) {
   );
 }
 
+//Returns items in a given shelf
 function selectBatch(shelfID){
   let [items, setItems] = useState([]);
   useEffect(() => {
@@ -175,9 +177,9 @@ function selectBatch(shelfID){
  * @returns 
  */
 function FoodScreen({ route, navigation }) {
-  const { shelfID } = route.params;
+  const { shelfID } = route.params; //receive shelfID
 
-  var items = selectBatch(shelfID);
+  var items = selectBatch(shelfID); //query db for items in shelf
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -212,13 +214,13 @@ function FoodScreen({ route, navigation }) {
   )
 }
 
-function updateDetails(notes,quantity,batchID) {
-  console.log("Notes: "+notes);
-  console.log("Quantity: "+quantity);
+//Updates Batch fields 
+function updateDetails(notes,quantity,expDate,batchID) {
+  console.log("Updated batch fields:\n  Quantity: "+quantity+"\n  ExpDate: "+expDate+"\n  Notes: "+notes);
   db.transaction((tx) => {
     tx.executeSql(
-      'update Batch set notes = ?, quantity = ? where batchID = ?;',
-      [notes, quantity, batchID],
+      'update Batch set notes = ?, quantity = ?, expDate = ? where batchID = ?;',
+      [notes, quantity, expDate, batchID],
     )
   });
   return(
@@ -234,13 +236,43 @@ function updateDetails(notes,quantity,batchID) {
   );
 }
 
-function FoodPicScreen({ route, navigation }) {
-  const { details } = route.params;
+//Returns a string in MM/DD/YY format for a given date
+function dateToStr(date){
+  function addZeroes(str){ //adds 0s to month and date to fit schema format
+    if (str.length < 2) { return "0"+str; }
+    else return str;
+  }
 
+  return ( (addZeroes((date.getMonth()+1).toString())) +'/'+ (addZeroes(date.getDate().toString())) +'/'+ (date.getFullYear().toString().substring(2)) );
+}
+
+//Lists all items in a shelf
+function FoodPicScreen({ route, navigation }) {
+  const { details } = route.params; //receive details
+
+  //datePicker
+  const [date, setDate] = useState(new Date(details.expDate));
+  const [mode, setMode] = useState('date');
+  const [show, setShow] = useState(false); //determines when datePicker is shown
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShow(Platform.OS === 'ios');
+    setDate(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+
+  const showDatePicker = () => {
+    showMode('date');
+  };
+
+  //notes and quantity
   const [notes, onChangeNotes] = React.useState(details.notes);
   const [quan, onChangeQuan] = React.useState(details.quantity+'');
-  //const [added, onChangeAdded] = React.useState(details.datePlaced);
-  //const [exp, onChangeExp] = React.useState(details.expDate);
 
   return (
     <View style={styles.listContainer}>
@@ -279,10 +311,31 @@ function FoodPicScreen({ route, navigation }) {
             style = {styles.borderText}
         ></TextInput>
       </View>
-      
+
       <Text>Date added: {details.datePlaced}</Text>
-      <Text>Expiration Date: {details.expDate}</Text>
-      <TextInput //TODO: allow changing of dateAdded and expDate
+
+      <View style = {styles.row}>
+        <Text >Expiration Date: </Text>
+        <TouchableHighlight 
+          onPress={ showDatePicker }
+          activeOpacity={0.6}
+          underlayColor={"#DDDDDD"} >
+          <Text style = {styles.borderText}>{dateToStr(date)}</Text>
+        </TouchableHighlight>
+      </View>
+      {show && (
+        <DateTimePicker
+          testID="dateTimePicker"
+          value={date}
+          mode={mode}
+          is24Hour={true}
+          display="default"
+          onChange={onChange}
+        />
+      )}
+
+      
+      <TextInput //TODO: allow changing of dateAdded (maybe), allow changing of image, automatic updates instead of pressing button (stretch goal maybe)
         value = {notes}
         onChangeText = {onChangeNotes}
         style = {styles.textBox}
@@ -291,7 +344,7 @@ function FoodPicScreen({ route, navigation }) {
         color="#0437A0"
         title="Update"
         onPress={() =>
-          updateDetails(notes, quan, details.batchID)
+          updateDetails(notes, quan, dateToStr(date), details.batchID)
         }
       />
       <FloatingButton //This button takes ther user to the homepage 
