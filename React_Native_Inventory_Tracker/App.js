@@ -13,7 +13,7 @@ import FloatingButton from './FloatingButton';
 import DropdownMenu from 'react-native-dropdown-menu';
 import DropDownPicker from 'react-native-dropdown-picker';
 
-const db = SQLite.openDatabase('Deeb'); //if app wont load after a reload change the name of the db (no clue why this happens)
+const db = SQLite.openDatabase('Daba'); //if app wont load after a reload change the name of the db (no clue why this happens)
 const Stack = createNativeStackNavigator();
 
 function setupDB() {
@@ -149,14 +149,14 @@ function HomeScreen({ navigation }) {
 }
 
 //Returns items in a given shelf
-function selectBatch(shelfID){
+function selectBatch(shelfID, sortBy){
   let [items, setItems] = useState([]);
   useEffect(() => {
     let isUnfin = true;
     db.transaction((tx) => {
       tx.executeSql(
-        'select batchID,product,datePlaced,expDate,notes,quantity from batch natural join shelves where shelfID = ?;',
-        [shelfID],
+        'select batchID,product,datePlaced,expDate,notes,quantity from batch natural join shelves where shelfID = ? ORDER BY ? ASC;',
+        [shelfID, sortBy],
         (tx, results) => {
           if (isUnfin){
             var temp = [];
@@ -183,7 +183,7 @@ function selectBatch(shelfID){
 function FoodScreen({ route, navigation }) {
   const { shelfID } = route.params; //receive shelfID
 
-  var items = selectBatch(shelfID); //query db for items in shelf
+  var items = selectBatch(shelfID,'batchID'); //query db for items in shelf
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -547,7 +547,7 @@ function Canning({ navigation }) {
   let orderByIdAsc = [];
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY batchID ASC;',
+      'SELECT batchID, product, datePlaced, expDate, notes, quantity FROM Batch ORDER BY batchID ASC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
@@ -563,7 +563,7 @@ function Canning({ navigation }) {
   let orderByDateAsc = [];
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY datePlaced ASC;',
+      'SELECT batchID, product, datePlaced, expDate, notes, quantity FROM Batch ORDER BY datePlaced ASC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
@@ -576,7 +576,7 @@ function Canning({ navigation }) {
   let orderByExpAsc = []
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY expDate ASC;',
+      'SELECT batchID, product, datePlaced, expDate, notes, quantity FROM Batch ORDER BY expDate ASC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
@@ -705,7 +705,7 @@ function Canning({ navigation }) {
             <TouchableHighlight
               activeOpacity={0.6}
               underlayColor={"darkgrey"}
-              onPress={() => console.log('Item Pressed')}
+              onPress={() => navigation.push('Item', { details: item })}
             >
               <View>
                 <Text style={styles.batchItems}> Batch {item.batchID}: {item.product} {"\n"} Placed:{item.datePlaced}{"\n"} Expires:{item.expDate}</Text>
