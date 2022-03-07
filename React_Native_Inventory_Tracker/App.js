@@ -99,6 +99,7 @@ export default function App() {
           <Stack.Screen name="Canning" component={Canning} />
           <Stack.Screen name="AddSection" component={AddSection} />
           <Stack.Screen name="EmptyJar" component={EmptyJar} />
+          <Stack.Screen name="BatchLocation" component={BatchLocation} />
         </Stack.Navigator>
       </NavigationContainer></>
   );
@@ -567,6 +568,11 @@ function Canning({ navigation }) {
             <Text style={styles.text}>View Empty Jars</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.pantryButton}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('BatchLocation') }}>
+            <Text style={styles.text}>View Batch by Location</Text>
+          </TouchableOpacity>
+        </View>
         <FlatList
           data={cans}
           keyExtractor={(item, index) => index}
@@ -577,7 +583,6 @@ function Canning({ navigation }) {
               onPress={() => console.log('Item Pressed')}
             >
               <View>
-                <Text></Text>
                 <Text style={styles.item}> Batch {item.batchID} - {item.product}</Text>
               </View>
             </TouchableHighlight>
@@ -630,8 +635,51 @@ function EmptyJar({ navigation, route }) {
             ListEmptyComponent={NoEmptyJarsMessage}
             renderItem = {({item, index, separators}) =>
              <View>
-               <Text></Text>
                <Text style={styles.item}>{item.size} - {item.mouth} - {item.count}</Text>
+             </View>
+          }
+      />
+    </ImageBackground>
+  );
+}
+
+function BatchLocation({ navigation, route }){
+  let [shelves, setShelves] = useState([]);
+    db.transaction((tx) => {
+      tx.executeSql(
+        'select product, quantity, shelfName from Batch NATURAL JOIN SHELVES GROUP BY shelfID;',
+        [],
+        (tx, results) => {
+          var temp = [];
+          for (var i = 0; i < results.rows.length; i++){
+            temp.push(results.rows.item(i));
+          }
+          setShelves(temp);
+          
+        }
+      )
+    });
+    const EmptyPantry = ({ item }) => {
+      return (
+        // Flat List Item
+        <Text style={styles.emptyList } onPress={() => getItem(item)}>
+          Your Pantry is Empty
+        </Text>
+      );
+    };
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <View><Text style={styles.item}>Location - Product - #</Text></View>
+      <FlatList
+            data = {shelves}
+            ListEmptyComponent={EmptyPantry}
+            renderItem = {({item, index, separators}) =>
+             <View>
+               <Text></Text>
+               <Text style={styles.item}>{item.shelfName} - {item.product} - {item.quantity}</Text>
              </View>
           }
       />
