@@ -543,75 +543,60 @@ function Pantry({ navigation }) {
 
 function Canning({ navigation }) {
   let [cans, setCans] = useState([]);
+
+  let orderByID = [];
   db.transaction((tx) => {
     tx.executeSql(
       'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY batchID ASC;',
       [],
       (tx, results) => {
-        var temp = [];
         for (var i = 0; i < results.rows.length; i++) {
-          temp.push(results.rows.item(i));
+          orderByID.push(results.rows.item(i));
         }
-        setCans(temp);
+        if(cans.length == 0){
+          setCans(orderByID);
+        }
       }
     )
   });
   
-  let [pcans, psetCans] = useState([]);
+
+  let orderByDate = [];
   db.transaction((tx) => {
     tx.executeSql(
       'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY datePlaced;',
       [],
       (tx, results) => {
-        var temp = [];
         for (var i = 0; i < results.rows.length; i++) {
-          temp.push(results.rows.item(i));
+          orderByDate.push(results.rows.item(i));
         }
-        psetCans(temp);
       }
     )
   });
 
-  let [expcans, expsetCans] = useState([]);
+  let orderByExp = []
   db.transaction((tx) => {
     tx.executeSql(
       'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY expDate;',
       [],
       (tx, results) => {
-        var temp = [];
         for (var i = 0; i < results.rows.length; i++) {
-          temp.push(results.rows.item(i));
+          orderByExp.push(results.rows.item(i));
         }
-        expsetCans(temp);
+        
       }
     )
   });
-  /*
-  <DropdownMenu
-            style = {{flex: 1}}
-            bgColor={'darkgrey'}
-            tintColor={'#000000'}
-            activityTintColor={'rgba(153,204,255,1.0)'}
-            handler={(selection) => setDropdownSelect(dropdownOptions[0][selection])}
-            data={dropdownOptions}
-          >
-            <View style={{flex:1}}>
-              <Text>Sort by: {dropdownSelect}</Text>
-            </View>
-          </DropdownMenu>
   
-  */
-
-  /*
-  var dropdownOptions = [['BatchID', 'Placement Date','Expiration Date']];
-  const [dropdownSelect, setDropdownSelect] = useState('BatchID'); */
+  let canArray = [orderByID, orderByDate, orderByExp];
+  
 
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('bID');
+  const [value, setValue] = useState('0');
   const [items, setItems] = useState([
-    {label: 'BatchID', value: 'bID'},
-    {label: 'Placement Date', value: 'pDate'},
-    {label: 'Expiration Date', value: 'expDate'}
+    {label: 'BatchID', value: '0'},
+    {label: 'Placement Date', value: '1'},
+    {label: 'Expiration Date', value: '2'}
   ]);
 
 
@@ -644,7 +629,7 @@ function Canning({ navigation }) {
               setValue={setValue}
               setItems={setItems}
               containerStyle ={{width: 200}}
-              onChangeValue={(value) => console.log(value)}
+              onSelectItem={(item) => setCans(canArray[item.value])}
             />
           </View>
         <FlatList
