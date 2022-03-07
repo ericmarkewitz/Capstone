@@ -544,51 +544,93 @@ function Pantry({ navigation }) {
 function Canning({ navigation }) {
   let [cans, setCans] = useState([]);
 
-  let orderByID = [];
+  let orderByIdAsc = [];
   db.transaction((tx) => {
     tx.executeSql(
       'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY batchID ASC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
-          orderByID.push(results.rows.item(i));
+          orderByIdAsc.push(results.rows.item(i));
         }
         if(cans.length == 0){
-          setCans(orderByID);
+          setCans(orderByIdAsc);
         }
       }
     )
   });
   
-
-  let orderByDate = [];
+  let orderByDateAsc = [];
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY datePlaced;',
+      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY datePlaced ASC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
-          orderByDate.push(results.rows.item(i));
+          orderByDateAsc.push(results.rows.item(i));
         }
       }
     )
   });
 
-  let orderByExp = []
+  let orderByExpAsc = []
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY expDate;',
+      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY expDate ASC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
-          orderByExp.push(results.rows.item(i));
+          orderByExpAsc.push(results.rows.item(i));
+        }
+        
+      }
+    )
+  });
+
+  //sort in descending order
+  let orderByIdDesc = [];
+  db.transaction((tx) => {
+    tx.executeSql(
+      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY batchID DESC;',
+      [],
+      (tx, results) => {
+        for (var i = 0; i < results.rows.length; i++) {
+          orderByIdDesc.push(results.rows.item(i));
+        }
+        if(cans.length == 0){
+        }
+      }
+    )
+  });
+  
+  let orderByDateDesc = [];
+  db.transaction((tx) => {
+    tx.executeSql(
+      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY datePlaced DESC;',
+      [],
+      (tx, results) => {
+        for (var i = 0; i < results.rows.length; i++) {
+          orderByDateDesc.push(results.rows.item(i));
+        }
+      }
+    )
+  });
+
+  let orderByExpDesc = []
+  db.transaction((tx) => {
+    tx.executeSql(
+      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY expDate DESC;',
+      [],
+      (tx, results) => {
+        for (var i = 0; i < results.rows.length; i++) {
+          orderByExpDesc.push(results.rows.item(i));
         }
         
       }
     )
   });
   
-  let canArray = [orderByID, orderByDate, orderByExp];
+  let canArray = [orderByIdAsc, orderByDateAsc, orderByExpAsc, orderByIdDesc, orderByDateDesc, orderByExpDesc];
   
 
   const [open, setOpen] = useState(false);
@@ -599,6 +641,15 @@ function Canning({ navigation }) {
     {label: 'Expiration Date', value: '2'}
   ]);
 
+
+  const [isEnabled, setIsEnabled] = useState(false);
+  /*
+    if(isEnabled){
+      setCans(canArray[value+3]);
+    }
+    else{
+      setCans(canArray[value])
+    };*/
 
   return (
     <ImageBackground
@@ -629,9 +680,24 @@ function Canning({ navigation }) {
               setValue={setValue}
               setItems={setItems}
               containerStyle ={{width: 200}}
-              onSelectItem={(item) => setCans(canArray[item.value])}
+              onSelectItem={(item) => {
+                if(isEnabled){
+                  setCans(canArray[item.value+3]);
+                }
+                else{
+                  setCans(canArray[item.value])
+                }
+              }}
             />
           </View>
+          <View>
+            <Text>ASC/DESC</Text>
+            <Switch
+              onValueChange = {() => setIsEnabled(previousState => !previousState)}
+              value = {isEnabled}
+            />
+          </View>
+          
         <FlatList
           data={cans}
           keyExtractor={(item, index) => index}
