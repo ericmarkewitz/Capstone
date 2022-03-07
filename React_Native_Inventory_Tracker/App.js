@@ -9,6 +9,9 @@ import { NavigationContainer } from "@react-navigation/native";
 import DateTimePicker from '@react-native-community/datetimepicker'; //npm install @react-native-community/datetimepicker
 //import { TouchableHighlight } from "react-native-web";
 import FloatingButton from './FloatingButton';
+//import {Dropdown} from 'react-native-material-dropdown';
+import DropdownMenu from 'react-native-dropdown-menu';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 const db = SQLite.openDatabase('Deeb'); //if app wont load after a reload change the name of the db (no clue why this happens)
 const Stack = createNativeStackNavigator();
@@ -537,11 +540,12 @@ function Pantry({ navigation }) {
 }
 
 
+
 function Canning({ navigation }) {
   let [cans, setCans] = useState([]);
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product FROM Batch;',
+      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY batchID ASC;',
       [],
       (tx, results) => {
         var temp = [];
@@ -552,6 +556,63 @@ function Canning({ navigation }) {
       }
     )
   });
+  
+  let [pcans, psetCans] = useState([]);
+  db.transaction((tx) => {
+    tx.executeSql(
+      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY datePlaced;',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++) {
+          temp.push(results.rows.item(i));
+        }
+        psetCans(temp);
+      }
+    )
+  });
+
+  let [expcans, expsetCans] = useState([]);
+  db.transaction((tx) => {
+    tx.executeSql(
+      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY expDate;',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++) {
+          temp.push(results.rows.item(i));
+        }
+        expsetCans(temp);
+      }
+    )
+  });
+  /*
+  <DropdownMenu
+            style = {{flex: 1}}
+            bgColor={'darkgrey'}
+            tintColor={'#000000'}
+            activityTintColor={'rgba(153,204,255,1.0)'}
+            handler={(selection) => setDropdownSelect(dropdownOptions[0][selection])}
+            data={dropdownOptions}
+          >
+            <View style={{flex:1}}>
+              <Text>Sort by: {dropdownSelect}</Text>
+            </View>
+          </DropdownMenu>
+  
+  */
+
+  /*
+  var dropdownOptions = [['BatchID', 'Placement Date','Expiration Date']];
+  const [dropdownSelect, setDropdownSelect] = useState('BatchID'); */
+
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('bID');
+  const [items, setItems] = useState([
+    {label: 'BatchID', value: 'bID'},
+    {label: 'Placement Date', value: 'pDate'},
+    {label: 'Expiration Date', value: 'expDate'}
+  ]);
 
 
   return (
@@ -560,9 +621,7 @@ function Canning({ navigation }) {
       style={{ width: '100%', height: '100%' }}
     >
       <SafeAreaView style={styles.container}>
-        <View>
-          <Text>HI</Text>
-        </View>
+        
         <View style={styles.pantryButton}>
           <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('EmptyJar') }}>
             <Text style={styles.text}>View Empty Jars</Text>
@@ -573,6 +632,21 @@ function Canning({ navigation }) {
             <Text style={styles.text}>View Batch by Location</Text>
           </TouchableOpacity>
         </View>
+        <View style ={{flex:0.6, zIndex: 5}}>
+          <View style={styles.text}>
+            <Text>Sort Batches By:</Text>
+          </View>
+            <DropDownPicker
+              open = {open}
+              value = {value}
+              items = {items}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setItems}
+              containerStyle ={{width: 200}}
+              onChangeValue={(value) => console.log(value)}
+            />
+          </View>
         <FlatList
           data={cans}
           keyExtractor={(item, index) => index}
@@ -583,7 +657,7 @@ function Canning({ navigation }) {
               onPress={() => console.log('Item Pressed')}
             >
               <View>
-                <Text style={styles.item}> Batch {item.batchID} - {item.product}</Text>
+                <Text style={styles.batchItems}> Batch {item.batchID}: {item.product} {"\n"} Placed:{item.datePlaced}{"\n"} Expires:{item.expDate}</Text>
               </View>
             </TouchableHighlight>
           }
@@ -599,6 +673,10 @@ function Canning({ navigation }) {
     </ImageBackground>
   );
 }
+/*
+function ViewBatch({Navigation}){
+
+}*/
 
 function EmptyJar({ navigation, route }) {
   let [jars, setJars] = useState([]);
@@ -744,6 +822,15 @@ const styles = StyleSheet.create({
     borderWidth: 5,
     borderColor: "darkgrey",
     fontSize: 30,
+    color: "black",
+    height: 75,
+    width: 300,
+  },
+  batchItems: {
+    textAlign: "auto",
+    borderWidth: 5,
+    borderColor: "darkgrey",
+    fontSize: 15,
     color: "black",
     height: 75,
     width: 300,
