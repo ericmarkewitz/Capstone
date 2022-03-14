@@ -35,6 +35,13 @@ function setupDB() {
     tx.executeSql('create table if not exists Jars(jarID integer primary key,size text,mouth text check (mouth = \'regular\' or mouth = \'wide\'));');
     tx.executeSql('create table if not exists CannedGoods(jarID integer,batchID integer,primary key (jarID, batchID),foreign key (jarID) references Jars(jarID),foreign key (batchID) references Batch(batchID));');
 
+    //General db
+    tx.executeSql('create table if not exists Section(sectionID integer primary key, sectionName text);');
+    tx.executeSql('create table if not exists Product(productID integer primary key, productName text, notes text, sectionID integer, foreign key (sectionID) references Section(sectionID));');
+    tx.executeSql('create table if not exists WishList(productID integer primary key, foreign key (productID) references Product(productID));');
+    tx.executeSql('create table if not exists Expiration(productID integer primary key, expirationDate text check (expirationDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),foreign key (productID) references Product (productID));');
+    tx.executeSql('create table if not exists Stock(productID integer,shelfID integer,locationID integer,datePurchased text check (datePurchased glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),quantity integer check (quantity >= 0),primary key(productID,shelfID,locationID),foreign key (productID) references Product(productID),foreign key (shelfID, locationID) references Shelf(shelfID,locationID));');
+
     //dummy data
     tx.executeSql('insert into Storage values (0, \'Pantry\');');
     tx.executeSql('insert into Shelves values (0, 0, \'Shelf A\');');
@@ -101,8 +108,10 @@ export default function App() {
           <Stack.Screen name="Pantry" component={Pantry} />
           <Stack.Screen name="Canning" component={Canning} />
           <Stack.Screen name="AddSection" component={AddSection} />
+          <Stack.Screen name="Sections" component={Sections} />
           <Stack.Screen name="EmptyJar" component={EmptyJar} />
           <Stack.Screen name="BatchLocation" component={BatchLocation} />
+          <Stack.Screen name="WishList" component={WishList} />
         </Stack.Navigator>
       </NavigationContainer></>
   );
@@ -122,7 +131,7 @@ function HomeScreen({ navigation }) {
     >
       <SafeAreaView style={styles.container}>
         <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('AddSection') }}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Sections') }}>
             <Text style={styles.text}>ADD NEW SECTION</Text>
             <Image source={require("./assets/newSection.png")} />
           </TouchableOpacity>
@@ -360,12 +369,100 @@ function FoodPicScreen({ route, navigation }) {
 
   );
 }
+function Sections({ navigation }){
+  const[sections, setSection] = useState('');
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select sectionName from Section;',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++){
+          temp.push(results.rows.item(i));
+        }
+        setSection(temp);
+ 
+      }
+    )
+  });
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+    <View>
+        <FlatList
+            data = {sections}
+            renderItem = {({item, index, separators}) =>
+             <View>
+               <Text style={styles.item}>{item.name}</Text>
+             </View>
+          }
+        />
+        <Button
+          title="WishList"
+          onPress={() => navigation.navigate('WishList')}
+        />
+    </View>
+    <FloatingButton 
+        style={styles.floatinBtn}
+        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+      />
+    </ImageBackground>
+  );
+}
 
+function WishList({ navigation }){
+  const[products, setProducts] = useState('');
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select productName from WishList natural join Product;',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++){
+          temp.push(results.rows.item(i));
+        }
+        setProducts(temp);
+ 
+      }
+    )
+  });
+  const NoItemsInList = ({ item }) => {
+    return (
+      <View>
+        <Text>
+            Your Wish List is Empty
+        </Text>
+        <Button style={styles.pantryButton}
+            title = 'Add Items to your Wish List'
+            onPress={() => navigation.navigate('Pantry')}
+        />
+      </View>
+    );
+  };
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <FlatList
+            data = {products}
+            ListEmptyComponent={NoItemsInList}
+            renderItem = {({item, index, separators}) =>
+            <View>
+              <Text style={styles.item}>{item.productName}</Text>
+            </View>
+          }
+      />
+    </ImageBackground>
+  );
+}
 function AddSection({ navigation }) {
   const [sectionName, setText] = useState('');
-  const [expDate, setExpDate] = useState('');
-  const [outStock, setOutStock] = useState('');
-  const [location, setLocation] = useState('');
+  const [expDate, setExpDate] = useState(false);
+  const [outStock, setOutStock] = useState(false);
+  const [location, setLocation] = useState(false);
   const [addSection, setAddSection] = useState('');
 
 
