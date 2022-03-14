@@ -17,7 +17,7 @@ create table Section(
 create table Product(
     productID integer primary key,
     productName text,
-    notes text
+    notes text,
     sectionID integer,
     foreign key (sectionID) references Section(sectionID)
 );
