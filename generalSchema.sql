@@ -7,12 +7,19 @@ drop table if exists Expiration;
 drop table if exists WishList;
 drop table if exists Location;
 drop table if exists Product;
+drop table if exists Section;
 
 --schema
+create table Section(
+    sectionID integer primary key,
+    sectionName text
+);
 create table Product(
     productID integer primary key,
     productName text,
     notes text
+    sectionID integer,
+    foreign key (sectionID) references Section(sectionID)
 );
 
 create table Location(
