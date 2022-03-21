@@ -22,13 +22,14 @@ function setupDB() {
   );
 
   db.transaction(tx => {
-    /*
+    /* 
     tx.executeSql('drop table if exists CannedGoods');
     tx.executeSql('drop table if exists Jars');
     tx.executeSql('drop table if exists Batch');
     tx.executeSql('drop table if exists Shelves');
     tx.executeSql('drop table if exists Storage');
     */
+
     tx.executeSql('create table if not exists Storage(locationID integer primary key,locationName text);');
     tx.executeSql('create table if not exists Shelves(shelfID integer primary key,locationID integer,shelfName text,foreign key (locationID) references Storage (locationID));');
     tx.executeSql('create table if not exists Batch(batchID integer primary key,product text,datePlaced text check (datePlaced glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),expDate text check (expDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),shelfID integer, quantity integer check (quantity >= 0), notes text,foreign key (shelfID) references Shelves(shelfID));');
@@ -49,6 +50,7 @@ function setupDB() {
     tx.executeSql('insert into Batch values (1, \'Peas\', \'01/17/22\',\'03/18/23\', 0, 12,\'also green\');');
     tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\');');
     tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\');');
+    tx.executeSql('insert into Batch values (4, \'delete me\', \'12/04/21\',\'03/04/22\', 0, 456,\'\');');
 
     tx.executeSql('insert into Jars values (0, \'16oz\', \'regular\');');
     tx.executeSql('insert into Jars values (1, \'20oz\', \'wide\');');
@@ -59,6 +61,11 @@ function setupDB() {
     //tx.executeSql('insert into CannedGoods values (1, 1);');
     //tx.executeSql('insert into CannedGoods values (2, 2);');
     //tx.executeSql('insert into CannedGoods values (3, 3);');
+
+    //tx.executeSql('insert into CannedGoods values (2, 0);');
+    //tx.executeSql('insert into CannedGoods values (0, 1);');
+    //tx.executeSql('insert into CannedGoods values (0, 2);');
+    //tx.executeSql('insert into CannedGoods values (0, 3);');
   })
 }
 
@@ -229,13 +236,13 @@ function FoodScreen({ route, navigation }) {
 
 //Updates Batch fields 
 function updateDetails(notes,quantity,expDate,batchID) {
-  console.log("Updated batch fields:\n  Quantity: "+quantity+"\n  ExpDate: "+expDate+"\n  Notes: "+notes);
   db.transaction((tx) => {
     tx.executeSql(
       'update Batch set notes = ?, quantity = ?, expDate = ? where batchID = ?;',
       [notes, quantity, expDate, batchID],
     )
   });
+  console.log("Updated batch fields:\n  Quantity: "+quantity+"\n  ExpDate: "+expDate+"\n  Notes: "+notes);
   return(
   Alert.alert(
     "Updated",
@@ -247,6 +254,18 @@ function updateDetails(notes,quantity,expDate,batchID) {
     ]
   )
   );
+}
+
+//Deletes batch
+function deleteItem(batchID, navigation){
+  db.transaction((tx) => {
+    tx.executeSql(
+      'delete from Batch where batchID = ?;',
+      [batchID],
+    )
+  });
+  console.log("Deleted Item "+batchID);
+  navigation.goBack(null);
 }
 
 //Returns a string in MM/DD/YY format for a given date
@@ -358,6 +377,38 @@ function FoodPicScreen({ route, navigation }) {
         title="Update"
         onPress={() =>
           updateDetails(notes, quan, dateToStr(date), details.batchID)
+        }
+      />
+      <Button
+        color="#FF0000"
+        title="Delete"
+        onPress={() =>
+          Alert.alert(
+            "Are you sure you want to delete this item?",
+            "You cannot undo this action.",
+            [
+              { text: "No",
+              },
+              {
+                text: "Yes",
+                onPress: () => 
+                  Alert.alert(
+                    "Are you REALLY sure?",
+                    "There is no going back from this.",
+                    [
+                      { text: "Wait, take me back!",
+                      },
+                      {
+                        text: "Yes",
+                        onPress: () => deleteItem(details.batchID, navigation) //NOTE/TODO: atm if you do this from foodscreen it will refresh but not canning
+                      }
+                    ]
+                  )
+              }
+            ]
+          )
+          
+
         }
       />
       <FloatingButton //This button takes ther user to the homepage 
