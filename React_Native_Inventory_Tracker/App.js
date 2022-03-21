@@ -816,27 +816,29 @@ function Canning({ navigation }) {
             <Text style={styles.text}>View Batch by Location</Text>
           </TouchableOpacity>
         </View>
-        <View style ={styles.floatingDropdown}>
-          <View style={styles.text}>
-            <Text>Sort Batches By:</Text>
-          </View>
-            <DropDownPicker
-              open = {open}
-              value = {value}
-              items = {items}
-              setOpen={setOpen}
-              setValue={setValue}
-              setItems={setItems}
-              containerStyle ={{width: 200}}
-              onSelectItem={(item) => {
-                if(isEnabled){
-                  setCans(canArray[item.value+3]);
-                }
-                else{
-                  setCans(canArray[item.value])
-                }
-              }}
-            />
+        
+        <View style={styles.sortRow}>
+          <View style ={styles.floatingDropdown}>
+            <View style={styles.text}>
+              <Text>Sort Batches By:</Text>
+            </View>
+              <DropDownPicker
+                open = {open}
+                value = {value}
+                items = {items}
+                setOpen={setOpen}
+                setValue={setValue}
+                setItems={setItems}
+                containerStyle ={{width: 200}}
+                onSelectItem={(item) => {
+                  if(isEnabled){
+                    setCans(canArray[item.value+3]);
+                  }
+                  else{
+                    setCans(canArray[item.value])
+                  }
+                }}
+              />
           </View>
           <View>
             <Text>ASC/DESC</Text>
@@ -845,6 +847,9 @@ function Canning({ navigation }) {
               value = {isEnabled}
             />
           </View>
+        </View>
+        
+        
           
         <FlatList
           data={cans}
@@ -1131,4 +1136,12 @@ const styles = StyleSheet.create({
       },
    })
   },
+  sortRow:{
+    flexDirection: "row",
+    ...Platform.select({
+      ios: {
+        zIndex: 5
+      },
+   })
+  }
 });
