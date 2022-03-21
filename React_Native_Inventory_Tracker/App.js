@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, TouchableWithoutFeedback } from "react-native";
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, Platform, TouchableWithoutFeedback } from "react-native";
 import * as SQLite from 'expo-sqlite'; //expo install expo-sqlite
 import * as SplashScreen from 'expo-splash-screen'; //expo install expo-splash-screen
 import * as Font from 'expo-font'; //expo install expo-font
@@ -13,7 +13,7 @@ import FloatingButton from './FloatingButton';
 import DropdownMenu from 'react-native-dropdown-menu';
 import DropDownPicker from 'react-native-dropdown-picker';
 
-const db = SQLite.openDatabase('Daba'); //if app wont load after a reload change the name of the db (no clue why this happens)
+const db = SQLite.openDatabase('daba'); //if app wont load after a reload change the name of the db (no clue why this happens)
 const Stack = createNativeStackNavigator();
 
 function setupDB() {
@@ -22,7 +22,7 @@ function setupDB() {
   );
 
   db.transaction(tx => {
-    /* 
+    /*
     tx.executeSql('drop table if exists CannedGoods');
     tx.executeSql('drop table if exists Jars');
     tx.executeSql('drop table if exists Batch');
@@ -799,7 +799,7 @@ function Canning({ navigation }) {
       setCans(canArray[value])
     };*/
 
-  return (
+  return ( //"View Empty Jars and "View Batch by Location" and "View Empty Jars" text breaks with more than 4 items
     <ImageBackground
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
@@ -808,7 +808,7 @@ function Canning({ navigation }) {
         
         <View style={styles.pantryButton}>
           <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('EmptyJar') }}>
-            <Text style={styles.text}>View Empty Jars</Text>
+            <Text style={styles.text}>View Empty Jars</Text> 
           </TouchableOpacity>
         </View>
         <View style={styles.pantryButton}>
@@ -816,11 +816,12 @@ function Canning({ navigation }) {
             <Text style={styles.text}>View Batch by Location</Text>
           </TouchableOpacity>
         </View>
-        <View style ={{flex:0.6, zIndex: 5}}>
+        <View style ={{flex:0.6}}>
           <View style={styles.text}>
             <Text>Sort Batches By:</Text>
           </View>
             <DropDownPicker
+              zIndex = {5} //was next to flex:0.6, check if still works on iOS
               open = {open}
               value = {value}
               items = {items}
