@@ -816,12 +816,11 @@ function Canning({ navigation }) {
             <Text style={styles.text}>View Batch by Location</Text>
           </TouchableOpacity>
         </View>
-        <View style ={{flex:0.6}}>
+        <View style ={styles.floatingDropdown}>
           <View style={styles.text}>
             <Text>Sort Batches By:</Text>
           </View>
             <DropDownPicker
-              zIndex = {5} //was next to flex:0.6, check if still works on iOS
               open = {open}
               value = {value}
               items = {items}
@@ -1123,5 +1122,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center',
 
-  }
+  },
+  floatingDropdown: {
+    flex: 0.6,
+    ...Platform.select({
+      ios: {
+        zIndex: 5
+      },
+   })
+  },
 });
