@@ -165,7 +165,7 @@ function HomeScreen({ navigation }) {
 }
 
 //Returns items in a given shelf
-function selectBatch(shelfID, sortBy){
+function selectBatch(shelfID, sortBy) {
   let [items, setItems] = useState([]);
   useEffect(() => {
     let isUnfin = true;
@@ -174,18 +174,18 @@ function selectBatch(shelfID, sortBy){
         'select batchID,product,datePlaced,expDate,notes,quantity from batch natural join shelves where shelfID = ? ORDER BY ? ASC;',
         [shelfID, sortBy],
         (tx, results) => {
-          if (isUnfin){
+          if (isUnfin) {
             var temp = [];
             for (var i = 0; i < results.rows.length; i++) {
               temp.push(results.rows.item(i));
             }
             setItems(temp);
           }
-  
+
         }
       )
     });
-    return () => isUnfin = false; 
+    return () => isUnfin = false;
   });
   return items;
 }
@@ -199,7 +199,7 @@ function selectBatch(shelfID, sortBy){
 function FoodScreen({ route, navigation }) {
   const { shelfID } = route.params; //receive shelfID
 
-  var items = selectBatch(shelfID,'batchID'); //query db for items in shelf
+  var items = selectBatch(shelfID, 'batchID'); //query db for items in shelf
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -207,7 +207,7 @@ function FoodScreen({ route, navigation }) {
     >
       <View style={styles.container}>
         <View styel={styles.pantryButton}>
-          <Text style={styles.textAddItems}>YOUR PANTRY:</Text>
+          <Text style={styles.textHead}>YOUR PANTRY:</Text>
         </View>
         <FlatList
           data={items}
@@ -216,7 +216,7 @@ function FoodScreen({ route, navigation }) {
             <TouchableHighlight
               activeOpacity={0.6}
               underlayColor={"#DDDDDD"}
-              onPress={() => navigation.push('Item', { details: item })} 
+              onPress={() => navigation.push('Item', { details: item })}
             >
               <View>
                 <Text style={styles.item} > {item.product} </Text>
@@ -234,54 +234,67 @@ function FoodScreen({ route, navigation }) {
   )
 }
 
-//Updates Batch fields 
-function updateDetails(notes,quantity,expDate,batchID) {
+/**
+ * This updates the batch screens and details for the user 
+ * @param {} param0 
+ * @returns 
+ */function updateDetails(notes, quantity, expDate, batchID) {
   db.transaction((tx) => {
     tx.executeSql(
       'update Batch set notes = ?, quantity = ?, expDate = ? where batchID = ?;',
       [notes, quantity, expDate, batchID],
     )
   });
-  console.log("Updated batch fields:\n  Quantity: "+quantity+"\n  ExpDate: "+expDate+"\n  Notes: "+notes);
-  return(
-  Alert.alert(
-    "Updated",
-    "",
-    [
-      {
-        text: "OK",
-      }
-    ]
-  )
+  console.log("Updated batch fields:\n  Quantity: " + quantity + "\n  ExpDate: " + expDate + "\n  Notes: " + notes);
+  return (
+    Alert.alert(
+      "Updated",
+      "",
+      [
+        {
+          text: "OK",
+        }
+      ]
+    )
   );
 }
 
-//Deletes batch
-function deleteItem(batchID, navigation){
+/**
+ * Deletes Items from a batch ID
+ * @param {} param0 
+ * @returns 
+ */
+function deleteItem(batchID, navigation) {
   db.transaction((tx) => {
     tx.executeSql(
       'delete from Batch where batchID = ?;',
       [batchID],
     )
   });
-  console.log("Deleted Item "+batchID);
+  console.log("Deleted Item " + batchID);
   navigation.goBack(null);
 }
 
-//Returns a string in MM/DD/YY format for a given date
-function dateToStr(date){
-  function addZeroes(str){ //adds 0s to month and date to fit schema format
-    if (str.length < 2) { return "0"+str; }
+/**
+ * Returns a string in MM/DD/YY format for a given date 
+ * @param {} param0 
+ * @returns 
+ */
+function dateToStr(date) {
+  function addZeroes(str) { //adds 0s to month and date to fit schema format
+    if (str.length < 2) { return "0" + str; }
     else return str;
   }
 
-  return ( (addZeroes((date.getMonth()+1).toString())) +'/'+ (addZeroes(date.getDate().toString())) +'/'+ (date.getFullYear().toString().substring(2)) );
+  return ((addZeroes((date.getMonth() + 1).toString())) + '/' + (addZeroes(date.getDate().toString())) + '/' + (date.getFullYear().toString().substring(2)));
 }
 
-//Lists all items in a shelf
-function FoodPicScreen({ route, navigation }) {
+/**
+ * Lists all items on a shelf
+ * @param {} param0 
+ * @returns 
+ */function FoodPicScreen({ route, navigation }) {
   const { details } = route.params; //receive details
-
   //datePicker
   const [date, setDate] = useState(new Date(details.expDate));
   const [mode, setMode] = useState('date');
@@ -304,135 +317,139 @@ function FoodPicScreen({ route, navigation }) {
 
   //notes and quantity
   const [notes, onChangeNotes] = React.useState(details.notes);
-  const [quan, onChangeQuan] = React.useState(details.quantity+'');
+  const [quan, onChangeQuan] = React.useState(details.quantity + '');
 
   return (
-    <View style={styles.listContainer}>
-      <Text> {details.product} </Text>
-      <Image
-        source={{
-          width: 200,
-          height: 300,
-          uri: "https://www.usu.edu/today/images/stories/xl/food-preservation-UST.jpg",
-        }} />
-      <Button
-        color="#0437A0"
-        title="Replace image"
-        onPress={() =>
-          Alert.alert(
-            "This box does nothing",
-            "",
-            [
-              {
-                text: "cancel",
-              },
-              {
-                text: "OK",
-              }
-            ]
-          )
-        }
-      />
-
-      <View style = {styles.row}>
-        <Text >Quantity: </Text>
-        <TextInput
-            value = {quan}
-            onChangeText = {onChangeQuan}
-            keyboardType= "numeric"
-            style = {styles.borderText}
-        ></TextInput>
-      </View>
-
-      <Text>Date added: {details.datePlaced}</Text>
-
-      <View style = {styles.row}>
-        <Text >Expiration Date: </Text>
-        <TouchableHighlight 
-          onPress={ showDatePicker }
-          activeOpacity={0.6}
-          underlayColor={"#DDDDDD"} >
-          <Text style = {styles.borderText}>{dateToStr(date)}</Text>
-        </TouchableHighlight>
-      </View>
-      {show && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={date}
-          mode={mode}
-          is24Hour={true}
-          display="default"
-          onChange={onChange}
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <View style={styles.listContainer}>
+        <Text style={styles.textHead} > {details.product}  </Text>
+        <Image
+          source={{ //CHANGE THIS TO BE THE UPDATED PHOTO THAT A USER ADDED 
+            width: 200,
+            height: 300,
+            uri: "https://www.usu.edu/today/images/stories/xl/food-preservation-UST.jpg",
+          }} />
+        <Button
+          color="#0437A0"
+          title="Replace image"
+          onPress={() =>
+            Alert.alert(
+              "This box does nothing now, but it will allow the user to select a new photo",
+              "",
+              [
+                {
+                  text: "cancel",
+                },
+                {
+                  text: "OK",
+                }
+              ]
+            )
+          }
         />
-      )}
 
-      
-      <TextInput //TODO: allow changing of dateAdded (maybe), allow changing of image, automatic updates instead of pressing button (stretch goal maybe)
-        value = {notes}
-        onChangeText = {onChangeNotes}
-        style = {styles.textBox}
-      />
-      <Button
-        color="#0437A0"
-        title="Update"
-        onPress={() =>
-          updateDetails(notes, quan, dateToStr(date), details.batchID)
-        }
-      />
-      <Button
-        color="#FF0000"
-        title="Delete"
-        onPress={() =>
-          Alert.alert(
-            "Are you sure you want to delete this item?",
-            "You cannot undo this action.",
-            [
-              { text: "No",
-              },
-              {
-                text: "Yes",
-                onPress: () => 
-                  Alert.alert(
-                    "Are you REALLY sure?",
-                    "There is no going back from this.",
-                    [
-                      { text: "Wait, take me back!",
-                      },
-                      {
-                        text: "Yes",
-                        onPress: () => deleteItem(details.batchID, navigation) //NOTE/TODO: atm if you do this from foodscreen it will refresh but not canning
-                      }
-                    ]
-                  )
-              }
-            ]
-          )
-          
+        <View style={styles.textForAddItems}>
+          <Text style={styles.text} >Quantity: </Text>
+          <TextInput
+            value={quan}
+            onChangeText={onChangeQuan}
+            keyboardType="numeric"
+            style={styles.borderText}
+          ></TextInput>
+        </View>
 
-        }
-      />
-      <FloatingButton //This button takes ther user to the homepage 
-        style={styles.floatinBtn}
-        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
-      />
-    </View>
+        <Text style={styles.text} >Date added: {details.datePlaced}</Text>
+
+        <View style={styles.row}>
+          <Text style={styles.text} >Expiration Date: </Text>
+          <TouchableHighlight
+            onPress={showDatePicker}
+            activeOpacity={0.6}
+            underlayColor={"#DDDDDD"} >
+            <Text style={styles.borderText}>{dateToStr(date)}</Text>
+          </TouchableHighlight>
+        </View>
+        {show && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={date}
+            mode={mode}
+            is24Hour={true}
+            display="default"
+            onChange={onChange}
+          />
+        )}
 
 
+        <TextInput //TODO: allow changing of dateAdded (maybe), allow changing of image, automatic updates instead of pressing button (stretch goal maybe)
+          value={notes}
+          onChangeText={onChangeNotes}
+          style={styles.textBox}
+        />
+        <TouchableOpacity //UPDATE BUTTON
+          style={styles.button}
+          onPress={() => updateDetails(notes, quan, dateToStr(date), details.batchID)}>
+          <Text style={styles.text} >UPDATE</Text>
+        </TouchableOpacity>
+
+        <Button
+          color="#FF0000"
+          title="Delete"
+          onPress={() =>
+            Alert.alert(
+              "Are you sure you want to delete this item?",
+              "You cannot undo this action.",
+              [
+                {
+                  text: "No",
+                },
+                {
+                  text: "Yes",
+                  onPress: () =>
+                    Alert.alert(
+                      "Are you REALLY sure?",
+                      "There is no going back from this.",
+                      [
+                        {
+                          text: "Wait, take me back!",
+                        },
+                        {
+                          text: "Yes",
+                          onPress: () => deleteItem(details.batchID, navigation) //NOTE/TODO: atm if you do this from foodscreen it will refresh but not canning
+                        }
+                      ]
+                    )
+                }
+              ]
+            )
+
+
+          }
+        />
+        <FloatingButton //This button takes ther user to the homepage 
+          style={styles.floatinBtn}
+          onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+        />
+      </View >
+    </ImageBackground>
   );
 }
-function Sections({ navigation }){
-  const[sections, setSection] = useState('');
+function Sections({ navigation }) {
+  const [sections, setSection] = useState('');
   db.transaction((tx) => {
     tx.executeSql(
       'select sectionName from Section;',
       [],
       (tx, results) => {
         var temp = [];
-        for (var i = 0; i < results.rows.length; i++){
+        for (var i = 0; i < results.rows.length; i++) {
           temp.push(results.rows.item(i));
         }
         setSection(temp);
- 
+
       }
     )
   });
@@ -441,21 +458,21 @@ function Sections({ navigation }){
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
-    <View>
+      <View>
         <FlatList
-            data = {sections}
-            renderItem = {({item, index, separators}) =>
-             <View>
-               <Text style={styles.item}>{item.name}</Text>
-             </View>
+          data={sections}
+          renderItem={({ item, index, separators }) =>
+            <View>
+              <Text style={styles.item}>{item.name}</Text>
+            </View>
           }
         />
         <Button
           title="WishList"
           onPress={() => navigation.navigate('WishList')}
         />
-    </View>
-    <FloatingButton 
+      </View>
+      <FloatingButton
         style={styles.floatinBtn}
         onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
       />
@@ -463,19 +480,19 @@ function Sections({ navigation }){
   );
 }
 
-function WishList({ navigation }){
-  const[products, setProducts] = useState('');
+function WishList({ navigation }) {
+  const [products, setProducts] = useState('');
   db.transaction((tx) => {
     tx.executeSql(
       'select productName from WishList natural join Product;',
       [],
       (tx, results) => {
         var temp = [];
-        for (var i = 0; i < results.rows.length; i++){
+        for (var i = 0; i < results.rows.length; i++) {
           temp.push(results.rows.item(i));
         }
         setProducts(temp);
- 
+
       }
     )
   });
@@ -483,11 +500,11 @@ function WishList({ navigation }){
     return (
       <View>
         <Text>
-            Your Wish List is Empty
+          Your Wish List is Empty
         </Text>
         <Button style={styles.pantryButton}
-            title = 'Add Items to your Wish List'
-            onPress={() => navigation.navigate('Pantry')}
+          title='Add Items to your Wish List'
+          onPress={() => navigation.navigate('Pantry')}
         />
       </View>
     );
@@ -498,13 +515,13 @@ function WishList({ navigation }){
       style={{ width: '100%', height: '100%' }}
     >
       <FlatList
-            data = {products}
-            ListEmptyComponent={NoItemsInList}
-            renderItem = {({item, index, separators}) =>
-            <View>
-              <Text style={styles.item}>{item.productName}</Text>
-            </View>
-          }
+        data={products}
+        ListEmptyComponent={NoItemsInList}
+        renderItem={({ item, index, separators }) =>
+          <View>
+            <Text style={styles.item}>{item.productName}</Text>
+          </View>
+        }
       />
     </ImageBackground>
   );
@@ -589,8 +606,10 @@ function AddItems({ navigation }) {
     >
       <View style={styles.container}>
         <View styel={styles.pantryButton}>
-          <Text style={styles.textAddItems}>ADD ITEMS TO YOUR PANTRY</Text>
+          <Text style={styles.textHead}>ADD ITEMS TO YOUR PANTRY</Text>
         </View>
+        <Text></Text>
+        <Text></Text>
         <View style={toggleStyles.container}>
           <TextInput //Stores the name of an item in nameOfItem
             style={styles.input}
@@ -701,13 +720,13 @@ function Canning({ navigation }) {
         for (var i = 0; i < results.rows.length; i++) {
           orderByIdAsc.push(results.rows.item(i));
         }
-        if(cans.length == 0){
+        if (cans.length == 0) {
           setCans(orderByIdAsc);
         }
       }
     )
   });
-  
+
   let orderByDateAsc = [];
   db.transaction((tx) => {
     tx.executeSql(
@@ -730,7 +749,7 @@ function Canning({ navigation }) {
         for (var i = 0; i < results.rows.length; i++) {
           orderByExpAsc.push(results.rows.item(i));
         }
-        
+
       }
     )
   });
@@ -745,12 +764,12 @@ function Canning({ navigation }) {
         for (var i = 0; i < results.rows.length; i++) {
           orderByIdDesc.push(results.rows.item(i));
         }
-        if(cans.length == 0){
+        if (cans.length == 0) {
         }
       }
     )
   });
-  
+
   let orderByDateDesc = [];
   db.transaction((tx) => {
     tx.executeSql(
@@ -773,20 +792,20 @@ function Canning({ navigation }) {
         for (var i = 0; i < results.rows.length; i++) {
           orderByExpDesc.push(results.rows.item(i));
         }
-        
+
       }
     )
   });
-  
+
   let canArray = [orderByIdAsc, orderByDateAsc, orderByExpAsc, orderByIdDesc, orderByDateDesc, orderByExpDesc];
-  
+
 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('0');
   const [items, setItems] = useState([
-    {label: 'BatchID', value: '0'},
-    {label: 'Placement Date', value: '1'},
-    {label: 'Expiration Date', value: '2'}
+    { label: 'BatchID', value: '0' },
+    { label: 'Placement Date', value: '1' },
+    { label: 'Expiration Date', value: '2' }
   ]);
 
 
@@ -805,10 +824,10 @@ function Canning({ navigation }) {
       style={{ width: '100%', height: '100%' }}
     >
       <SafeAreaView style={styles.container}>
-        
+
         <View style={styles.pantryButton}>
           <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('EmptyJar') }}>
-            <Text style={styles.text}>View Empty Jars</Text> 
+            <Text style={styles.text}>View Empty Jars</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.pantryButton}>
@@ -816,41 +835,41 @@ function Canning({ navigation }) {
             <Text style={styles.text}>View Batch by Location</Text>
           </TouchableOpacity>
         </View>
-        
+
         <View style={styles.sortRow}>
-          <View style ={styles.floatingDropdown}>
+          <View style={styles.floatingDropdown}>
             <View style={styles.text}>
               <Text>Sort Batches By:</Text>
             </View>
-              <DropDownPicker
-                open = {open}
-                value = {value}
-                items = {items}
-                setOpen={setOpen}
-                setValue={setValue}
-                setItems={setItems}
-                containerStyle ={{width: 200}}
-                onSelectItem={(item) => {
-                  if(isEnabled){
-                    setCans(canArray[item.value+3]);
-                  }
-                  else{
-                    setCans(canArray[item.value])
-                  }
-                }}
-              />
+            <DropDownPicker
+              open={open}
+              value={value}
+              items={items}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setItems}
+              containerStyle={{ width: 200 }}
+              onSelectItem={(item) => {
+                if (isEnabled) {
+                  setCans(canArray[item.value + 3]);
+                }
+                else {
+                  setCans(canArray[item.value])
+                }
+              }}
+            />
           </View>
           <View>
             <Text>ASC/DESC</Text>
             <Switch
-              onValueChange = {() => setIsEnabled(previousState => !previousState)}
-              value = {isEnabled}
+              onValueChange={() => setIsEnabled(previousState => !previousState)}
+              value={isEnabled}
             />
           </View>
         </View>
-        
-        
-          
+
+
+
         <FlatList
           data={cans}
           keyExtractor={(item, index) => index}
@@ -884,28 +903,28 @@ function ViewBatch({Navigation}){
 
 function EmptyJar({ navigation, route }) {
   let [jars, setJars] = useState([]);
-    db.transaction((tx) => {
-      tx.executeSql(
-        'select size, mouth, count(mouth) as count from jars where jarID NOT IN (SELECT jarID FROM jars Natural JOIN CannedGoods) GROUP BY size;',
-        [],
-        (tx, results) => {
-          var temp = [];
-          for (var i = 0; i < results.rows.length; i++){
-            temp.push(results.rows.item(i));
-          }
-          setJars(temp);
-          
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select size, mouth, count(mouth) as count from jars where jarID NOT IN (SELECT jarID FROM jars Natural JOIN CannedGoods) GROUP BY size;',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++) {
+          temp.push(results.rows.item(i));
         }
-      )
-    });
-    const NoEmptyJarsMessage = ({ item }) => {
-      return (
-        // Flat List Item
-        <Text style={styles.emptyList } onPress={() => getItem(item)}>
-          All jars are currently in use
-        </Text>
-      );
-    };
+        setJars(temp);
+
+      }
+    )
+  });
+  const NoEmptyJarsMessage = ({ item }) => {
+    return (
+      // Flat List Item
+      <Text style={styles.emptyList} onPress={() => getItem(item)}>
+        All jars are currently in use
+      </Text>
+    );
+  };
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -913,42 +932,49 @@ function EmptyJar({ navigation, route }) {
     >
       <View><Text style={styles.item}>Size - Mouth - #</Text></View>
       <FlatList
-            data = {jars}
-            ListEmptyComponent={NoEmptyJarsMessage}
-            renderItem = {({item, index, separators}) =>
-             <View>
-               <Text style={styles.item}>{item.size} - {item.mouth} - {item.count}</Text>
-             </View>
-          }
+        data={jars}
+        ListEmptyComponent={NoEmptyJarsMessage}
+        renderItem={({ item, index, separators }) =>
+          <View>
+            <Text style={styles.item}>{item.size} - {item.mouth} - {item.count}</Text>
+          </View>
+        }
       />
     </ImageBackground>
   );
 }
 
-function BatchLocation({ navigation, route }){
+
+const sort_Array_Alphabetically = () => {
+
+  set_DATA(list_Items.sort());
+
+}
+
+function BatchLocation({ navigation, route }) {
   let [shelves, setShelves] = useState([]);
-    db.transaction((tx) => {
-      tx.executeSql(
-        'select product, quantity, shelfName from Batch NATURAL JOIN SHELVES GROUP BY shelfID;',
-        [],
-        (tx, results) => {
-          var temp = [];
-          for (var i = 0; i < results.rows.length; i++){
-            temp.push(results.rows.item(i));
-          }
-          setShelves(temp);
-          
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select product, quantity, shelfName from Batch NATURAL JOIN SHELVES GROUP BY shelfID;',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++) {
+          temp.push(results.rows.item(i));
         }
-      )
-    });
-    const EmptyPantry = ({ item }) => {
-      return (
-        // Flat List Item
-        <Text style={styles.emptyList } onPress={() => getItem(item)}>
-          Your Pantry is Empty
-        </Text>
-      );
-    };
+        setShelves(temp);
+
+      }
+    )
+  });
+  const EmptyPantry = ({ item }) => {
+    return (
+      // Flat List Item
+      <Text style={styles.emptyList} onPress={() => getItem(item)}>
+        Your Pantry is Empty
+      </Text>
+    );
+  };
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -956,14 +982,15 @@ function BatchLocation({ navigation, route }){
     >
       <View><Text style={styles.item}>Location - Product - #</Text></View>
       <FlatList
-            data = {shelves}
-            ListEmptyComponent={EmptyPantry}
-            renderItem = {({item, index, separators}) =>
-             <View>
-               <Text></Text>
-               <Text style={styles.item}>{item.shelfName} - {item.product} - {item.quantity}</Text>
-             </View>
-          }
+        data={shelves}
+        ListEmptyComponent={EmptyPantry}
+
+        renderItem={({ item, index, separators }) =>
+          <View>
+            <Text></Text>
+            <Text style={styles.item}>{item.shelfName} - {item.product} - {item.quantity}</Text>
+          </View>
+        }
       />
     </ImageBackground>
   );
@@ -1055,6 +1082,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
   },
+  textHead: {
+    textAlign: 'center',
+    fontSize: 30,
+    fontFamily: 'Avenir',
+    fontWeight: 'bold',
+    color: 'black',
+  },
   textForAddItems: {
     textAlign: 'center',
     fontSize: 14,
@@ -1134,14 +1168,14 @@ const styles = StyleSheet.create({
       ios: {
         zIndex: 5
       },
-   })
+    })
   },
-  sortRow:{
+  sortRow: {
     flexDirection: "row",
     ...Platform.select({
       ios: {
         zIndex: 5
       },
-   })
+    })
   }
 });
