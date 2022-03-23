@@ -28,6 +28,7 @@ create table Batch(
     shelfID integer, 
     quantity integer check (quantity >= 0),
     notes text,
+    imagePath text,
     foreign key (shelfID) references Shelves(shelfID)
 );
 

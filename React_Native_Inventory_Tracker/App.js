@@ -12,6 +12,8 @@ import FloatingButton from './FloatingButton';
 //import {Dropdown} from 'react-native-material-dropdown';
 import DropdownMenu from 'react-native-dropdown-menu';
 import DropDownPicker from 'react-native-dropdown-picker';
+//import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 
 const db = SQLite.openDatabase('daba'); //if app wont load after a reload change the name of the db (no clue why this happens)
 const Stack = createNativeStackNavigator();
@@ -32,7 +34,7 @@ function setupDB() {
 
     tx.executeSql('create table if not exists Storage(locationID integer primary key,locationName text);');
     tx.executeSql('create table if not exists Shelves(shelfID integer primary key,locationID integer,shelfName text,foreign key (locationID) references Storage (locationID));');
-    tx.executeSql('create table if not exists Batch(batchID integer primary key,product text,datePlaced text check (datePlaced glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),expDate text check (expDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),shelfID integer, quantity integer check (quantity >= 0), notes text,foreign key (shelfID) references Shelves(shelfID));');
+    tx.executeSql('create table if not exists Batch(batchID integer primary key,product text,datePlaced text check (datePlaced glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),expDate text check (expDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),shelfID integer, quantity integer check (quantity >= 0), notes text, imagePath text, foreign key (shelfID) references Shelves(shelfID));');
     tx.executeSql('create table if not exists Jars(jarID integer primary key,size text,mouth text check (mouth = \'regular\' or mouth = \'wide\'));');
     tx.executeSql('create table if not exists CannedGoods(jarID integer,batchID integer,primary key (jarID, batchID),foreign key (jarID) references Jars(jarID),foreign key (batchID) references Batch(batchID));');
 
@@ -46,11 +48,11 @@ function setupDB() {
     //dummy data
     tx.executeSql('insert into Storage values (0, \'Pantry\');');
     tx.executeSql('insert into Shelves values (0, 0, \'Shelf A\');');
-    tx.executeSql('insert into Batch values (0, \'Pickles\', \'02/18/22\',\'05/27/22\', 0, 4,\'green\');');
-    tx.executeSql('insert into Batch values (1, \'Peas\', \'01/17/22\',\'03/18/23\', 0, 12,\'also green\');');
-    tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\');');
-    tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\');');
-    tx.executeSql('insert into Batch values (4, \'delete me\', \'12/04/21\',\'03/04/22\', 0, 456,\'\');');
+    tx.executeSql('insert into Batch values (0, \'Pickles\', \'02/18/22\',\'05/27/22\', 0, 4,\'green\',\'./assets/default.jpg\');');
+    tx.executeSql('insert into Batch values (1, \'Peas\', \'01/17/22\',\'03/18/23\', 0, 12,\'also green\',\'./assets/default.jpg\');');
+    tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\',\'./assets/default.jpg\');');
+    tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\'./assets/default.jpg\');');
+    tx.executeSql('insert into Batch values (4, \'delete me\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\'./assets/default.jpg\');');
 
     tx.executeSql('insert into Jars values (0, \'16oz\', \'regular\');');
     tx.executeSql('insert into Jars values (1, \'20oz\', \'wide\');');
@@ -171,7 +173,7 @@ function selectBatch(shelfID, sortBy) {
     let isUnfin = true;
     db.transaction((tx) => {
       tx.executeSql(
-        'select batchID,product,datePlaced,expDate,notes,quantity from batch natural join shelves where shelfID = ? ORDER BY ? ASC;',
+        'select batchID,product,datePlaced,expDate,notes,quantity,imagePath from batch natural join shelves where shelfID = ? ORDER BY ? ASC;',
         [shelfID, sortBy],
         (tx, results) => {
           if (isUnfin) {
@@ -289,12 +291,43 @@ function dateToStr(date) {
   return ((addZeroes((date.getMonth() + 1).toString())) + '/' + (addZeroes(date.getDate().toString())) + '/' + (date.getFullYear().toString().substring(2)));
 }
 
+//updates imagePath field
+function updateImagePath(image, batchID){
+  db.transaction((tx) => {
+    tx.executeSql(
+      'update Batch set imagePath = ? where batchID = ?;',
+      [image, batchID],
+    )
+  });
+}
+
 /**
- * Lists all items on a shelf
+ * Lists details for an item
  * @param {} param0 
  * @returns 
  */function FoodPicScreen({ route, navigation }) {
+
   const { details } = route.params; //receive details
+
+  //image handling
+  const [image, setImage] = useState(details.imagePath);
+  const pickImage = async () => {
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [3, 4],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      
+      updateImagePath(result.uri, details.batchID);
+
+      setImage(result.uri);
+    }
+  };
+
   //datePicker
   const [date, setDate] = useState(new Date(details.expDate));
   const [mode, setMode] = useState('date');
@@ -318,6 +351,8 @@ function dateToStr(date) {
   //notes and quantity
   const [notes, onChangeNotes] = React.useState(details.notes);
   const [quan, onChangeQuan] = React.useState(details.quantity + '');
+  var defaultPic = './assets/default.jpg'; //maybe TODO: format of default pic doesnt work, may not be needed anyways
+  if (image == null) { setImage(defaultPic); }
 
   return (
     <ImageBackground
@@ -326,29 +361,16 @@ function dateToStr(date) {
     >
       <View style={styles.listContainer}>
         <Text style={styles.textHead} > {details.product}  </Text>
-        <Image
-          source={{ //CHANGE THIS TO BE THE UPDATED PHOTO THAT A USER ADDED 
-            width: 200,
-            height: 300,
-            uri: "https://www.usu.edu/today/images/stories/xl/food-preservation-UST.jpg",
-          }} />
+
+        {image && <Image 
+        source={{uri: image}}
+        style={{ width: 225, height: 300 }}
+        />}
+
         <Button
           color="#0437A0"
-          title="Replace image"
-          onPress={() =>
-            Alert.alert(
-              "This box does nothing now, but it will allow the user to select a new photo",
-              "",
-              [
-                {
-                  text: "cancel",
-                },
-                {
-                  text: "OK",
-                }
-              ]
-            )
-          }
+          title="Add/Replace image"
+          onPress={pickImage}
         />
 
         <View style={styles.textForAddItems}>
@@ -714,7 +736,7 @@ function Canning({ navigation }) {
   let orderByIdAsc = [];
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate, notes, quantity FROM Batch ORDER BY batchID ASC;',
+      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY batchID ASC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
@@ -730,7 +752,7 @@ function Canning({ navigation }) {
   let orderByDateAsc = [];
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate, notes, quantity FROM Batch ORDER BY datePlaced ASC;',
+      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY datePlaced ASC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
@@ -743,7 +765,7 @@ function Canning({ navigation }) {
   let orderByExpAsc = []
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate, notes, quantity FROM Batch ORDER BY expDate ASC;',
+      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY expDate ASC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
@@ -758,7 +780,7 @@ function Canning({ navigation }) {
   let orderByIdDesc = [];
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY batchID DESC;',
+      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY batchID DESC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
@@ -773,7 +795,7 @@ function Canning({ navigation }) {
   let orderByDateDesc = [];
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY datePlaced DESC;',
+      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY datePlaced DESC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
@@ -786,7 +808,7 @@ function Canning({ navigation }) {
   let orderByExpDesc = []
   db.transaction((tx) => {
     tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate FROM Batch ORDER BY expDate DESC;',
+      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY expDate DESC;',
       [],
       (tx, results) => {
         for (var i = 0; i < results.rows.length; i++) {
