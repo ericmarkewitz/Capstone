@@ -173,7 +173,7 @@ function selectBatch(shelfID, sortBy) {
     let isUnfin = true;
     db.transaction((tx) => {
       tx.executeSql(
-        'select batchID,product,datePlaced,expDate,notes,quantity,imagePath from batch natural join shelves where shelfID = ? ORDER BY ? ASC;',
+        'select batchID,product,datePlaced,expDate,notes,quantity,imagePath from Batch natural join Shelves where shelfID = ? ORDER BY ? ASC;',
         [shelfID, sortBy],
         (tx, results) => {
           if (isUnfin) {
@@ -729,116 +729,47 @@ function Pantry({ navigation }) {
 }
 
 
+//Returns all items in batch
+function selectCans(sortBy) {
+  let [items, setItems] = useState([]);
+  useEffect(() => {
+    let isUnfin = true;
+    db.transaction((tx) => {
+      tx.executeSql(
+        'SELECT * FROM Batch ORDER BY ?;',
+        [sortBy],
+        (tx, results) => {
+          if (isUnfin) {
+            var temp = [];
+            for (var i = 0; i < results.rows.length; i++) {
+              temp.push(results.rows.item(i));
+            }
+            setItems(temp);
+          }
+        }
+      )
+    });
+    return () => isUnfin = false;
+  });
+  return items;
+}
+
 
 function Canning({ navigation }) {
-  let [cans, setCans] = useState([]);
-
-  let orderByIdAsc = [];
-  db.transaction((tx) => {
-    tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY batchID ASC;',
-      [],
-      (tx, results) => {
-        for (var i = 0; i < results.rows.length; i++) {
-          orderByIdAsc.push(results.rows.item(i));
-        }
-        if (cans.length == 0) {
-          setCans(orderByIdAsc);
-        }
-      }
-    )
-  });
-
-  let orderByDateAsc = [];
-  db.transaction((tx) => {
-    tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY datePlaced ASC;',
-      [],
-      (tx, results) => {
-        for (var i = 0; i < results.rows.length; i++) {
-          orderByDateAsc.push(results.rows.item(i));
-        }
-      }
-    )
-  });
-
-  let orderByExpAsc = []
-  db.transaction((tx) => {
-    tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY expDate ASC;',
-      [],
-      (tx, results) => {
-        for (var i = 0; i < results.rows.length; i++) {
-          orderByExpAsc.push(results.rows.item(i));
-        }
-
-      }
-    )
-  });
-
-  //sort in descending order
-  let orderByIdDesc = [];
-  db.transaction((tx) => {
-    tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY batchID DESC;',
-      [],
-      (tx, results) => {
-        for (var i = 0; i < results.rows.length; i++) {
-          orderByIdDesc.push(results.rows.item(i));
-        }
-        if (cans.length == 0) {
-        }
-      }
-    )
-  });
-
-  let orderByDateDesc = [];
-  db.transaction((tx) => {
-    tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY datePlaced DESC;',
-      [],
-      (tx, results) => {
-        for (var i = 0; i < results.rows.length; i++) {
-          orderByDateDesc.push(results.rows.item(i));
-        }
-      }
-    )
-  });
-
-  let orderByExpDesc = []
-  db.transaction((tx) => {
-    tx.executeSql(
-      'SELECT batchID, product, datePlaced, expDate, notes, quantity, imagePath FROM Batch ORDER BY expDate DESC;',
-      [],
-      (tx, results) => {
-        for (var i = 0; i < results.rows.length; i++) {
-          orderByExpDesc.push(results.rows.item(i));
-        }
-
-      }
-    )
-  });
-
-  let canArray = [orderByIdAsc, orderByDateAsc, orderByExpAsc, orderByIdDesc, orderByDateDesc, orderByExpDesc];
-
-
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('0');
+  const [value, setValue] = useState('batchID');
   const [items, setItems] = useState([
-    { label: 'BatchID', value: '0' },
-    { label: 'Placement Date', value: '1' },
-    { label: 'Expiration Date', value: '2' }
+    { label: 'BatchID', value: 'batchID' },
+    { label: 'Placement Date', value: 'datePlaced' },
+    { label: 'Expiration Date', value: 'expDate' }
   ]);
 
-
   const [isEnabled, setIsEnabled] = useState(false);
-  /*
-    if(isEnabled){
-      setCans(canArray[value+3]);
-    }
-    else{
-      setCans(canArray[value])
-    };*/
+
+  
+  let cans = selectCans(value);
+  //const [cans, setCans] = useState(selectCans(value));
+
 
   return ( //"View Empty Jars and "View Batch by Location" and "View Empty Jars" text breaks with more than 4 items
     <ImageBackground
@@ -872,12 +803,7 @@ function Canning({ navigation }) {
               setItems={setItems}
               containerStyle={{ width: 200 }}
               onSelectItem={(item) => {
-                if (isEnabled) {
-                  setCans(canArray[item.value + 3]);
-                }
-                else {
-                  setCans(canArray[item.value])
-                }
+                setValue(item);
               }}
             />
           </View>
