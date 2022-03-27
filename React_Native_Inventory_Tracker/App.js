@@ -406,7 +406,7 @@ function updateImagePath(image, batchID){
         )}
 
 
-        <TextInput //TODO: allow changing of dateAdded (maybe), allow changing of image, automatic updates instead of pressing button (stretch goal maybe)
+        <TextInput //TODO: allow changing of dateAdded (maybe), automatic updates instead of pressing button (stretch goal maybe)
           value={notes}
           onChangeText={onChangeNotes}
           style={styles.textBox}
@@ -614,13 +614,101 @@ function AddSection({ navigation }) {
   );
 }
 
+function addItem(product, expDate, shelfID, quantity, notes, imagePath){
+  var datePlaced = dateToStr(new Date());
+  if (quantity == '') { quantity = 0; }
+
+  console.log( 'product: '+product+'\ndatePlaced: '+datePlaced+'\nexpDate: '+expDate+'\nshelfID: '+shelfID+'\nquantity: '+quantity+'\nnotes: '+notes+'\nimagePath: '+imagePath);
+
+  if (product != ''){
+    db.transaction(tx => {
+      tx.executeSql('insert into Batch (product, datePlaced, expDate, shelfID, quantity, notes, imagePath) values (?, ?, ?, ?, ?, ?, ?);',
+      [product, datePlaced, expDate, shelfID, quantity, notes, imagePath],
+      )
+    });
+    /* //making sure was actually added
+    db.transaction(tx => {
+      tx.executeSql('select * from Batch where product = ?;',
+      [product],
+      (tx, results) => {
+          console.log(results.rows.item(0))
+      }
+      )
+    });
+    */
+    return (
+      Alert.alert(
+        "Product added.",
+        "",
+        [
+          {
+            text: "OK",
+          }
+        ]
+      )
+    );
+  }
+  else {
+    return (
+      Alert.alert(
+        "Please enter an item name.",
+        "",
+        [
+          {
+            text: "OK",
+          }
+        ]
+      )
+    );
+  }
+}
+
 function AddItems({ navigation }) {
   const [nameOfItem, setText] = useState('');
   const [quantity, setTextQuan] = useState('');
-  const [expDate, setExpDate] = useState('');
+  //const [expDate, setExpDate] = useState('');
   const [addntInfo, setaddntInfo] = useState('');
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
+  //image handling
+  const [image, setImage] = useState('./assets/default.jpg');
+  const pickImage = async () => {
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [3, 4],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+
+      setImage(result.uri);
+    }
+  };
+
+  //datePicker
+  const [expDate, setExpDate] = useState(new Date());
+  const [mode, setMode] = useState('date');
+  const [show, setShow] = useState(false); //determines when datePicker is shown
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || expDate;
+    setShow(Platform.OS === 'ios');
+    setExpDate(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+
+  const showDatePicker = () => {
+    showMode('date');
+  };
+
+
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -655,23 +743,51 @@ function AddItems({ navigation }) {
             onValueChange={toggleSwitch}
             value={isEnabled}
           />
-          <TextInput //stores the expiration date in expDate
-            style={styles.input}
-            placeholder="Add expiration date"
-            onChangeText={(expDate) => setExpDate(expDate)}
-            defaultValue={expDate}
-          />
+          <Text>Expiration Date:</Text>
+          <TouchableHighlight
+            onPress={showDatePicker}
+            activeOpacity={0.6}
+            underlayColor={"#DDDDDD"} >
+            <Text style={styles.input}>{dateToStr(expDate)}</Text>
+          </TouchableHighlight>
+
           <TextInput //stores additional info in addntInfo
             style={styles.input}
             placeholder="Add additional info"
             onChangeText={(addntInfo) => setaddntInfo(addntInfo)}
             defaultValue={addntInfo}
           />
+
+          <View style={styles.row}>
+            <Button
+              color="#0437A0"
+              title="Add image"
+              onPress={pickImage}
+            />
+            {image && <Image 
+            source={{uri: image}}
+            style={{ width: 45, height: 60 }}
+            />}
+          </View>
+
         </View>
+        {show && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={expDate}
+            mode={mode}
+            is24Hour={true}
+            display="default"
+            onChange={onChange}
+          />
+        )}
         <View style={styles.pantryButton}>
           <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
             style={styles.button}
-            onPress={() => { console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) }}>
+            onPress={() => {
+              addItem(nameOfItem, dateToStr(expDate), 0, quantity, addntInfo, image)
+              //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
+              }}>
             <Text style={styles.textForAddItems}>ADD ITEM TO INVENTORY</Text>
           </TouchableOpacity>
         </View>
