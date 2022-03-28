@@ -59,6 +59,7 @@ function setupDB() {
     tx.executeSql('insert into Jars values (2, \'48oz\', \'regular\');');
     tx.executeSql('insert into Jars values (3, \'12oz\', \'wide\');');
 
+
     //tx.executeSql('insert into CannedGoods values (0, 0);');
     //tx.executeSql('insert into CannedGoods values (1, 1);');
     //tx.executeSql('insert into CannedGoods values (2, 2);');
@@ -483,16 +484,23 @@ function Sections({ navigation }) {
       <View>
         <FlatList
           data={sections}
+          keyExtractor={(item, index) => index}
           renderItem={({ item, index, separators }) =>
             <View>
-              <Text style={styles.item}>{item.name}</Text>
+              <Text style={styles.item}>{item.sectionName}</Text>
             </View>
           }
         />
-        <Button
-          title="WishList"
-          onPress={() => navigation.navigate('WishList')}
-        />
+        <TouchableOpacity
+          style={styles.item}
+          onPress={() => navigation.navigate('WishList')}>
+          <Text style={styles.text} >Wish List</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.addToWishList}
+          onPress={() => navigation.navigate('AddSection')}>
+          <Text style={styles.text} >Add Section</Text>
+        </TouchableOpacity>
       </View>
       <FloatingButton
         style={styles.floatinBtn}
@@ -521,13 +529,14 @@ function WishList({ navigation }) {
   const NoItemsInList = ({ item }) => {
     return (
       <View>
-        <Text>
+        <Text style = {styles.emptyList}>
           Your Wish List is Empty
         </Text>
-        <Button style={styles.pantryButton}
-          title='Add Items to your Wish List'
-          onPress={() => navigation.navigate('Pantry')}
-        />
+        <TouchableOpacity
+          style={styles.addToWishList}
+          onPress={() => navigation.navigate('Pantry')}>
+          <Text style={styles.text} >Add Items</Text>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -539,6 +548,7 @@ function WishList({ navigation }) {
       <FlatList
         data={products}
         ListEmptyComponent={NoItemsInList}
+        keyExtractor={(item) => index}
         renderItem={({ item, index, separators }) =>
           <View>
             <Text style={styles.item}>{item.productName}</Text>
@@ -548,62 +558,78 @@ function WishList({ navigation }) {
     </ImageBackground>
   );
 }
+
+function insertSection(sectionName, sectionID){ 
+  if(sectionName != '') {
+      // value previously stored
+    console.log( 'sectionName: '+sectionName+'\nsectionID: '+sectionID+'')
+    db.transaction(tx => {
+      tx.executeSql(
+        'insert into Section (sectionID, sectionName) values (?,?);',
+        [sectionID, sectionName]
+      )
+    });
+    return(
+      Alert.alert(
+        "",
+        "Section has been added",
+        [{
+          text: "Ok",
+          onPress: console.log("Success!")
+        }]
+        )
+    )
+  } else{
+    return(
+      Alert.alert(
+        "",
+        "Enter valid name",
+        [{
+          text: "Ok",
+          onPress: console.log("Request Valid Name"),
+        }]
+        )
+    )
+  }
+};
+
 function AddSection({ navigation }) {
-  const [sectionName, setText] = useState('');
-  const [expDate, setExpDate] = useState(false);
-  const [outStock, setOutStock] = useState(false);
-  const [location, setLocation] = useState(false);
-  const [addSection, setAddSection] = useState('');
-
-
+  const [sectionName, setSectionName] = useState('');
+  const[sectionID, setSectionID] = useState(0)
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select sectionID from Section;',
+      [],
+      (tx, results) => {
+        var temp = 0;
+        temp = 0
+        temp = results.rows.length
+        temp += 1
+        setSectionID(temp);
+      }
+    )
+  }); 
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
       <View style={toggleStyles.container}>
-        <View style={styles.button}>
-          <Text>Enter Section Information</Text>
+        <View>
+          <Text style={styles.textHead}>Enter Section Information</Text>
         </View>
         <TextInput
           style={styles.inputAddSection}
           placeholder="Section Name" //ENTER NAME OF CATGEORY
-          onChangeText={(sectionName) => setText(sectionName)}
+          //onChangeText={(sectionName) => setText(sectionName)}
+          onChangeText={(sectionName) => setSectionName(sectionName)}
           defaultValue={sectionName}
         />
-        <View style={toggleStyles.container}>
-          <Text style={styles.textAddItems}>Section {sectionName} will be sorted by</Text>
-          <Text>{outStock}</Text>
-          <Text>{expDate}</Text>
-          <Text>{location}</Text>
-        </View>
-        <View style={toggleStyles.container}>
-          <Text style={styles.textAddItems}>Select Sorting Options</Text>
-        </View>
-        <Button
-          color="coral"
-          backgroundColor="darkgrey"
-          title="Out of Stock"
-          onPress={(outStock) => setOutStock('Out of Stock')}
-        />
-        <Button
-          color="coral"
-          backgroundColor="darkgrey"
-          title="About to Expire"
-          onPress={(expDate) => setExpDate('About to Expire')}
-        />
-        <Button
-          color="coral"
-          backgroundColor="darkgrey"
-          title="Location"
-          onPress={(location) => setLocation('Location')}
-        />
-        <Button
-          color="coral"
-          backgroundColor="darkgrey"
-          title="Submit"
-          onPress={() => console.log('the section' + sectionName + 'has been added.')}
-        />
+        <TouchableOpacity
+          style={styles.AddSection}
+          onPress={() => {insertSection(sectionName, sectionID)}}>
+          <Text style={styles.text} >Add Secction</Text>
+        </TouchableOpacity>
 
       </View>
       <FloatingButton //This button takes ther user to the homepage 
@@ -1213,8 +1239,7 @@ const styles = StyleSheet.create({
     top: 100,
     padding: 10,
     fontSize: 18,
-    textAlign: "center",
-    backgroundColor: "#303838"
+    textAlign: "center"
   },
   row: {
     flexDirection: "row",
@@ -1241,5 +1266,31 @@ const styles = StyleSheet.create({
         zIndex: 5
       },
     })
+  },
+  addToWishList:{
+    backgroundColor: '#859a9b',
+    borderRadius: 20,
+    padding: 10,
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    top: 100,
+    width: "50%",
+    left: 90,
+  },
+  AddSection:{
+    backgroundColor: '#859a9b',
+    borderRadius: 20,
+    padding: 10,
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    top: 80,
+    width: "50%",
+    left: 10,
   }
 });
