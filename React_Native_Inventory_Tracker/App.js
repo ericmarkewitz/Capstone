@@ -878,6 +878,7 @@ function Pantry({ navigation }) {
 }
 
 
+
 //Returns all items in Batch table sorted on an input
 function selectCans(sortBy) {
   let [items, setItems] = useState([]);
@@ -911,22 +912,41 @@ function Canning({ navigation }) {
   const [items, setItems] = useState([
     { label: 'BatchID', value: 'batchID' },
     { label: 'Placement Date', value: 'datePlaced' },
-    { label: 'Expiration Date', value: 'expDate' }
+    { label: 'Expiration Date', value: 'expDate' },
+    { label: 'Product Name', value: 'product' }
   ]);
 
   const [isEnabled, setIsEnabled] = useState(false); //True if the switch is toggled
   let canArr = [];  
+
+  let bIDAsc = selectCans('batchID');
+  let bIDDesc = bIDAsc.slice().reverse();
+
+  let bIDAscTuple = [bIDAsc, 'batchID', 'ASC'];
+  let bIDDescTuple = [bIDDesc, 'batchID', 'Desc'];
+
+  canArr.push(bIDAscTuple);
+  canArr.push(bIDDescTuple);
+
  
   for (let currItem of items){ 
     //console.log(currItem);
-    let canAsc = selectCans(currItem.value);
-    let canDesc = canAsc.slice().reverse(); //Copys and reverses the array into descending order
+    let sortVal = currItem.value;
+    if(sortVal != 'batchID'){
+      let tempArr = bIDAsc.slice();
 
-    let ascTuple = [canAsc, currItem.value, 'ASC'];
-    let descTuple = [canDesc, currItem.value, 'DESC'];
+      let canAsc = tempArr.sort((a, b) => a[sortVal].localeCompare(b[sortVal]));
+        
+
+      let canDesc = canAsc.slice().reverse(); //Copys and reverses the array into descending order
+
+      let ascTuple = [canAsc, sortVal, 'ASC'];
+      let descTuple = [canDesc, sortVal, 'DESC'];
     
-    canArr.push(ascTuple);
-    canArr.push(descTuple);
+      canArr.push(ascTuple);
+      canArr.push(descTuple);
+    }
+    
   }
         
   const [cans, setCans] = useState([]);
