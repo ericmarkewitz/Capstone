@@ -30,6 +30,12 @@ function setupDB() {
     tx.executeSql('drop table if exists Batch');
     tx.executeSql('drop table if exists Shelves');
     tx.executeSql('drop table if exists Storage');
+
+    tx.executeSql('drop table if exists Section');
+    tx.executeSql('drop table if exists Product');
+    tx.executeSql('drop table if exists WishList');
+    tx.executeSql('drop table if exists Expiration');
+    tx.executeSql('drop table if exists Stock');
     */
 
     tx.executeSql('create table if not exists Storage(locationID integer primary key,locationName text);');
@@ -845,14 +851,14 @@ function Pantry({ navigation }) {
 }
 
 
-//Returns all items in batch
+//Returns all items in Batch table sorted on an input
 function selectCans(sortBy) {
   let [items, setItems] = useState([]);
   useEffect(() => {
     let isUnfin = true;
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM Batch ORDER BY ?;',
+        'SELECT * FROM Batch ORDER BY ? ASC;',
         [sortBy],
         (tx, results) => {
           if (isUnfin) {
@@ -872,19 +878,41 @@ function selectCans(sortBy) {
 
 
 function Canning({ navigation }) {
+  
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('batchID');
+  const [currValue, setCurrValue] = useState('batchID');
   const [items, setItems] = useState([
     { label: 'BatchID', value: 'batchID' },
     { label: 'Placement Date', value: 'datePlaced' },
     { label: 'Expiration Date', value: 'expDate' }
   ]);
 
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(false); //True if the switch is toggled
+  let canArr = [];  
+ 
+  for (let currItem of items){ 
+    let canAsc = selectCans(currItem.value);
+    let canDesc = canAsc.slice().reverse(); //Copys and reverses the array into descending order
 
+    let ascTuple = [canAsc, currItem.value, 'ASC'];
+    let descTuple = [canDesc, currItem.value, 'DESC'];
+    
+    canArr.push(ascTuple);
+    canArr.push(descTuple);
+  }
+        
+  const [cans, setCans] = useState([]);
   
-  let cans = selectCans(value);
-  //const [cans, setCans] = useState(selectCans(value));
+  /*
+  useEffect(() => {
+    if(cans.length == 0){
+      let batchAsc = selectCans('batchID');
+      setCans(batchAsc);
+      
+    }
+  }, []);*/
+  
+  
 
 
   return ( //"View Empty Jars and "View Batch by Location" and "View Empty Jars" text breaks with more than 4 items
@@ -893,65 +921,104 @@ function Canning({ navigation }) {
       style={{ width: '100%', height: '100%' }}
     >
       <SafeAreaView style={styles.container}>
-
-        <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('EmptyJar') }}>
-            <Text style={styles.text}>View Empty Jars</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('BatchLocation') }}>
-            <Text style={styles.text}>View Batch by Location</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.sortRow}>
-          <View style={styles.floatingDropdown}>
+        <View style={styles.canningRow}>
+          <View style={styles.canningFloatingDropdown}>
             <View style={styles.text}>
               <Text>Sort Batches By:</Text>
             </View>
             <DropDownPicker
               open={open}
-              value={value}
+              value={currValue}
               items={items}
               setOpen={setOpen}
-              setValue={setValue}
+              setValue={setCurrValue}
               setItems={setItems}
-              containerStyle={{ width: 200 }}
+              //containerStyle={{ width: 200 }}
               onSelectItem={(item) => {
-                setValue(item);
+                let currVal = item.value;
+                setCurrValue(currVal);
+                for(let i=0; i<canArr.length; i++){
+                  let order = canArr[i][1];
+                  if (order == currVal){
+
+                    if(isEnabled){
+                      setCans(canArr[i+1][0]);
+                    }
+                    else{
+                      setCans(canArr[i][0]);
+                    }
+                    break;
+                  }
+                }
+                
               }}
             />
           </View>
-          <View>
+          <View style={{padding:10}}>
             <Text>ASC/DESC</Text>
             <Switch
-              onValueChange={() => setIsEnabled(previousState => !previousState)}
+              onValueChange={(newValue) => 
+                {
+                  setIsEnabled(previousState => !previousState);
+                  
+                  for(let i=0; i<canArr.length; i++){
+                    let order = canArr[i][1];
+                    if(order == currValue){
+                      if(newValue){
+                        setCans(canArr[i+1][0]);
+                        break;
+                      }
+                      else{
+                        setCans(canArr[i][0]);
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
               value={isEnabled}
             />
           </View>
         </View>
 
 
-
-        <FlatList
-          data={cans}
-          keyExtractor={(item, index) => index}
-          renderItem={({ item, index, separator }) =>
-            <TouchableHighlight
-              activeOpacity={0.6}
-              underlayColor={"darkgrey"}
-              onPress={() => navigation.push('Item', { details: item })}
-            >
-              <View>
-                <Text style={styles.batchItems}> Batch {item.batchID}: {item.product} {"\n"} Placed:{item.datePlaced}{"\n"} Expires:{item.expDate}</Text>
-              </View>
-            </TouchableHighlight>
-          }
-        />
-        <View>
-          <Text>Add Canned Item</Text>
+        <View style={styles.canningList}>
+          <FlatList
+              data={cans}
+              keyExtractor={(item, index) => index}
+              renderItem={({ item, index, separator }) =>
+                <TouchableHighlight
+                  activeOpacity={0.6}
+                  underlayColor={"darkgrey"}
+                  onPress={() => navigation.push('Item', { details: item })}
+                >
+                  
+                <Text style={styles.canningItems}> Batch {item.batchID}: {item.product} {"\n"} Placed:{item.datePlaced}{"\n"} Expires:{item.expDate}</Text>
+                  
+                </TouchableHighlight>
+              }
+              //extraData={cans}
+            />
         </View>
+          
+        <View style={styles.canningAllButtons}>
+          
+            <TouchableOpacity style={styles.canningAddButton} onPress={() => { navigation.navigate('AddItems') }}>
+              <Text style={styles.text}>Add a Batch</Text>
+            </TouchableOpacity>
+          
+            <TouchableOpacity style={styles.canningButton} onPress={() => { navigation.navigate('EmptyJar') }}>
+              <Text style={styles.text}>View Empty Jars</Text>
+            </TouchableOpacity>
+          
+            <TouchableOpacity style={styles.canningButton} onPress={() => { navigation.navigate('BatchLocation') }}>
+              <Text style={styles.text}>View Batch by Location</Text>
+            </TouchableOpacity>
+          
+
+          
+        </View>
+        <View style={{flex:0.3}}/>
         <FloatingButton //This button takes ther user to the homepage 
           style={styles.floatinBtn}
           onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
@@ -1066,6 +1133,7 @@ function BatchLocation({ navigation, route }) {
 
 const toggleStyles = StyleSheet.create({
   container: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 50,
@@ -1102,7 +1170,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     justifyContent: 'flex-end',
     marginBottom: 60,
-
   },
   sectionHeader: {
     textAlign: "center",
@@ -1121,15 +1188,7 @@ const styles = StyleSheet.create({
     height: 75,
     width: 300,
   },
-  batchItems: {
-    textAlign: "auto",
-    borderWidth: 5,
-    borderColor: "darkgrey",
-    fontSize: 15,
-    color: "black",
-    height: 75,
-    width: 300,
-  },
+  
   input: {
     borderColor: "gray",
     width: "100%",
@@ -1226,20 +1285,63 @@ const styles = StyleSheet.create({
     textAlign: 'center',
 
   },
-  floatingDropdown: {
+  canningFloatingDropdown: {
     flex: 0.6,
-    ...Platform.select({
-      ios: {
-        zIndex: 5
-      },
-    })
+    //padding: 10,
   },
-  sortRow: {
+  canningRow: {
+    top: 15,
+    //padding: -50,
+    flex:0.4,
     flexDirection: "row",
     ...Platform.select({
       ios: {
         zIndex: 5
       },
     })
-  }
+  },
+  canningList: {
+    flex: 1.8,
+  },
+  canningAllButtons:{
+    flex: 1,
+    alignItems: 'center',
+    //justifyContent: 'center',
+    textAlign: 'center',
+  },
+  canningAddButton: {
+    top: 7,
+    backgroundColor: '#859a9b',
+    borderRadius: 8,
+    padding: 7,
+    
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    marginBottom: 50,
+  },
+
+  canningButton: {
+    backgroundColor: '#859a9b',
+    borderRadius: 8,
+    padding: 7,
+    //marginBottom: 20,
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    marginBottom: 10,
+  },
+  canningItems: {
+    textAlign: "auto",
+    borderWidth: 5,
+    borderColor: "darkgrey",
+    fontSize: 15,
+    color: "black",
+    height: 75,
+    width: 300,
+  },
 });
