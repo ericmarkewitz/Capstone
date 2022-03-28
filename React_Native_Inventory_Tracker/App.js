@@ -128,7 +128,7 @@ export default function App() {
           <Stack.Screen name="EmptyJar" component={EmptyJar} />
           <Stack.Screen name="BatchLocation" component={BatchLocation} />
           <Stack.Screen name="ViewLocation" component={ViewLocation} />
-          <Stack.Screen name="WishList" component={WishList} />          
+          <Stack.Screen name="WishList" component={WishList} />
         </Stack.Navigator>
       </NavigationContainer></>
   );
@@ -300,7 +300,7 @@ function dateToStr(date) {
 }
 
 //updates imagePath field
-function updateImagePath(image, batchID){
+function updateImagePath(image, batchID) {
   db.transaction((tx) => {
     tx.executeSql(
       'update Batch set imagePath = ? where batchID = ?;',
@@ -329,7 +329,7 @@ function updateImagePath(image, batchID){
     });
 
     if (!result.cancelled) {
-      
+
       updateImagePath(result.uri, details.batchID);
 
       setImage(result.uri);
@@ -370,9 +370,9 @@ function updateImagePath(image, batchID){
       <View style={styles.listContainer}>
         <Text style={styles.textHead} > {details.product}  </Text>
 
-        {image && <Image 
-        source={{uri: image}}
-        style={{ width: 225, height: 300 }}
+        {image && <Image
+          source={{ uri: image }}
+          style={{ width: 225, height: 300 }}
         />}
 
         <Button
@@ -503,7 +503,7 @@ function Sections({ navigation }) {
           onPress={() => navigation.navigate('WishList')}>
           <Text style={styles.text} >Wish List</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.addToWishList}
           onPress={() => navigation.navigate('AddSection')}>
           <Text style={styles.text} >Add Section</Text>
@@ -536,7 +536,7 @@ function WishList({ navigation }) {
   const NoItemsInList = ({ item }) => {
     return (
       <View>
-        <Text style = {styles.emptyList}>
+        <Text style={styles.emptyList}>
           Your Wish List is Empty
         </Text>
         <TouchableOpacity
@@ -566,17 +566,17 @@ function WishList({ navigation }) {
   );
 }
 
-function insertSection(sectionName, sectionID){ 
-  if(sectionName != '') {
-      // value previously stored
-    console.log( 'sectionName: '+sectionName+'\nsectionID: '+sectionID+'')
+function insertSection(sectionName, sectionID) {
+  if (sectionName != '') {
+    // value previously stored
+    console.log('sectionName: ' + sectionName + '\nsectionID: ' + sectionID + '')
     db.transaction(tx => {
       tx.executeSql(
         'insert into Section (sectionID, sectionName) values (?,?);',
         [sectionID, sectionName]
       )
     });
-    return(
+    return (
       Alert.alert(
         "",
         "Section has been added",
@@ -584,10 +584,10 @@ function insertSection(sectionName, sectionID){
           text: "Ok",
           onPress: console.log("Success!")
         }]
-        )
+      )
     )
-  } else{
-    return(
+  } else {
+    return (
       Alert.alert(
         "",
         "Enter valid name",
@@ -595,14 +595,14 @@ function insertSection(sectionName, sectionID){
           text: "Ok",
           onPress: console.log("Request Valid Name"),
         }]
-        )
+      )
     )
   }
 };
 
 function AddSection({ navigation }) {
   const [sectionName, setSectionName] = useState('');
-  const[sectionID, setSectionID] = useState(0)
+  const [sectionID, setSectionID] = useState(0)
   db.transaction((tx) => {
     tx.executeSql(
       'select sectionID from Section;',
@@ -615,7 +615,7 @@ function AddSection({ navigation }) {
         setSectionID(temp);
       }
     )
-  }); 
+  });
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -634,7 +634,7 @@ function AddSection({ navigation }) {
         />
         <TouchableOpacity
           style={styles.AddSection}
-          onPress={() => {insertSection(sectionName, sectionID)}}>
+          onPress={() => { insertSection(sectionName, sectionID) }}>
           <Text style={styles.text} >Add Secction</Text>
         </TouchableOpacity>
 
@@ -647,16 +647,16 @@ function AddSection({ navigation }) {
   );
 }
 
-function addItem(product, expDate, shelfID, quantity, notes, imagePath){
+function addItem(product, expDate, shelfID, quantity, notes, imagePath) {
   var datePlaced = dateToStr(new Date());
   if (quantity == '') { quantity = 0; }
 
-  console.log( 'product: '+product+'\ndatePlaced: '+datePlaced+'\nexpDate: '+expDate+'\nshelfID: '+shelfID+'\nquantity: '+quantity+'\nnotes: '+notes+'\nimagePath: '+imagePath);
+  console.log('product: ' + product + '\ndatePlaced: ' + datePlaced + '\nexpDate: ' + expDate + '\nshelfID: ' + shelfID + '\nquantity: ' + quantity + '\nnotes: ' + notes + '\nimagePath: ' + imagePath);
 
-  if (product != ''){
+  if (product != '') {
     db.transaction(tx => {
       tx.executeSql('insert into Batch (product, datePlaced, expDate, shelfID, quantity, notes, imagePath) values (?, ?, ?, ?, ?, ?, ?);',
-      [product, datePlaced, expDate, shelfID, quantity, notes, imagePath],
+        [product, datePlaced, expDate, shelfID, quantity, notes, imagePath],
       )
     });
     /* //making sure was actually added
@@ -784,6 +784,16 @@ function AddItems({ navigation }) {
             <Text style={styles.input}>{dateToStr(expDate)}</Text>
           </TouchableHighlight>
 
+          {show && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={expDate}
+              mode={mode}
+              is24Hour={true}
+              display="default"
+              onChange={onChange}
+            />
+          )}
           <TextInput //stores additional info in addntInfo
             style={styles.input}
             placeholder="Add additional info"
@@ -794,33 +804,24 @@ function AddItems({ navigation }) {
           <View style={styles.row}>
             <Button
               color="#0437A0"
-              title="Add image"
+              title="ADD IMAGE"
               onPress={pickImage}
             />
-            {image && <Image 
-            source={{uri: image}}
-            style={{ width: 45, height: 60 }}
+            {image && <Image
+              source={{ uri: image }}
+              style={{ width: 45, height: 60 }}
             />}
           </View>
 
         </View>
-        {show && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={expDate}
-            mode={mode}
-            is24Hour={true}
-            display="default"
-            onChange={onChange}
-          />
-        )}
+
         <View style={styles.pantryButton}>
           <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
             style={styles.button}
             onPress={() => {
               addItem(nameOfItem, dateToStr(expDate), 0, quantity, addntInfo, image)
               //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-              }}>
+            }}>
             <Text style={styles.textForAddItems}>ADD ITEM TO INVENTORY</Text>
           </TouchableOpacity>
         </View>
@@ -905,7 +906,7 @@ function selectCans(sortBy) {
 
 
 function Canning({ navigation }) {
-  
+
   const [open, setOpen] = useState(false);
   const [currValue, setCurrValue] = useState('batchID');
   const [items, setItems] = useState([
@@ -915,22 +916,22 @@ function Canning({ navigation }) {
   ]);
 
   const [isEnabled, setIsEnabled] = useState(false); //True if the switch is toggled
-  let canArr = [];  
- 
-  for (let currItem of items){ 
+  let canArr = [];
+
+  for (let currItem of items) {
     //console.log(currItem);
     let canAsc = selectCans(currItem.value);
     let canDesc = canAsc.slice().reverse(); //Copys and reverses the array into descending order
 
     let ascTuple = [canAsc, currItem.value, 'ASC'];
     let descTuple = [canDesc, currItem.value, 'DESC'];
-    
+
     canArr.push(ascTuple);
     canArr.push(descTuple);
   }
-        
+
   const [cans, setCans] = useState([]);
-  
+
   /*
   useEffect(() => {
     if(cans.length == 0){
@@ -939,8 +940,8 @@ function Canning({ navigation }) {
       
     }
   }, []);*/
-  
-  
+
+
 
 
   return ( //"View Empty Jars and "View Batch by Location" and "View Empty Jars" text breaks with more than 4 items
@@ -965,44 +966,43 @@ function Canning({ navigation }) {
               onSelectItem={(item) => {
                 let currVal = item.value;
                 setCurrValue(currVal);
-                for(let i=0; i<canArr.length; i++){
+                for (let i = 0; i < canArr.length; i++) {
                   let order = canArr[i][1];
-                  if (order == currVal){
+                  if (order == currVal) {
 
-                    if(isEnabled){
-                      setCans(canArr[i+1][0]);
+                    if (isEnabled) {
+                      setCans(canArr[i + 1][0]);
                     }
-                    else{
+                    else {
                       setCans(canArr[i][0]);
                     }
                     break;
                   }
                 }
-                
+
               }}
             />
           </View>
-          <View style={{padding:10}}>
+          <View style={{ padding: 10 }}>
             <Text>ASC/DESC</Text>
             <Switch
-              onValueChange={(newValue) => 
-                {
-                  setIsEnabled(previousState => !previousState);
-                  
-                  for(let i=0; i<canArr.length; i++){
-                    let order = canArr[i][1];
-                    if(order == currValue){
-                      if(newValue){
-                        setCans(canArr[i+1][0]);
-                        break;
-                      }
-                      else{
-                        setCans(canArr[i][0]);
-                        break;
-                      }
+              onValueChange={(newValue) => {
+                setIsEnabled(previousState => !previousState);
+
+                for (let i = 0; i < canArr.length; i++) {
+                  let order = canArr[i][1];
+                  if (order == currValue) {
+                    if (newValue) {
+                      setCans(canArr[i + 1][0]);
+                      break;
+                    }
+                    else {
+                      setCans(canArr[i][0]);
+                      break;
                     }
                   }
                 }
+              }
               }
               value={isEnabled}
             />
@@ -1012,42 +1012,42 @@ function Canning({ navigation }) {
 
         <View style={styles.canningList}>
           <FlatList
-              data={cans}
-              keyExtractor={(item, index) => index}
-              renderItem={({ item, index, separator }) =>
-                <TouchableHighlight
-                  activeOpacity={0.6}
-                  underlayColor={"darkgrey"}
-                  onPress={() => navigation.push('Item', { details: item })}
-                  //style={{flex: 1}}
-                >
+            data={cans}
+            keyExtractor={(item, index) => index}
+            renderItem={({ item, index, separator }) =>
+              <TouchableHighlight
+                activeOpacity={0.6}
+                underlayColor={"darkgrey"}
+                onPress={() => navigation.push('Item', { details: item })}
+              //style={{flex: 1}}
+              >
                 <View>
                   <Text style={styles.canningItems}> Batch {item.batchID}: {item.product} {"\n"}                                          Placed:{item.datePlaced}{"\n"}                                          Expires:{item.expDate}</Text>
                 </View>
-                
-                </TouchableHighlight>
-              }
-            />
-        </View>
-          
-        <View style={styles.canningAllButtons}>
-          
-            <TouchableOpacity style={styles.canningAddButton} onPress={() => { navigation.navigate('AddItems') }}>
-              <Text style={styles.text}>Add a Batch</Text>
-            </TouchableOpacity>
-          
-            <TouchableOpacity style={styles.canningButton} onPress={() => { navigation.navigate('EmptyJar') }}>
-              <Text style={styles.text}>View Empty Jars</Text>
-            </TouchableOpacity>
-          
-            <TouchableOpacity style={styles.canningButton} onPress={() => { navigation.navigate('BatchLocation') }}>
-              <Text style={styles.text}>View Batch by Location</Text>
-            </TouchableOpacity>
-          
 
-          
+              </TouchableHighlight>
+            }
+          />
         </View>
-        <View style={{flex:0.3}}/>
+
+        <View style={styles.canningAllButtons}>
+
+          <TouchableOpacity style={styles.canningAddButton} onPress={() => { navigation.navigate('AddItems') }}>
+            <Text style={styles.text}>Add a Batch</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.canningButton} onPress={() => { navigation.navigate('EmptyJar') }}>
+            <Text style={styles.text}>View Empty Jars</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.canningButton} onPress={() => { navigation.navigate('BatchLocation') }}>
+            <Text style={styles.text}>View Batch by Location</Text>
+          </TouchableOpacity>
+
+
+
+        </View>
+        <View style={{ flex: 0.3 }} />
         <FloatingButton //This button takes ther user to the homepage 
           style={styles.floatinBtn}
           onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
@@ -1149,11 +1149,11 @@ function BatchLocation({ navigation, route }) {
         renderItem={({ item, index, separators }) =>
           <View>
             <TouchableHighlight
-                  activeOpacity={0.6}
-                  underlayColor={"darkgrey"}
-                  onPress={() => navigation.push('ViewLocation', { details: item })}
-                  //style={{flex: 1}}
-              >
+              activeOpacity={0.6}
+              underlayColor={"darkgrey"}
+              onPress={() => navigation.push('ViewLocation', { details: item })}
+            //style={{flex: 1}}
+            >
               <Text style={styles.item}>{item.shelfName}                     {item.shelfID} </Text>
             </TouchableHighlight>
           </View>
@@ -1168,9 +1168,9 @@ function ViewLocation({ navigation, route }) {
   const details = item.details;
   const shelfName = details.shelfName;
   const shelfID = details.shelfID;
-  
+
   let [batches, setBatches] = useState([]);
-  
+
   db.transaction((tx) => {
     tx.executeSql(
       'SELECT shelfID,batchID,product,quantity FROM Batch NATURAL JOIN Shelves WHERE shelfID == ? ORDER BY batchID;',
@@ -1202,11 +1202,11 @@ function ViewLocation({ navigation, route }) {
     >
       <View>
         <View style={styles.item}>
-          <Text style={{fontSize: 30, textAlign: 'center'}}> {shelfName} </Text>
-          <Text style={{fontSize: 24}}> BatchID | Product | Quantity </Text>
+          <Text style={{ fontSize: 30, textAlign: 'center' }}> {shelfName} </Text>
+          <Text style={{ fontSize: 24 }}> BatchID | Product | Quantity </Text>
         </View>
-        
-        
+
+
         <FlatList
           data={batches}
           ListEmptyComponent={EmptyPantry}
@@ -1214,18 +1214,18 @@ function ViewLocation({ navigation, route }) {
           renderItem={({ item, index, separators }) =>
             <View>
               <TouchableHighlight
-                    activeOpacity={0.6}
-                    underlayColor={"darkgrey"}
-                    onPress={() => navigation.push('Item', { details: item })}
-                    //style={{flex: 1}}
-                >
+                activeOpacity={0.6}
+                underlayColor={"darkgrey"}
+                onPress={() => navigation.push('Item', { details: item })}
+              //style={{flex: 1}}
+              >
                 <Text style={styles.item}>{item.batchID} | {item.product} | {item.quantity}</Text>
               </TouchableHighlight>
             </View>
           }
         />
       </View>
-      
+
 
     </ImageBackground>
   );
@@ -1266,6 +1266,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
+
   },
   button: {
     backgroundColor: '#859a9b',
@@ -1286,6 +1287,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     borderWidth: 1,
     borderColor: "darkgrey",
+
   },
   item: {
     textAlign: "auto",
@@ -1296,7 +1298,7 @@ const styles = StyleSheet.create({
     height: 75,
     width: 300,
   },
-  
+
   input: {
     borderColor: "gray",
     width: "100%",
@@ -1319,11 +1321,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir',
     fontWeight: 'bold',
     color: 'black',
+    paddingBottom: 70,
   },
   textForAddItems: {
     textAlign: 'center',
     fontSize: 14,
-
     fontFamily: 'Avenir',
     fontWeight: 'bold',
     color: 'black',
@@ -1384,6 +1386,16 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
+    backgroundColor: '#859a9b',
+    borderRadius: 20,
+    padding: 10,
+    marginBottom: 20,
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   borderText: {
     borderWidth: 1,
@@ -1399,7 +1411,7 @@ const styles = StyleSheet.create({
   canningRow: {
     top: 15,
     //padding: -50,
-    flex:0.4,
+    flex: 0.4,
     flexDirection: "row",
     ...Platform.select({
       ios: {
@@ -1410,7 +1422,7 @@ const styles = StyleSheet.create({
   canningList: {
     flex: 1.8,
   },
-  canningAllButtons:{
+  canningAllButtons: {
     flex: 1,
     alignItems: 'center',
     //justifyContent: 'center',
@@ -1421,7 +1433,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#859a9b',
     borderRadius: 8,
     padding: 7,
-    
+
     shadowColor: '#303838',
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,
@@ -1452,7 +1464,7 @@ const styles = StyleSheet.create({
     width: 300,
   },
 
-  addToWishList:{
+  addToWishList: {
     backgroundColor: '#859a9b',
     borderRadius: 20,
     padding: 10,
@@ -1465,7 +1477,7 @@ const styles = StyleSheet.create({
     width: "50%",
     left: 90,
   },
-  AddSection:{
+  AddSection: {
     backgroundColor: '#859a9b',
     borderRadius: 20,
     padding: 10,
