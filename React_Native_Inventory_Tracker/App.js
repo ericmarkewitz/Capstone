@@ -127,7 +127,8 @@ export default function App() {
           <Stack.Screen name="Sections" component={Sections} />
           <Stack.Screen name="EmptyJar" component={EmptyJar} />
           <Stack.Screen name="BatchLocation" component={BatchLocation} />
-          <Stack.Screen name="WishList" component={WishList} />
+          <Stack.Screen name="ViewLocation" component={ViewLocation} />
+          <Stack.Screen name="WishList" component={WishList} />          
         </Stack.Navigator>
       </NavigationContainer></>
   );
@@ -917,6 +918,7 @@ function Canning({ navigation }) {
   let canArr = [];  
  
   for (let currItem of items){ 
+    //console.log(currItem);
     let canAsc = selectCans(currItem.value);
     let canDesc = canAsc.slice().reverse(); //Copys and reverses the array into descending order
 
@@ -1017,13 +1019,14 @@ function Canning({ navigation }) {
                   activeOpacity={0.6}
                   underlayColor={"darkgrey"}
                   onPress={() => navigation.push('Item', { details: item })}
+                  //style={{flex: 1}}
                 >
-                  
-                <Text style={styles.canningItems}> Batch {item.batchID}: {item.product} {"\n"} Placed:{item.datePlaced}{"\n"} Expires:{item.expDate}</Text>
-                  
+                <View>
+                  <Text style={styles.canningItems}> Batch {item.batchID}: {item.product} {"\n"}                                          Placed:{item.datePlaced}{"\n"}                                          Expires:{item.expDate}</Text>
+                </View>
+                
                 </TouchableHighlight>
               }
-              //extraData={cans}
             />
         </View>
           
@@ -1062,7 +1065,7 @@ function EmptyJar({ navigation, route }) {
   let [jars, setJars] = useState([]);
   db.transaction((tx) => {
     tx.executeSql(
-      'select size, mouth, count(mouth) as count from jars where jarID NOT IN (SELECT jarID FROM jars Natural JOIN CannedGoods) GROUP BY size;',
+      'SELECT jarID, size, mouth, count(mouth) as count FROM jars WHERE jarID NOT IN (SELECT jarID FROM jars Natural JOIN CannedGoods) GROUP BY size;',
       [],
       (tx, results) => {
         var temp = [];
@@ -1091,6 +1094,7 @@ function EmptyJar({ navigation, route }) {
       <FlatList
         data={jars}
         ListEmptyComponent={NoEmptyJarsMessage}
+        eyExtractor={(item, index) => index}
         renderItem={({ item, index, separators }) =>
           <View>
             <Text style={styles.item}>{item.size} - {item.mouth} - {item.count}</Text>
@@ -1112,7 +1116,7 @@ function BatchLocation({ navigation, route }) {
   let [shelves, setShelves] = useState([]);
   db.transaction((tx) => {
     tx.executeSql(
-      'select product, quantity, shelfName from Batch NATURAL JOIN SHELVES GROUP BY shelfID;',
+      'SELECT shelfID,shelfName FROM Shelves ORDER BY shelfID;',
       [],
       (tx, results) => {
         var temp = [];
@@ -1120,10 +1124,10 @@ function BatchLocation({ navigation, route }) {
           temp.push(results.rows.item(i));
         }
         setShelves(temp);
-
       }
     )
   });
+
   const EmptyPantry = ({ item }) => {
     return (
       // Flat List Item
@@ -1137,15 +1141,21 @@ function BatchLocation({ navigation, route }) {
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
-      <View><Text style={styles.item}>Location - Product - #</Text></View>
+      <View><Text style={styles.item}> Name        |        Shelf #</Text></View>
       <FlatList
         data={shelves}
         ListEmptyComponent={EmptyPantry}
-
+        keyExtractor={(item, index) => index}
         renderItem={({ item, index, separators }) =>
           <View>
-            <Text></Text>
-            <Text style={styles.item}>{item.shelfName} - {item.product} - {item.quantity}</Text>
+            <TouchableHighlight
+                  activeOpacity={0.6}
+                  underlayColor={"darkgrey"}
+                  onPress={() => navigation.push('ViewLocation', { details: item })}
+                  //style={{flex: 1}}
+              >
+              <Text style={styles.item}>{item.shelfName}                     {item.shelfID} </Text>
+            </TouchableHighlight>
           </View>
         }
       />
@@ -1153,6 +1163,78 @@ function BatchLocation({ navigation, route }) {
   );
 }
 
+function ViewLocation({ navigation, route }) {
+  const item = route.params; //receive shelfID
+  const details = item.details;
+  const shelfName = details.shelfName;
+  const shelfID = details.shelfID;
+  
+  let [batches, setBatches] = useState([]);
+  
+  db.transaction((tx) => {
+    tx.executeSql(
+      'SELECT shelfID,batchID,product,quantity FROM Batch NATURAL JOIN Shelves WHERE shelfID == ? ORDER BY batchID;',
+      [shelfID],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++) {
+          temp.push(results.rows.item(i));
+        }
+        setBatches(temp);
+      }
+    )
+  });
+  //for() 
+
+
+  const EmptyPantry = ({ item }) => {
+    return (
+      // Flat List Item
+      <Text style={styles.emptyList} onPress={() => getItem(item)}>
+        Your Pantry is Empty
+      </Text>
+    );
+  };
+  return (
+    <ImageBackground
+      source={require('./assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <View>
+        <View style={styles.item}>
+          <Text style={{fontSize: 30, textAlign: 'center'}}> {shelfName} </Text>
+          <Text style={{fontSize: 24}}> BatchID | Product | Quantity </Text>
+        </View>
+        
+        
+        <FlatList
+          data={batches}
+          ListEmptyComponent={EmptyPantry}
+          keyExtractor={(item, index) => index}
+          renderItem={({ item, index, separators }) =>
+            <View>
+              <TouchableHighlight
+                    activeOpacity={0.6}
+                    underlayColor={"darkgrey"}
+                    onPress={() => navigation.push('Item', { details: item })}
+                    //style={{flex: 1}}
+                >
+                <Text style={styles.item}>{item.batchID} | {item.product} | {item.quantity}</Text>
+              </TouchableHighlight>
+            </View>
+          }
+        />
+      </View>
+      
+
+    </ImageBackground>
+  );
+}
+
+/*
+
+
+*/
 
 //STYLES
 
