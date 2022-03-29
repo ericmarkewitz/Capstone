@@ -1110,14 +1110,14 @@ function EmptyJar({ navigation, route }) {
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
-      <View><Text style={styles.item}>Size - Mouth - #</Text></View>
+      <View style={styles.item}><Text style={{fontSize:28}}>Size - Mouth - Quantity</Text></View>
       <FlatList
         data={jars}
         ListEmptyComponent={NoEmptyJarsMessage}
         eyExtractor={(item, index) => index}
         renderItem={({ item, index, separators }) =>
           <View>
-            <Text style={styles.item}>{item.size} - {item.mouth} - {item.count}</Text>
+            <Text style={[styles.item, {fontSize: 26}]}>{item.size} - {item.mouth} - {item.count}</Text>
           </View>
         }
       />
