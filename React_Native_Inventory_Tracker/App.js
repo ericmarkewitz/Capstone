@@ -16,7 +16,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 import {Asset} from 'expo-asset';
 
-const db = SQLite.openDatabase('daba'); //if app wont load after a reload change the name of the db (no clue why this happens)
+const db = SQLite.openDatabase('db'); //if app wont load after a reload change the name of the db (no clue why this happens)
 const Stack = createNativeStackNavigator();
 const defaultPic = Asset.fromModule(require('./assets/default.jpg')).uri;
 
@@ -43,7 +43,7 @@ function setupDB() {
 
     tx.executeSql('create table if not exists Storage(locationID integer primary key,locationName text);');
     tx.executeSql('create table if not exists Shelves(shelfID integer primary key,locationID integer,shelfName text,foreign key (locationID) references Storage (locationID));');
-    tx.executeSql('create table if not exists Batch(batchID integer primary key,product text,datePlaced text check (datePlaced glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),expDate text check (expDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),shelfID integer, quantity integer check (quantity >= 0), notes text, imagePath text, foreign key (shelfID) references Shelves(shelfID));');
+    tx.executeSql('create table if not exists Batch(batchID integer primary key,product text,datePlaced text check (datePlaced glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),expDate text check (expDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expDate glob \'N/A\'),shelfID integer, quantity integer check (quantity >= 0), notes text, imagePath text, foreign key (shelfID) references Shelves(shelfID));');
     tx.executeSql('create table if not exists Jars(jarID integer primary key,size text,mouth text check (mouth = \'regular\' or mouth = \'wide\'));');
     tx.executeSql('create table if not exists CannedGoods(jarID integer,batchID integer,primary key (jarID, batchID),foreign key (jarID) references Jars(jarID),foreign key (batchID) references Batch(batchID));');
 
@@ -51,7 +51,7 @@ function setupDB() {
     tx.executeSql('create table if not exists Section(sectionID integer primary key, sectionName text);');
     tx.executeSql('create table if not exists Product(productID integer primary key, productName text, notes text, sectionID integer, foreign key (sectionID) references Section(sectionID));');
     tx.executeSql('create table if not exists WishList(productID integer primary key, foreign key (productID) references Product(productID));');
-    tx.executeSql('create table if not exists Expiration(productID integer primary key, expirationDate text check (expirationDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),foreign key (productID) references Product (productID));');
+    tx.executeSql('create table if not exists Expiration(productID integer primary key, expirationDate text check (expirationDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expirationDate glob \'N/A\'),foreign key (productID) references Product (productID));');
     tx.executeSql('create table if not exists Stock(productID integer,shelfID integer,locationID integer,datePurchased text check (datePurchased glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),quantity integer check (quantity >= 0),primary key(productID,shelfID,locationID),foreign key (productID) references Product(productID),foreign key (shelfID, locationID) references Shelf(shelfID,locationID));');
 
     //dummy data
@@ -341,8 +341,8 @@ function dateToStr(date) {
     if (str.length < 2) { return "0" + str; }
     else return str;
   }
-
-  return ((addZeroes((date.getMonth() + 1).toString())) + '/' + (addZeroes(date.getDate().toString())) + '/' + (date.getFullYear().toString().substring(2)));
+  if (date+"" == 'Invalid Date') { return 'N/A'; }
+  else {return ((addZeroes((date.getMonth() + 1).toString())) + '/' + (addZeroes(date.getDate().toString())) + '/' + (date.getFullYear().toString().substring(2)));}
 }
 
 //updates imagePath field
@@ -402,7 +402,7 @@ function updateImagePath(image, batchID) {
   };
 
   const showDatePicker = () => {
-    showMode('date');
+    if (details.expDate != 'N/A') {showMode('date')};
   };
 
   //notes and quantity
@@ -436,9 +436,6 @@ function updateImagePath(image, batchID) {
       )
     });
   }
-
-  //var defaultPic = './assets/default.jpg'; //maybe TODO: format of default pic doesnt work, may not be needed anyways
-  //if (image == null) { setImage(defaultPic); }
 
   return (
     <ImageBackground
@@ -477,7 +474,9 @@ function updateImagePath(image, batchID) {
         <View style={styles.row}>
           <Text style={styles.text} >Expiration Date: </Text>
           <TouchableHighlight
-            onPress={showDatePicker}
+            onPress= {
+              showDatePicker
+            }
             activeOpacity={0.6}
             underlayColor={"#DDDDDD"} >
             <Text style={styles.borderText} onChange = {updateExpDate(dateToStr(date), details.batchID)} >{dateToStr(date)}</Text>
@@ -527,16 +526,9 @@ function updateImagePath(image, batchID) {
                         {
                           text: "Yes",
                           onPress: () => deleteItem(details.batchID, navigation) //NOTE/TODO: atm if you do this from foodscreen it will refresh but not canning
-                        }
-                      ]
-                    )
-                }
-              ]
-            )
-
-
-          }
-        />
+                        }])}])}>
+          <Text style={styles.textForAddItems}>DELETE</Text>
+        </TouchableOpacity>
         <FloatingButton //This button takes ther user to the homepage 
           style={styles.floatinBtn}
           onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
@@ -782,8 +774,10 @@ function AddItems({ navigation }) {
   //const [expDate, setExpDate] = useState('');
   const [addntInfo, setaddntInfo] = useState('');
   const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
-
+  const toggleSwitch = () => {
+    setIsEnabled(previousState => !previousState);
+    toggleExpDate(isEnabled);
+  }
   //image handling
 
   const [image, setImage] = useState(defaultPic);
@@ -801,8 +795,6 @@ function AddItems({ navigation }) {
       setImage(result.uri);
     }
   };
-
-
 
   //datePicker
   const [expDate, setExpDate] = useState(new Date());
@@ -824,6 +816,12 @@ function AddItems({ navigation }) {
     showMode('date');
   };
 
+  //Toggle expDate between date and N/A
+  const [realExpDate, setRealExpDate] = useState('N/A');
+  const toggleExpDate = (isEnabled) => {
+    if (isEnabled){ setRealExpDate('N/A'); }
+    else { setRealExpDate(dateToStr(expDate)); }
+  }
 
   return (
     <ImageBackground
@@ -864,7 +862,7 @@ function AddItems({ navigation }) {
             onPress={showDatePicker}
             activeOpacity={0.6}
             underlayColor={"#DDDDDD"} >
-            <Text style={styles.input}>{dateToStr(expDate)}</Text>
+            <Text style={styles.input}>{realExpDate}</Text>
           </TouchableHighlight>
 
           <TextInput //stores additional info in addntInfo
@@ -904,7 +902,7 @@ function AddItems({ navigation }) {
           <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
             style={styles.button}
             onPress={() => {
-              addItem(nameOfItem, dateToStr(expDate), 0, quantity, addntInfo, image)
+              addItem(nameOfItem, realExpDate, 0, quantity, addntInfo, image)
               //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
             }}>
             <Text style={styles.textForAddItems}>ADD ITEM TO INVENTORY</Text>
@@ -918,16 +916,7 @@ function AddItems({ navigation }) {
     </ImageBackground>
   );
 }
-/**
- * This determines if the toggle is switched to true or false
- */
-function toggleTF() {
-  if (isEnabled == true) {
-    //then remember the expriation date
-  } else {
-    //do not remeber the expriation date 
-  }
-}
+
 
 function Pantry({ navigation }) {
   return (
@@ -1377,25 +1366,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#859a9b',
     borderRadius: 20,
     padding: 10,
-    marginBottom: 20,
+    marginTop: 10, 
+    marginBottom: 10,
     shadowColor: '#303838',
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,
     shadowOpacity: 0.35,
     justifyContent: 'flex-end',
-    marginBottom: 60,
+    //marginBottom: 60, //originally was marginBottom20 with no marginTop and marginBottom 60 uncommented, feel free to revert
   },
   redButton: {
-    backgroundColor: '#9e2c18',
+    backgroundColor: '#d43215',
     borderRadius: 20,
     padding: 10,
-    marginBottom: 20,
+    marginTop: 5,
+    marginBottom: 10,
     shadowColor: '#303838',
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,
     shadowOpacity: 0.35,
     justifyContent: 'flex-end',
-    marginBottom: 60,
   },
   sectionHeader: {
     textAlign: "center",
@@ -1450,7 +1440,7 @@ const styles = StyleSheet.create({
   textBox: {
     height: 150,
     width: 200,
-    margin: 12,
+    margin: 6,
     borderWidth: 1,
     borderColor: "darkgrey",
     padding: 10,
