@@ -377,12 +377,14 @@ function updateImagePath(image, batchID) {
           source={{ uri: image }}
           style={{ width: 225, height: 300 }}
         />}
-
-        <Button
-          color="#0437A0"
-          title="Add/Replace image"
-          onPress={pickImage}
-        />
+        <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
+          style={styles.button}
+          onPress = 
+            {pickImage}
+            //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
+          >
+          <Text style={styles.textForAddItems}>ADD/REPLACE IMAGE</Text>
+        </TouchableOpacity>
 
         <View style={styles.textForAddItems}>
           <Text style={styles.text} >Quantity: </Text>
@@ -795,11 +797,14 @@ function AddItems({ navigation }) {
           />
 
           <View style={styles.row}>
-            <Button
-              color="#0437A0"
-              title="Add image"
-              onPress={pickImage}
-            />
+            <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
+              style={styles.button}
+              onPress = 
+                {pickImage}
+                //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
+              >
+              <Text style={styles.textForAddItems}>ADD IMAGE</Text>
+            </TouchableOpacity>
             {image && <Image
               source={{ uri: image }}
               style={{ width: 45, height: 60 }}
