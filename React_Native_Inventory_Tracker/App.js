@@ -158,9 +158,9 @@ function HomeScreen({ navigation }) {
         </View>
 
         <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Canning', {starterCans: cans}) }}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Canning', { starterCans: cans }) }}>
             <Text style={styles.text}>VIEW CANNING</Text>
-            <Image style={styles.cannedItem} source={require("./assets/can.png")} />
+            <Image source={require("./assets/can.png")} />
           </TouchableOpacity>
         </View>
 
@@ -787,16 +787,6 @@ function AddItems({ navigation }) {
             <Text style={styles.input}>{dateToStr(expDate)}</Text>
           </TouchableHighlight>
 
-          {show && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={expDate}
-              mode={mode}
-              is24Hour={true}
-              display="default"
-              onChange={onChange}
-            />
-          )}
           <TextInput //stores additional info in addntInfo
             style={styles.input}
             placeholder="Add additional info"
@@ -807,7 +797,7 @@ function AddItems({ navigation }) {
           <View style={styles.row}>
             <Button
               color="#0437A0"
-              title="ADD IMAGE"
+              title="Add image"
               onPress={pickImage}
             />
             {image && <Image
@@ -817,7 +807,16 @@ function AddItems({ navigation }) {
           </View>
 
         </View>
-
+        {show && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={expDate}
+            mode={mode}
+            is24Hour={true}
+            display="default"
+            onChange={onChange}
+          />
+        )}
         <View style={styles.pantryButton}>
           <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
             style={styles.button}
@@ -909,12 +908,8 @@ function selectCans(sortBy) {
 }
 
 
-<<<<<<< HEAD
-function Canning({ navigation }) {
-=======
 function Canning({ navigation, route }) {
   const starterCans = route.params.starterCans;
->>>>>>> 4df7a6db14bd0262db2ca1c0012cc8d8445eb283
 
   const [open, setOpen] = useState(false);
   const [currValue, setCurrValue] = useState('batchID');
@@ -957,15 +952,9 @@ function Canning({ navigation, route }) {
     }
 
   }
-<<<<<<< HEAD
 
-  const [cans, setCans] = useState([]);
-
-=======
-        
   const [cans, setCans] = useState(starterCans);
-  
->>>>>>> 4df7a6db14bd0262db2ca1c0012cc8d8445eb283
+
   /*
   useEffect(() => {
     if(cans.length == 0){
@@ -1124,14 +1113,14 @@ function EmptyJar({ navigation, route }) {
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
-      <View style={styles.item}><Text style={{fontSize:28}}>Size - Mouth - Quantity</Text></View>
+      <View style={styles.item}><Text style={{ fontSize: 28 }}>Size - Mouth - Quantity</Text></View>
       <FlatList
         data={jars}
         ListEmptyComponent={NoEmptyJarsMessage}
         eyExtractor={(item, index) => index}
         renderItem={({ item, index, separators }) =>
           <View>
-            <Text style={[styles.item, {fontSize: 26}]}>{item.size} - {item.mouth} - {item.count}</Text>
+            <Text style={[styles.item, { fontSize: 26 }]}>{item.size} - {item.mouth} - {item.count}</Text>
           </View>
         }
       />
@@ -1300,7 +1289,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-
   },
   button: {
     backgroundColor: '#859a9b',
@@ -1321,7 +1309,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     borderWidth: 1,
     borderColor: "darkgrey",
-
   },
   item: {
     textAlign: "auto",
@@ -1355,11 +1342,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir',
     fontWeight: 'bold',
     color: 'black',
-    paddingBottom: 70,
+    paddingBottom: 50,
   },
   textForAddItems: {
     textAlign: 'center',
     fontSize: 14,
+
     fontFamily: 'Avenir',
     fontWeight: 'bold',
     color: 'black',
@@ -1420,16 +1408,6 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    backgroundColor: '#859a9b',
-    borderRadius: 20,
-    padding: 10,
-    marginBottom: 20,
-    shadowColor: '#303838',
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 10,
-    shadowOpacity: 0.35,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
   },
   borderText: {
     borderWidth: 1,
