@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, Platform, TouchableWithoutFeedback } from "react-native";
+import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, Platform, TouchableWithoutFeedback, ScrollView } from "react-native";
 import * as SQLite from 'expo-sqlite'; //expo install expo-sqlite
 import * as SplashScreen from 'expo-splash-screen'; //expo install expo-splash-screen
 import * as Font from 'expo-font'; //expo install expo-font
@@ -144,12 +144,15 @@ function HomeScreen({ navigation }) {
 
   const cans = selectCans('batchID');
 
+  const sections = getSection();
+
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
       <SafeAreaView style={styles.container}>
+        <ScrollView>
         <View style={styles.pantryButton}>
           <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Sections') }}>
             <Text style={styles.text}>ADD NEW SECTION</Text>
@@ -170,13 +173,52 @@ function HomeScreen({ navigation }) {
             <Image source={require("./assets/pantry.png")} />
           </TouchableOpacity>
         </View>
+        <View style={styles.pantryButton}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
+            <Text style={styles.text}>Wish List</Text>
+            <Image source={require("./assets/pantry.png")} />
+          </TouchableOpacity>
+        </View>
+        <View>
+          {sections.map(sections =>{
+            return (
+              <View key={sections.sectionID}>
+                <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
+                  <Text style={styles.text}>{sections.sectionName}</Text>
+                  <Image source={require("./assets/pantry.png")} />
+                </TouchableOpacity>
+              </View>
+            )
+          })}
+        </View>
+        </ScrollView>
         < StatusBar style="auto" />
-
+        <TouchableOpacity style={styles.editHome} //This button takes ther user to the homepage 
+        onPress={() => navigation.navigate('Sections')}>
+        <Text style={styles.text}>Edit</Text>
+        </TouchableOpacity>
       </SafeAreaView >
     </ImageBackground>
   );
 }
 
+function getSection(){
+  let[sections, setSection] = useState([]);
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select * from Section;',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++) {
+          temp.push(results.rows.item(i));
+        }
+        setSection(temp);
+      }
+    )
+  });
+  return sections
+}
 //Returns items in a given shelf
 function selectBatch(shelfID, sortBy) {
   let [items, setItems] = useState([]);
@@ -501,41 +543,24 @@ function updateImagePath(image, batchID) {
   );
 }
 function Sections({ navigation }) {
-  const [sections, setSection] = useState('');
-  db.transaction((tx) => {
-    tx.executeSql(
-      'select sectionName from Section;',
-      [],
-      (tx, results) => {
-        var temp = [];
-        for (var i = 0; i < results.rows.length; i++) {
-          temp.push(results.rows.item(i));
-        }
-        setSection(temp);
+  const sections = getSection()
 
-      }
-    )
-  });
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
       <View>
+        <Text style={styles.textHead}>Select Section you want to Delete</Text>
         <FlatList
           data={sections}
           keyExtractor={(item, index) => index}
           renderItem={({ item, index, separators }) =>
-            <View>
-              <Text style={styles.item}>{item.sectionName}</Text>
-            </View>
+          <TouchableOpacity style={styles.sections} onPress={() => {removeSection(item.sectionID)}}>
+            <Text style={styles.text}>{item.sectionName}</Text>
+          </TouchableOpacity>
           }
         />
-        <TouchableOpacity
-          style={styles.item}
-          onPress={() => navigation.navigate('WishList')}>
-          <Text style={styles.text} >Wish List</Text>
-        </TouchableOpacity>
         <TouchableOpacity
           style={styles.addToWishList}
           onPress={() => navigation.navigate('AddSection')}>
@@ -574,7 +599,7 @@ function WishList({ navigation }) {
         </Text>
         <TouchableOpacity
           style={styles.addToWishList}
-          onPress={() => navigation.navigate('Pantry')}>
+          onPress={() => navigation.navigate('Sections')}>
           <Text style={styles.text} >Add Items</Text>
         </TouchableOpacity>
       </View>
@@ -632,10 +657,29 @@ function insertSection(sectionName, sectionID) {
     )
   }
 };
-
+function removeSection(ID){
+  console.log("removing section")
+  console.log(ID)
+  db.transaction((tx) => {
+    tx.executeSql(
+      'delete from Section where sectionID = ID;',
+    )
+  });
+  return (
+    Alert.alert(
+      "",
+      "Section has been deleted",
+      [{
+        text: "Ok",
+        onPress: console.log("Success!")
+      }]
+    )
+  )
+}
 function AddSection({ navigation }) {
   const [sectionName, setSectionName] = useState('');
   const [sectionID, setSectionID] = useState(0)
+
   db.transaction((tx) => {
     tx.executeSql(
       'select sectionID from Section;',
@@ -668,7 +712,7 @@ function AddSection({ navigation }) {
         <TouchableOpacity
           style={styles.AddSection}
           onPress={() => { insertSection(sectionName, sectionID) }}>
-          <Text style={styles.text} >Add Secction</Text>
+          <Text style={styles.text} >Add New Secction</Text>
         </TouchableOpacity>
 
       </View>
@@ -1530,7 +1574,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOpacity: 0.35,
     justifyContent: 'flex-end',
-    top: 100,
+    top: 200,
     width: "50%",
     left: 90,
   },
@@ -1546,5 +1590,28 @@ const styles = StyleSheet.create({
     top: 80,
     width: "50%",
     left: 10,
+  },
+  editHome: {
+    backgroundColor: '#859a9b',
+    borderRadius: 30,
+    padding: 10,
+    marginBottom: 20,
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    marginBottom: 10,
+    left: 125
+  },
+  sections: {
+    textAlign: "center",
+    borderWidth: 3,
+    borderColor: "darkgrey",
+    fontSize: 40,
+    color: "black",
+    height: 60,
+    width: 250,
+    left: 70,
   },
 });
