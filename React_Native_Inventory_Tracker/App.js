@@ -141,6 +141,9 @@ export default function App() {
  */
 function HomeScreen({ navigation }) {
   const [section, setText] = useState('');
+
+  const cans = selectCans('batchID');
+
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -155,7 +158,7 @@ function HomeScreen({ navigation }) {
         </View>
 
         <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Canning') }}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Canning', {starterCans: cans}) }}>
             <Text style={styles.text}>VIEW CANNING</Text>
             <Image style={styles.cannedItem} source={require("./assets/can.png")} />
           </TouchableOpacity>
@@ -906,7 +909,12 @@ function selectCans(sortBy) {
 }
 
 
+<<<<<<< HEAD
 function Canning({ navigation }) {
+=======
+function Canning({ navigation, route }) {
+  const starterCans = route.params.starterCans;
+>>>>>>> 4df7a6db14bd0262db2ca1c0012cc8d8445eb283
 
   const [open, setOpen] = useState(false);
   const [currValue, setCurrValue] = useState('batchID');
@@ -949,9 +957,15 @@ function Canning({ navigation }) {
     }
 
   }
+<<<<<<< HEAD
 
   const [cans, setCans] = useState([]);
 
+=======
+        
+  const [cans, setCans] = useState(starterCans);
+  
+>>>>>>> 4df7a6db14bd0262db2ca1c0012cc8d8445eb283
   /*
   useEffect(() => {
     if(cans.length == 0){
