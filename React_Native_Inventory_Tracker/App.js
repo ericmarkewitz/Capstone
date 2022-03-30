@@ -247,11 +247,13 @@ function FoodScreen({ route, navigation }) {
   )
 }
 
+
+/*
 /**
- * This updates the batch screens and details for the user 
+ * This updates the batch screens and details for the user (DEPRECATED)
  * @param {} param0 
  * @returns 
- */function updateDetails(notes, quantity, expDate, batchID) {
+ */ /*function updateDetails(notes, quantity, expDate, batchID) {
   db.transaction((tx) => {
     tx.executeSql(
       'update Batch set notes = ?, quantity = ?, expDate = ? where batchID = ?;',
@@ -271,7 +273,7 @@ function FoodScreen({ route, navigation }) {
     )
   );
 }
-
+*/
 /**
  * Deletes Items from a batch ID
  * @param {} param0 
@@ -320,6 +322,8 @@ function updateImagePath(image, batchID) {
 
   const { details } = route.params; //receive details
 
+  
+
   //image handling
   const [image, setImage] = useState(details.imagePath);
   const pickImage = async () => {
@@ -348,6 +352,7 @@ function updateImagePath(image, batchID) {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === 'ios');
     setDate(currentDate);
+
   };
 
   const showMode = (currentMode) => {
@@ -362,6 +367,35 @@ function updateImagePath(image, batchID) {
   //notes and quantity
   const [notes, onChangeNotes] = React.useState(details.notes);
   const [quan, onChangeQuan] = React.useState(details.quantity + '');
+  //updates quantity field
+  const updateQuantity = (quantity, batchID) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        'update Batch set quantity = ? where batchID = ?;',
+        [quantity, batchID],
+      )
+    });
+  }
+  //updates expDate field
+  const updateExpDate = (expDate, batchID) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        'update Batch set expDate = ? where batchID = ?;',
+        [expDate, batchID],
+      )
+    });
+    return expDate;
+  }
+  //updates notes field
+  const updateNotes = (notes, batchID) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        'update Batch set notes = ? where batchID = ?;',
+        [notes, batchID],
+      )
+    });
+  }
+
   var defaultPic = './assets/default.jpg'; //maybe TODO: format of default pic doesnt work, may not be needed anyways
   if (image == null) { setImage(defaultPic); }
 
@@ -391,6 +425,7 @@ function updateImagePath(image, batchID) {
           <TextInput
             value={quan}
             onChangeText={onChangeQuan}
+            onChange = {updateQuantity(quan,details.batchID)}
             keyboardType="numeric"
             style={styles.borderText}
           ></TextInput>
@@ -404,7 +439,7 @@ function updateImagePath(image, batchID) {
             onPress={showDatePicker}
             activeOpacity={0.6}
             underlayColor={"#DDDDDD"} >
-            <Text style={styles.borderText}>{dateToStr(date)}</Text>
+            <Text style={styles.borderText} onChange = {updateExpDate(dateToStr(date), details.batchID)} >{dateToStr(date)}</Text>
           </TouchableHighlight>
         </View>
         {show && (
@@ -414,24 +449,21 @@ function updateImagePath(image, batchID) {
             mode={mode}
             is24Hour={true}
             display="default"
-            onChange={onChange}
+            onChange = {onChange}
+
           />
         )}
 
 
-        <TextInput //TODO: allow changing of dateAdded (maybe), automatic updates instead of pressing button (stretch goal maybe)
-          value={notes}
+        <TextInput //TODO: allow changing of dateAdded (maybe)
+          value = {notes}
           onChangeText={onChangeNotes}
+          onChange = {updateNotes(notes,details.batchID)}
           style={styles.textBox}
         />
-        <TouchableOpacity //UPDATE BUTTON
-          style={styles.button}
-          onPress={() => updateDetails(notes, quan, dateToStr(date), details.batchID)}>
-          <Text style={styles.text} >UPDATE</Text>
-        </TouchableOpacity>
 
-        <Button
-          color="#FF0000"
+        <TouchableOpacity
+          style={styles.redButton}
           title="Delete"
           onPress={() =>
             Alert.alert(
@@ -1297,6 +1329,18 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#859a9b',
+    borderRadius: 20,
+    padding: 10,
+    marginBottom: 20,
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    marginBottom: 60,
+  },
+  redButton: {
+    backgroundColor: '#9e2c18',
     borderRadius: 20,
     padding: 10,
     marginBottom: 20,
