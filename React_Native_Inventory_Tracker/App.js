@@ -14,9 +14,11 @@ import DropdownMenu from 'react-native-dropdown-menu';
 import DropDownPicker from 'react-native-dropdown-picker';
 //import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
+import {Asset} from 'expo-asset';
 
 const db = SQLite.openDatabase('daba'); //if app wont load after a reload change the name of the db (no clue why this happens)
 const Stack = createNativeStackNavigator();
+const defaultPic = Asset.fromModule(require('./assets/default.jpg')).uri;
 
 function setupDB() {
   db.exec([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false, () =>
@@ -24,6 +26,7 @@ function setupDB() {
   );
 
   db.transaction(tx => {
+    
     /*
     tx.executeSql('drop table if exists CannedGoods');
     tx.executeSql('drop table if exists Jars');
@@ -54,11 +57,11 @@ function setupDB() {
     //dummy data
     tx.executeSql('insert into Storage values (0, \'Pantry\');');
     tx.executeSql('insert into Shelves values (0, 0, \'Shelf A\');');
-    tx.executeSql('insert into Batch values (0, \'Pickles\', \'02/18/22\',\'05/27/22\', 0, 4,\'green\',\'./assets/default.jpg\');');
-    tx.executeSql('insert into Batch values (1, \'Peas\', \'01/17/22\',\'03/18/23\', 0, 12,\'also green\',\'./assets/default.jpg\');');
-    tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\',\'./assets/default.jpg\');');
-    tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\'./assets/default.jpg\');');
-    tx.executeSql('insert into Batch values (4, \'delete me\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\'./assets/default.jpg\');');
+    tx.executeSql('insert into Batch values (0, \'Pickles\', \'02/18/22\',\'05/27/22\', 0, 4,\'green\',\''+defaultPic+'\');');
+    tx.executeSql('insert into Batch values (1, \'Peas\', \'01/17/22\',\'03/18/23\', 0, 12,\'also green\',\''+defaultPic+'\');');
+    tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\',\''+defaultPic+'\');');
+    tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\''+defaultPic+'\');');
+    tx.executeSql('insert into Batch values (4, \'delete me\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\''+defaultPic+'\');');
 
     tx.executeSql('insert into Jars values (0, \'16oz\', \'regular\');');
     tx.executeSql('insert into Jars values (1, \'20oz\', \'wide\');');
@@ -434,8 +437,8 @@ function updateImagePath(image, batchID) {
     });
   }
 
-  var defaultPic = './assets/default.jpg'; //maybe TODO: format of default pic doesnt work, may not be needed anyways
-  if (image == null) { setImage(defaultPic); }
+  //var defaultPic = './assets/default.jpg'; //maybe TODO: format of default pic doesnt work, may not be needed anyways
+  //if (image == null) { setImage(defaultPic); }
 
   return (
     <ImageBackground
@@ -782,7 +785,8 @@ function AddItems({ navigation }) {
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
   //image handling
-  const [image, setImage] = useState('./assets/default.jpg');
+
+  const [image, setImage] = useState(defaultPic);
   const pickImage = async () => {
 
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -797,6 +801,8 @@ function AddItems({ navigation }) {
       setImage(result.uri);
     }
   };
+
+
 
   //datePicker
   const [expDate, setExpDate] = useState(new Date());
