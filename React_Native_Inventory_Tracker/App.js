@@ -141,6 +141,9 @@ export default function App() {
  */
 function HomeScreen({ navigation }) {
   const [section, setText] = useState('');
+
+  const cans = selectCans('batchID');
+
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -155,7 +158,7 @@ function HomeScreen({ navigation }) {
         </View>
 
         <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Canning') }}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Canning', {starterCans: cans}) }}>
             <Text style={styles.text}>VIEW CANNING</Text>
             <Image style={styles.cannedItem} source={require("./assets/can.png")} />
           </TouchableOpacity>
@@ -905,8 +908,9 @@ function selectCans(sortBy) {
 }
 
 
-function Canning({ navigation }) {
-  
+function Canning({ navigation, route }) {
+  const starterCans = route.params.starterCans;
+
   const [open, setOpen] = useState(false);
   const [currValue, setCurrValue] = useState('batchID');
   const [items, setItems] = useState([
@@ -949,7 +953,7 @@ function Canning({ navigation }) {
     
   }
         
-  const [cans, setCans] = useState([]);
+  const [cans, setCans] = useState(starterCans);
   
   /*
   useEffect(() => {
