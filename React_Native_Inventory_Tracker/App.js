@@ -247,13 +247,8 @@ function FoodScreen({ route, navigation }) {
   )
 }
 
-
 /*
-/**
- * This updates the batch screens and details for the user (DEPRECATED)
- * @param {} param0 
- * @returns 
- */ /*function updateDetails(notes, quantity, expDate, batchID) {
+function updateDetails(notes, quantity, expDate, batchID) { //DEPRECATED
   db.transaction((tx) => {
     tx.executeSql(
       'update Batch set notes = ?, quantity = ?, expDate = ? where batchID = ?;',
@@ -274,6 +269,7 @@ function FoodScreen({ route, navigation }) {
   );
 }
 */
+
 /**
  * Deletes Items from a batch ID
  * @param {} param0 
