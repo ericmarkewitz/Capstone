@@ -1154,7 +1154,7 @@ function EmptyJar({ navigation, route }) {
       <FlatList
         data={jars}
         ListEmptyComponent={NoEmptyJarsMessage}
-        eyExtractor={(item, index) => index}
+        keyExtractor={(item, index) => index}
         renderItem={({ item, index, separators }) =>
           <View>
             <Text style={[styles.item, { fontSize: 26 }]}>{item.size} - {item.mouth} - {item.count}</Text>
