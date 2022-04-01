@@ -179,7 +179,7 @@ function HomeScreen({ navigation }) {
         <View style={styles.pantryButton}>
           <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
             <Text style={styles.text}>Wish List</Text>
-            <Image source={require("./assets/pantry.png")} />
+            <Image style={styles.homeWihsList} source={require("./assets/wishList.png")} />
           </TouchableOpacity>
         </View>
         <View>
@@ -188,7 +188,7 @@ function HomeScreen({ navigation }) {
               <View key={sections.sectionID}>
                 <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
                   <Text style={styles.text}>{sections.sectionName}</Text>
-                  <Image source={require("./assets/pantry.png")} />
+                  <Image source={require("./assets/newSection.png")} />
                 </TouchableOpacity>
               </View>
             )
@@ -570,7 +570,7 @@ function Sections({ navigation }) {
   );
 }
 
-function WishList({ navigation }) {
+function getWishListItems(){
   const [products, setProducts] = useState('');
   db.transaction((tx) => {
     tx.executeSql(
@@ -586,17 +586,18 @@ function WishList({ navigation }) {
       }
     )
   });
-  const NoItemsInList = ({ item }) => {
+  return products
+}
+
+function WishList({ navigation }) {
+  const products = getWishListItems()
+  
+  const NoItemsInList = ({ item, navigation }) => {
     return (
       <View>
         <Text style={styles.emptyList}>
           Your Wish List is Empty
         </Text>
-        <TouchableOpacity
-          style={styles.addToWishList}
-          onPress={() => navigation.navigate('Sections')}>
-          <Text style={styles.text} >Add Items</Text>
-        </TouchableOpacity>
       </View>
     );
   };
@@ -615,13 +616,39 @@ function WishList({ navigation }) {
           </View>
         }
       />
+      <TouchableOpacity
+          style={styles.addItemToWishList}
+          onPress={() => navigation.navigate('Pantry')}>
+          <Text style={styles.text} >Add Items</Text>
+      </TouchableOpacity>
+      <FloatingButton
+        style={styles.floatinBtn}
+        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+      />
     </ImageBackground>
   );
 }
+function getSectionID(){
+  let [sectionID, setSectionID] = useState(0)
+  b.transaction((tx) => {
+    tx.executeSql(
+      'select sectionID from Section;',
+      [],
+      (tx, results) => {
+        var temp = 0;
+        temp = 0
+        temp = results.rows.length
+        temp += 1
+        setSectionID(temp);
+      }
+    )
+  });
+  return sectionID
+}
 
-function insertSection(sectionName, sectionID) {
+function insertSection(sectionName) {
+  const sectionID = getSectionID();
   if (sectionName != '') {
-    // value previously stored
     console.log('sectionName: ' + sectionName + '\nsectionID: ' + sectionID + '')
     db.transaction(tx => {
       tx.executeSql(
@@ -652,6 +679,7 @@ function insertSection(sectionName, sectionID) {
     )
   }
 };
+
 function removeSection(ID){
   console.log("removing section")
   console.log(ID)
@@ -659,6 +687,7 @@ function removeSection(ID){
     tx.executeSql(
       'delete from Section where sectionID = ID;',
     )
+    console.log("Deleting")
   });
   return (
     Alert.alert(
@@ -671,23 +700,9 @@ function removeSection(ID){
     )
   )
 }
+
 function AddSection({ navigation }) {
   const [sectionName, setSectionName] = useState('');
-  const [sectionID, setSectionID] = useState(0)
-
-  db.transaction((tx) => {
-    tx.executeSql(
-      'select sectionID from Section;',
-      [],
-      (tx, results) => {
-        var temp = 0;
-        temp = 0
-        temp = results.rows.length
-        temp += 1
-        setSectionID(temp);
-      }
-    )
-  });
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -706,7 +721,7 @@ function AddSection({ navigation }) {
         />
         <TouchableOpacity
           style={styles.AddSection}
-          onPress={() => { insertSection(sectionName, sectionID) }}>
+          onPress={() => {insertSection(sectionName)}}>
           <Text style={styles.text} >Add New Secction</Text>
         </TouchableOpacity>
 
@@ -1486,10 +1501,11 @@ const styles = StyleSheet.create({
     right: 10,
   },
   emptyList: {
-    top: 100,
+    top: 200,
     padding: 10,
     fontSize: 18,
-    textAlign: "center"
+    textAlign: "center",
+    fontWeight: "bold",
   },
   row: {
     flexDirection: "row",
@@ -1610,4 +1626,21 @@ const styles = StyleSheet.create({
     width: 250,
     left: 70,
   },
+  homeWihsList: {
+    height: 150,
+    width: 150,
+  },    
+  addItemToWishList:{
+    backgroundColor: '#859a9b',
+    borderRadius: 20,
+    padding: 10,
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    bottom: 120,
+    width: "50%",
+    left:100,
+  }
 });
