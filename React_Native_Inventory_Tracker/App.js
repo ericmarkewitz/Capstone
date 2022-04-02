@@ -143,8 +143,6 @@ export default function App() {
  * @returns 
  */
 function HomeScreen({ navigation }) {
-  const [section, setText] = useState('');
-
   const cans = selectCans('batchID');
 
   const sections = getSection();
@@ -591,7 +589,7 @@ function getWishListItems(){
 
 function WishList({ navigation }) {
   const products = getWishListItems()
-  
+
   const NoItemsInList = ({ item, navigation }) => {
     return (
       <View>
@@ -629,8 +627,8 @@ function WishList({ navigation }) {
   );
 }
 function getSectionID(){
-  let [sectionID, setSectionID] = useState(0)
-  b.transaction((tx) => {
+  let sectionID = 0
+  db.transaction((tx) => {
     tx.executeSql(
       'select sectionID from Section;',
       [],
@@ -639,7 +637,7 @@ function getSectionID(){
         temp = 0
         temp = results.rows.length
         temp += 1
-        setSectionID(temp);
+        sectionID = temp;
       }
     )
   });
@@ -647,7 +645,7 @@ function getSectionID(){
 }
 
 function insertSection(sectionName) {
-  const sectionID = getSectionID();
+  let sectionID = getSectionID();
   if (sectionName != '') {
     console.log('sectionName: ' + sectionName + '\nsectionID: ' + sectionID + '')
     db.transaction(tx => {
@@ -680,12 +678,13 @@ function insertSection(sectionName) {
   }
 };
 
-function removeSection(ID){
+function removeSection(sectionID){
   console.log("removing section")
-  console.log(ID)
+  console.log(sectionID)
   db.transaction((tx) => {
     tx.executeSql(
-      'delete from Section where sectionID = ID;',
+      'delete from Section where sectionID = ?;',
+      [sectionID],
     )
     console.log("Deleting")
   });
@@ -1486,8 +1485,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     justifyContent: 'flex-end',
-    marginBottom: 30,
-    marginTop: 100,
+    marginBottom: 70,
   },
   cannedItem: {
     alignItems: "center",
