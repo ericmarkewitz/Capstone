@@ -36,11 +36,11 @@ function setupDB() {
     tx.executeSql('drop table if exists Shelves');
     tx.executeSql('drop table if exists Storage');
 
-    tx.executeSql('drop table if exists Section');
-    tx.executeSql('drop table if exists Product');
-    tx.executeSql('drop table if exists WishList');
-    tx.executeSql('drop table if exists Expiration');
     tx.executeSql('drop table if exists Stock');
+    tx.executeSql('drop table if exists Expiration');
+    tx.executeSql('drop table if exists WishList');
+    tx.executeSql('drop table if exists Product');
+    tx.executeSql('drop table if exists Section');
     */
 
     tx.executeSql('create table if not exists Storage(locationID integer primary key,locationName text);');
@@ -50,7 +50,7 @@ function setupDB() {
     tx.executeSql('create table if not exists CannedGoods(jarID integer,batchID integer,primary key (jarID, batchID),foreign key (jarID) references Jars(jarID),foreign key (batchID) references Batch(batchID));');
 
     //General db
-    tx.executeSql('create table if not exists Section(sectionID integer primary key, sectionName text);');
+    tx.executeSql('create table if not exists Section(sectionID integer primary key, sectionName text, imagePath text);');
     tx.executeSql('create table if not exists Product(productID integer primary key, productName text, notes text, sectionID integer, foreign key (sectionID) references Section(sectionID));');
     tx.executeSql('create table if not exists WishList(productID integer primary key, foreign key (productID) references Product(productID));');
     tx.executeSql('create table if not exists Expiration(productID integer primary key, expirationDate text check (expirationDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expirationDate glob \'N/A\'),foreign key (productID) references Product (productID));');
@@ -661,14 +661,14 @@ function getSectionID() {
   return sectionID
 }
 
-function insertSection(sectionName) {
+function insertSection(sectionName, imagePath) {
   let sectionID = getSectionID();
   if (sectionName != '') {
-    console.log('sectionName: ' + sectionName + '\nsectionID: ' + sectionID + '')
+    console.log('sectionName: ' + sectionName + '\nsectionID: ' + sectionID + '\nimagePath: '+imagePath)
     db.transaction(tx => {
       tx.executeSql(
-        'insert into Section (sectionID, sectionName) values (?,?);',
-        [sectionID, sectionName]
+        'insert into Section (sectionID, sectionName, imagePath) values (?,?,?);',
+        [sectionID, sectionName, imagePath]
       )
     });
     return (
@@ -719,6 +719,25 @@ function removeSection(sectionID) {
 
 function AddSection({ navigation }) {
   const [sectionName, setSectionName] = useState('');
+
+  //image handling
+  const [image, setImage] = useState(defaultPic);
+  const pickImage = async () => {
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [3, 4],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+
+      setImage(result.uri);
+    }
+  };
+
+
   return (
     <ImageBackground
       source={require('./assets/cart.jpg')}
@@ -728,6 +747,21 @@ function AddSection({ navigation }) {
         <View>
           <Text style={styles.textHead}>Enter Section Information</Text>
         </View>
+
+        {image && <Image
+            source={{ uri: image }}
+            style={{ width: 90, height: 120 }}
+        />}
+
+        <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
+          style={styles.button}
+          onPress=
+          {pickImage}
+          //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
+          >
+          <Text style={styles.textForAddItems}>ADD IMAGE</Text>
+        </TouchableOpacity>
+
         <TextInput
           style={styles.inputAddSection}
           placeholder="Section Name" //ENTER NAME OF CATGEORY
@@ -737,7 +771,7 @@ function AddSection({ navigation }) {
         />
         <TouchableOpacity
           style={styles.AddSection}
-          onPress={() => { insertSection(sectionName) }}>
+          onPress={() => { insertSection(sectionName, image) }}>
           <Text style={styles.text} >Add New Secction</Text>
         </TouchableOpacity>
 
