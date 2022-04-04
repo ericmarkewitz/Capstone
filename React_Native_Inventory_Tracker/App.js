@@ -1037,12 +1037,71 @@ function Canning({ navigation, route }) {
 
 
   for (let currItem of items) {
-    //console.log(currItem);
     let sortVal = currItem.value;
     if (sortVal != 'batchID') {
       let tempArr = bIDAsc.slice();
 
-      let canAsc = tempArr.sort((a, b) => a[sortVal].localeCompare(b[sortVal]));
+      let canAsc = tempArr.sort((a, b) => {
+        if(sortVal === 'datePlaced' || sortVal === 'expDate'){
+          if(a === 'N/A'){
+            if(b === 'N/A'){
+              return 0
+            }
+            else{
+              return 1;
+            }
+          }
+          if(b === 'N/A'){
+            return -1;
+          }
+
+          //Dates should be format MM/DD/YY so arr will be [MM, DD, YY] 
+          aStr = String(a[sortVal]);
+          bStr = String(b[sortVal]);
+          
+          const aDates = aStr.split('/');
+          const bDates = bStr.split('/');
+
+          const aYears = aDates[2];
+          const bYears = bDates[2];
+
+          if(aYears > bYears){
+            return 1;
+          }
+          else if(aYears < bYears){
+            return -1
+          }
+          else{
+            //This block represents if they have the same year
+            const aMonths = aDates[0];
+            const bMonths = bDates[0];
+
+            if(aMonths > bMonths){
+              return 1;
+            }
+            else if(aMonths < bMonths){
+              return -1;
+            }
+            else{
+              //If they have the same year and month
+              const aDays = aDates[1];
+              const bDays = bDates[1];
+
+              if(aDays > bDays){
+                return 1;
+              }
+              else if(aDays < bDays){
+                return -1;
+              }
+              else return 0; //If they are the same date, default to prior sorting
+            }
+          }
+        }
+        else{
+          //If they're not a date just use default localeCompare to sort
+          return a[sortVal].localeCompare(b[sortVal]);
+        }
+      });
 
 
       let canDesc = canAsc.slice().reverse(); //Copys and reverses the array into descending order
@@ -1057,6 +1116,7 @@ function Canning({ navigation, route }) {
   }
 
   const [cans, setCans] = useState(starterCans);
+  //const [cans, setCans] = useState(canArr[0][0]);
 
   /*
   useEffect(() => {
@@ -1094,8 +1154,7 @@ function Canning({ navigation, route }) {
                 setCurrValue(currVal);
                 for (let i = 0; i < canArr.length; i++) {
                   let order = canArr[i][1];
-                  if (order == currVal) {
-
+                  if (order === currVal) {
                     if (isEnabled) {
                       setCans(canArr[i + 1][0]);
                     }
@@ -1117,7 +1176,7 @@ function Canning({ navigation, route }) {
 
                 for (let i = 0; i < canArr.length; i++) {
                   let order = canArr[i][1];
-                  if (order == currValue) {
+                  if (order === currValue) {
                     if (newValue) {
                       setCans(canArr[i + 1][0]);
                       break;
