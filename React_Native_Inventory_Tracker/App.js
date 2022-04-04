@@ -14,7 +14,9 @@ import DropdownMenu from 'react-native-dropdown-menu';
 import DropDownPicker from 'react-native-dropdown-picker';
 //import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
-import {Asset} from 'expo-asset';
+import { Asset } from 'expo-asset';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+
 
 const db = SQLite.openDatabase('db'); //if app wont load after a reload change the name of the db (no clue why this happens)
 const Stack = createNativeStackNavigator();
@@ -26,7 +28,7 @@ function setupDB() {
   );
 
   db.transaction(tx => {
-    
+
     /*
     tx.executeSql('drop table if exists CannedGoods');
     tx.executeSql('drop table if exists Jars');
@@ -57,11 +59,11 @@ function setupDB() {
     //dummy data
     tx.executeSql('insert into Storage values (0, \'Pantry\');');
     tx.executeSql('insert into Shelves values (0, 0, \'Shelf A\');');
-    tx.executeSql('insert into Batch values (0, \'Pickles\', \'02/18/22\',\'05/27/22\', 0, 4,\'green\',\''+defaultPic+'\');');
-    tx.executeSql('insert into Batch values (1, \'Peas\', \'01/17/22\',\'03/18/23\', 0, 12,\'also green\',\''+defaultPic+'\');');
-    tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\',\''+defaultPic+'\');');
-    tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\''+defaultPic+'\');');
-    tx.executeSql('insert into Batch values (4, \'delete me\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\''+defaultPic+'\');');
+    tx.executeSql('insert into Batch values (0, \'Pickles\', \'02/18/22\',\'05/27/22\', 0, 4,\'green\',\'' + defaultPic + '\');');
+    tx.executeSql('insert into Batch values (1, \'Peas\', \'01/17/22\',\'03/18/23\', 0, 12,\'also green\',\'' + defaultPic + '\');');
+    tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\',\'' + defaultPic + '\');');
+    tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\'' + defaultPic + '\');');
+    tx.executeSql('insert into Batch values (4, \'delete me\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\'' + defaultPic + '\');');
 
     tx.executeSql('insert into Jars values (0, \'16oz\', \'regular\');');
     tx.executeSql('insert into Jars values (1, \'20oz\', \'wide\');');
@@ -154,57 +156,57 @@ function HomeScreen({ navigation }) {
     >
       <SafeAreaView style={styles.container}>
         <ScrollView>
-        <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Sections') }}>
-            <Text style={styles.text}>ADD NEW SECTION</Text>
-            <Image source={require("./assets/newSection.png")} />
-          </TouchableOpacity>
-        </View>
+          <View style={styles.pantryButton}>
+            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Sections') }}>
+              <Text style={styles.text}>ADD NEW SECTION</Text>
+              <Image source={require("./assets/newSection.png")} />
+            </TouchableOpacity>
+          </View>
 
-        <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Canning', { starterCans: cans }) }}>
-            <Text style={styles.text}>VIEW CANNING</Text>
-            <Image source={require("./assets/can.png")} />
-          </TouchableOpacity>
-        </View>
+          <View style={styles.pantryButton}>
+            <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Canning', { starterCans: cans }) }}>
+              <Text style={styles.text}>VIEW CANNING</Text>
+              <Image source={require("./assets/can.png")} />
+            </TouchableOpacity>
+          </View>
 
-        <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Pantry') }}>
-            <Text style={styles.text}>VIEW PANTRY</Text>
-            <Image source={require("./assets/pantry.png")} />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
-            <Text style={styles.text}>Wish List</Text>
-            <Image style={styles.homeWihsList} source={require("./assets/wishList.png")} />
-          </TouchableOpacity>
-        </View>
-        <View>
-          {sections.map(sections =>{
-            return (
-              <View key={sections.sectionID}>
-                <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
-                  <Text style={styles.text}>{sections.sectionName}</Text>
-                  <Image source={require("./assets/newSection.png")} />
-                </TouchableOpacity>
-              </View>
-            )
-          })}
-        </View>
+          <View style={styles.pantryButton}>
+            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Pantry') }}>
+              <Text style={styles.text}>VIEW PANTRY</Text>
+              <Image source={require("./assets/pantry.png")} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.pantryButton}>
+            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
+              <Text style={styles.text}>Wish List</Text>
+              <Image style={styles.homeWihsList} source={require("./assets/wishList.png")} />
+            </TouchableOpacity>
+          </View>
+          <View>
+            {sections.map(sections => {
+              return (
+                <View key={sections.sectionID}>
+                  <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
+                    <Text style={styles.text}>{sections.sectionName}</Text>
+                    <Image source={require("./assets/newSection.png")} />
+                  </TouchableOpacity>
+                </View>
+              )
+            })}
+          </View>
         </ScrollView>
         < StatusBar style="auto" />
         <TouchableOpacity style={styles.editHome} //This button takes ther user to the homepage 
-        onPress={() => navigation.navigate('Sections')}>
-        <Text style={styles.text}>Edit</Text>
+          onPress={() => navigation.navigate('Sections')}>
+          <Text style={styles.text}>Edit</Text>
         </TouchableOpacity>
       </SafeAreaView >
     </ImageBackground>
   );
 }
 
-function getSection(){
-  let[sections, setSection] = useState([]);
+function getSection() {
+  let [sections, setSection] = useState([]);
   db.transaction((tx) => {
     tx.executeSql(
       'select * from Section;',
@@ -339,8 +341,8 @@ function dateToStr(date) {
     if (str.length < 2) { return "0" + str; }
     else return str;
   }
-  if (date+"" == 'Invalid Date') { return 'N/A'; }
-  else {return ((addZeroes((date.getMonth() + 1).toString())) + '/' + (addZeroes(date.getDate().toString())) + '/' + (date.getFullYear().toString().substring(2)));}
+  if (date + "" == 'Invalid Date') { return 'N/A'; }
+  else { return ((addZeroes((date.getMonth() + 1).toString())) + '/' + (addZeroes(date.getDate().toString())) + '/' + (date.getFullYear().toString().substring(2))); }
 }
 
 //updates imagePath field
@@ -361,7 +363,7 @@ function updateImagePath(image, batchID) {
 
   const { details } = route.params; //receive details
 
-  
+
 
   //image handling
   const [image, setImage] = useState(details.imagePath);
@@ -400,7 +402,7 @@ function updateImagePath(image, batchID) {
   };
 
   const showDatePicker = () => {
-    if (details.expDate != 'N/A') {showMode('date')};
+    if (details.expDate != 'N/A') { showMode('date') };
   };
 
   //notes and quantity
@@ -440,7 +442,12 @@ function updateImagePath(image, batchID) {
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
-      <View style={styles.listContainer}>
+      <KeyboardAwareScrollView
+        style={styles.listContainer}
+        resetScrollToCoords={{ x: 0, y: 0 }}
+        contentContainerStyle={styles.container}
+        scrollEnabled={false}
+      >
         <Text style={styles.textHead} > {details.product}  </Text>
 
         {image && <Image
@@ -449,37 +456,46 @@ function updateImagePath(image, batchID) {
         />}
         <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
           style={styles.button}
-          onPress = 
-            {pickImage}
-            //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-          >
+          onPress=
+          {pickImage}
+        //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
+        >
           <Text style={styles.textForAddItems}>ADD/REPLACE IMAGE</Text>
         </TouchableOpacity>
 
-        <View style={styles.textForAddItems}>
+        <KeyboardAwareScrollView
+          resetScrollToCoords={{ x: 0, y: 0 }}
+          contentContainerStyle={styles.container}
+          scrollEnabled={false}
+          style={styles.textForAddItems}>
           <Text style={styles.text} >Quantity: </Text>
+
           <TextInput
             value={quan}
             onChangeText={onChangeQuan}
-            onChange = {updateQuantity(quan,details.batchID)}
+            onChange={updateQuantity(quan, details.batchID)}
             keyboardType="numeric"
             style={styles.borderText}
-          ></TextInput>
-        </View>
 
+          ></TextInput>
+        </KeyboardAwareScrollView>
         <Text style={styles.text} >Date added: {details.datePlaced}</Text>
 
-        <View style={styles.row}>
+        <KeyboardAwareScrollView
+          style={styles.row}
+          resetScrollToCoords={{ x: 0, y: 0 }}
+          contentContainerStyle={styles.container}
+          scrollEnabled={false}>
           <Text style={styles.text} >Expiration Date: </Text>
           <TouchableHighlight
-            onPress= {
+            onPress={
               showDatePicker
             }
             activeOpacity={0.6}
             underlayColor={"#DDDDDD"} >
-            <Text style={styles.borderText} onChange = {updateExpDate(dateToStr(date), details.batchID)} >{dateToStr(date)}</Text>
+            <Text style={styles.borderText} onChange={updateExpDate(dateToStr(date), details.batchID)} >{dateToStr(date)}</Text>
           </TouchableHighlight>
-        </View>
+        </KeyboardAwareScrollView>
         {show && (
           <DateTimePicker
             testID="dateTimePicker"
@@ -487,16 +503,16 @@ function updateImagePath(image, batchID) {
             mode={mode}
             is24Hour={true}
             display="default"
-            onChange = {onChange}
+            onChange={onChange}
 
           />
         )}
 
 
         <TextInput //TODO: allow changing of dateAdded (maybe)
-          value = {notes}
+          value={notes}
           onChangeText={onChangeNotes}
-          onChange = {updateNotes(notes,details.batchID)}
+          onChange={updateNotes(notes, details.batchID)}
           style={styles.textBox}
         />
 
@@ -524,14 +540,15 @@ function updateImagePath(image, batchID) {
                         {
                           text: "Yes",
                           onPress: () => deleteItem(details.batchID, navigation) //NOTE/TODO: atm if you do this from foodscreen it will refresh but not canning
-                        }])}])}>
+                        }])
+                }])}>
           <Text style={styles.textForAddItems}>DELETE</Text>
         </TouchableOpacity>
         <FloatingButton //This button takes ther user to the homepage 
           style={styles.floatinBtn}
           onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
         />
-      </View >
+      </KeyboardAwareScrollView >
     </ImageBackground>
   );
 }
@@ -549,9 +566,9 @@ function Sections({ navigation }) {
           data={sections}
           keyExtractor={(item, index) => index}
           renderItem={({ item, index, separators }) =>
-          <TouchableOpacity style={styles.sections} onPress={() => {removeSection(item.sectionID)}}>
-            <Text style={styles.text}>{item.sectionName}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.sections} onPress={() => { removeSection(item.sectionID) }}>
+              <Text style={styles.text}>{item.sectionName}</Text>
+            </TouchableOpacity>
           }
         />
         <TouchableOpacity
@@ -568,7 +585,7 @@ function Sections({ navigation }) {
   );
 }
 
-function getWishListItems(){
+function getWishListItems() {
   const [products, setProducts] = useState('');
   db.transaction((tx) => {
     tx.executeSql(
@@ -615,9 +632,9 @@ function WishList({ navigation }) {
         }
       />
       <TouchableOpacity
-          style={styles.addItemToWishList}
-          onPress={() => navigation.navigate('Pantry')}>
-          <Text style={styles.text} >Add Items</Text>
+        style={styles.addItemToWishList}
+        onPress={() => navigation.navigate('Pantry')}>
+        <Text style={styles.text} >Add Items</Text>
       </TouchableOpacity>
       <FloatingButton
         style={styles.floatinBtn}
@@ -626,7 +643,7 @@ function WishList({ navigation }) {
     </ImageBackground>
   );
 }
-function getSectionID(){
+function getSectionID() {
   let sectionID = 0
   db.transaction((tx) => {
     tx.executeSql(
@@ -678,7 +695,7 @@ function insertSection(sectionName) {
   }
 };
 
-function removeSection(sectionID){
+function removeSection(sectionID) {
   console.log("removing section")
   console.log(sectionID)
   db.transaction((tx) => {
@@ -720,7 +737,7 @@ function AddSection({ navigation }) {
         />
         <TouchableOpacity
           style={styles.AddSection}
-          onPress={() => {insertSection(sectionName)}}>
+          onPress={() => { insertSection(sectionName) }}>
           <Text style={styles.text} >Add New Secction</Text>
         </TouchableOpacity>
 
@@ -833,7 +850,7 @@ function AddItems({ navigation }) {
   //Toggle expDate between date and N/A
   const [realExpDate, setRealExpDate] = useState('N/A');
   const toggleExpDate = (isEnabled) => {
-    if (isEnabled){ setRealExpDate('N/A'); }
+    if (isEnabled) { setRealExpDate('N/A'); }
     else { setRealExpDate(dateToStr(expDate)); }
   }
 
@@ -880,7 +897,7 @@ function AddItems({ navigation }) {
           </TouchableHighlight>
 
           <TextInput //stores additional info in addntInfo
-            style={styles.input}
+            style={styles.textBox}
             placeholder="Add additional info"
             onChangeText={(addntInfo) => setaddntInfo(addntInfo)}
             defaultValue={addntInfo}
@@ -889,10 +906,10 @@ function AddItems({ navigation }) {
           <View style={styles.row}>
             <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
               style={styles.button}
-              onPress = 
-                {pickImage}
-                //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-              >
+              onPress=
+              {pickImage}
+            //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
+            >
               <Text style={styles.textForAddItems}>ADD IMAGE</Text>
             </TouchableOpacity>
             {image && <Image
@@ -1380,7 +1397,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#859a9b',
     borderRadius: 20,
     padding: 10,
-    marginTop: 10, 
+    marginTop: 10,
     marginBottom: 10,
     shadowColor: '#303838',
     shadowOffset: { width: 0, height: 5 },
@@ -1441,7 +1458,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir',
     fontWeight: 'bold',
     color: 'black',
-    paddingBottom: 50,
+    paddingBottom: 100,
   },
   textForAddItems: {
     textAlign: 'center',
@@ -1627,8 +1644,8 @@ const styles = StyleSheet.create({
   homeWihsList: {
     height: 150,
     width: 150,
-  },    
-  addItemToWishList:{
+  },
+  addItemToWishList: {
     backgroundColor: '#859a9b',
     borderRadius: 20,
     padding: 10,
@@ -1639,6 +1656,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     bottom: 120,
     width: "50%",
-    left:100,
+    left: 100,
   }
 });
