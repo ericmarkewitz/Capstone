@@ -52,7 +52,7 @@ function setupDB() {
     //General db
     tx.executeSql('create table if not exists Section(sectionID integer primary key, sectionName text, imagePath text);');
     tx.executeSql('create table if not exists Product(productID integer primary key, productName text, notes text, sectionID integer, foreign key (sectionID) references Section(sectionID));');
-    tx.executeSql('create table if not exists WishList(productID integer primary key, foreign key (productID) references Product(productID));');
+    tx.executeSql('create table if not exists WishList(batchID integer primary key, product text, foreign key (batchID) references Batch(batchID));');
     tx.executeSql('create table if not exists Expiration(productID integer primary key, expirationDate text check (expirationDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expirationDate glob \'N/A\'),foreign key (productID) references Product (productID));');
     tx.executeSql('create table if not exists Stock(productID integer,shelfID integer,locationID integer,datePurchased text check (datePurchased glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),quantity integer check (quantity >= 0),primary key(productID,shelfID,locationID),foreign key (productID) references Product(productID),foreign key (shelfID, locationID) references Shelf(shelfID,locationID));');
 
@@ -69,6 +69,8 @@ function setupDB() {
     tx.executeSql('insert into Jars values (1, \'20oz\', \'wide\');');
     tx.executeSql('insert into Jars values (2, \'48oz\', \'regular\');');
     tx.executeSql('insert into Jars values (3, \'12oz\', \'wide\');');
+
+    tx.executeSql('insert into WishList values (2, \'Walnuts\');');
 
 
     //tx.executeSql('insert into CannedGoods values (0, 0);');
@@ -443,12 +445,11 @@ function updateImagePath(image, batchID) {
       style={{ width: '100%', height: '100%' }}
     >
       <KeyboardAwareScrollView
-        style={styles.listContainer}
         resetScrollToCoords={{ x: 0, y: 0 }}
         contentContainerStyle={styles.container}
         scrollEnabled={false}
       >
-        <Text style={styles.textHead} > {details.product}  </Text>
+        <Text style={styles.textHead4Item} > {details.product}  </Text>
 
         {image && <Image
           source={{ uri: image }}
@@ -466,8 +467,7 @@ function updateImagePath(image, batchID) {
         <KeyboardAwareScrollView
           resetScrollToCoords={{ x: 0, y: 0 }}
           contentContainerStyle={styles.container}
-          scrollEnabled={false}
-          style={styles.textForAddItems}>
+          scrollEnabled={false}>
           <Text style={styles.text} >Quantity: </Text>
 
           <TextInput
@@ -482,7 +482,6 @@ function updateImagePath(image, batchID) {
         <Text style={styles.text} >Date added: {details.datePlaced}</Text>
 
         <KeyboardAwareScrollView
-          style={styles.row}
           resetScrollToCoords={{ x: 0, y: 0 }}
           contentContainerStyle={styles.container}
           scrollEnabled={false}>
@@ -544,6 +543,7 @@ function updateImagePath(image, batchID) {
                 }])}>
           <Text style={styles.textForAddItems}>DELETE</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.addToWishListbtn} onPress={() => addToWishList(details.batchID, details.product)}><Image style={styles.addItemToWLPic} source={require("./assets/wishList.png")} /></TouchableOpacity>
         <FloatingButton //This button takes ther user to the homepage 
           style={styles.floatinBtn}
           onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
@@ -552,6 +552,26 @@ function updateImagePath(image, batchID) {
     </ImageBackground>
   );
 }
+
+function addToWishList(batchID, product){
+    db.transaction(tx => {
+      tx.executeSql(
+        'insert into WishList (batchID, product) values (?,?);',
+        [batchID, product]
+      )
+    });
+    return(
+      Alert.alert(
+        "",
+        "Item has been added",
+        [{
+          text: "Ok",
+          onPress: console.log("Success!")
+        }]
+      )
+    )
+}
+
 function Sections({ navigation }) {
   const sections = getSection()
 
@@ -589,7 +609,7 @@ function getWishListItems() {
   const [products, setProducts] = useState('');
   db.transaction((tx) => {
     tx.executeSql(
-      'select productName from WishList natural join Product;',
+      'select * from WishList;',
       [],
       (tx, results) => {
         var temp = [];
@@ -597,7 +617,6 @@ function getWishListItems() {
           temp.push(results.rows.item(i));
         }
         setProducts(temp);
-
       }
     )
   });
@@ -627,7 +646,7 @@ function WishList({ navigation }) {
         keyExtractor={(item) => index}
         renderItem={({ item, index, separators }) =>
           <View>
-            <Text style={styles.item}>{item.productName}</Text>
+            <Text style={styles.item}>{item.product}</Text>
           </View>
         }
       />
@@ -1494,6 +1513,14 @@ const styles = StyleSheet.create({
     color: 'black',
     paddingBottom: 100,
   },
+  textHead4Item: {
+    textAlign: 'center',
+    fontSize: 30,
+    fontFamily: 'Avenir',
+    fontWeight: 'bold',
+    color: 'black',
+    paddingBottom: 20,
+  },
   textForAddItems: {
     textAlign: 'center',
     fontSize: 14,
@@ -1691,5 +1718,13 @@ const styles = StyleSheet.create({
     bottom: 120,
     width: "50%",
     left: 100,
+  },
+  addToWishListbtn:{
+    bottom: 300,
+    left: 130
+  },
+  addItemToWLPic:{
+    height: 70,
+    width: 70,
   }
 });
