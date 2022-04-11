@@ -18,6 +18,7 @@ import { Asset } from 'expo-asset';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 
+
 const db = SQLite.openDatabase('db'); //if app wont load after a reload change the name of the db (no clue why this happens)
 const Stack = createNativeStackNavigator();
 const defaultPic = Asset.fromModule(require('./assets/default.jpg')).uri;
@@ -52,7 +53,7 @@ function setupDB() {
     //General db
     tx.executeSql('create table if not exists Section(sectionID integer primary key, sectionName text, imagePath text);');
     tx.executeSql('create table if not exists Product(productID integer primary key, productName text, notes text, sectionID integer, foreign key (sectionID) references Section(sectionID));');
-    tx.executeSql('create table if not exists WishList(productID integer primary key, foreign key (productID) references Product(productID));');
+    tx.executeSql('create table if not exists WishList(batchID integer primary key, product text, foreign key (batchID) references Batch(batchID));');
     tx.executeSql('create table if not exists Expiration(productID integer primary key, expirationDate text check (expirationDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expirationDate glob \'N/A\'),foreign key (productID) references Product (productID));');
     tx.executeSql('create table if not exists Stock(productID integer,shelfID integer,locationID integer,datePurchased text check (datePurchased glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),quantity integer check (quantity >= 0),primary key(productID,shelfID,locationID),foreign key (productID) references Product(productID),foreign key (shelfID, locationID) references Shelf(shelfID,locationID));');
 
@@ -69,6 +70,8 @@ function setupDB() {
     tx.executeSql('insert into Jars values (1, \'20oz\', \'wide\');');
     tx.executeSql('insert into Jars values (2, \'48oz\', \'regular\');');
     tx.executeSql('insert into Jars values (3, \'12oz\', \'wide\');');
+
+    tx.executeSql('insert into WishList values (2, \'Walnuts\');');
 
 
     //tx.executeSql('insert into CannedGoods values (0, 0);');
@@ -403,6 +406,7 @@ function updateImagePath(image, batchID) {
 
   const showDatePicker = () => {
     if (details.expDate != 'N/A') { showMode('date') };
+
   };
 
   //notes and quantity
@@ -442,116 +446,152 @@ function updateImagePath(image, batchID) {
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
-      <KeyboardAwareScrollView
-        style={styles.listContainer}
-        resetScrollToCoords={{ x: 0, y: 0 }}
-        contentContainerStyle={styles.container}
-        scrollEnabled={false}
-      >
-        <Text style={styles.textHead} > {details.product}  </Text>
-
-        {image && <Image
-          source={{ uri: image }}
-          style={{ width: 225, height: 300 }}
-        />}
-        <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
-          style={styles.button}
-          onPress=
-          {pickImage}
-        //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-        >
-          <Text style={styles.textForAddItems}>ADD/REPLACE IMAGE</Text>
-        </TouchableOpacity>
-
+      <KeyboardAwareScrollView>
         <KeyboardAwareScrollView
           resetScrollToCoords={{ x: 0, y: 0 }}
           contentContainerStyle={styles.container}
           scrollEnabled={false}
-          style={styles.textForAddItems}>
-          <Text style={styles.text} >Quantity: </Text>
+        >
+          <Text style={styles.textHead4Item} > {details.product}  </Text>
 
-          <TextInput
-            value={quan}
-            onChangeText={onChangeQuan}
-            onChange={updateQuantity(quan, details.batchID)}
-            keyboardType="numeric"
-            style={styles.borderText}
+          {image && <Image
+            source={{ uri: image }}
+            style={{ width: 225, height: 300 }}
+          />}
+          <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
+            style={styles.button}
+            onPress=
+            {pickImage}
+          //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
+          >
+            <Text style={styles.textForAddItems}>ADD/REPLACE IMAGE</Text>
+          </TouchableOpacity>
 
-          ></TextInput>
-        </KeyboardAwareScrollView>
-        <Text style={styles.text} >Date added: {details.datePlaced}</Text>
+          <KeyboardAwareScrollView
+            resetScrollToCoords={{ x: 0, y: 0 }}
+            contentContainerStyle={styles.container}
+            scrollEnabled={false}>
+            <Text style={styles.text} >Quantity: </Text>
 
-        <KeyboardAwareScrollView
-          style={styles.row}
-          resetScrollToCoords={{ x: 0, y: 0 }}
-          contentContainerStyle={styles.container}
-          scrollEnabled={false}>
-          <Text style={styles.text} >Expiration Date: </Text>
-          <TouchableHighlight
-            onPress={
-              showDatePicker
-            }
-            activeOpacity={0.6}
-            underlayColor={"#DDDDDD"} >
-            <Text style={styles.borderText} onChange={updateExpDate(dateToStr(date), details.batchID)} >{dateToStr(date)}</Text>
-          </TouchableHighlight>
-        </KeyboardAwareScrollView>
-        {show && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={date}
-            mode={mode}
-            is24Hour={true}
-            display="default"
-            onChange={onChange}
+            <TextInput
+              value={quan}
+              onChangeText={onChangeQuan}
+              onChange={updateQuantity(quan, details.batchID)}
+              keyboardType="numeric"
+              style={styles.borderText}
 
+            ></TextInput>
+          </KeyboardAwareScrollView>
+          <Text style={styles.text} >Date added: {details.datePlaced}</Text>
+
+          <KeyboardAwareScrollView
+            resetScrollToCoords={{ x: 0, y: 0 }}
+            contentContainerStyle={styles.container}
+            scrollEnabled={false}>
+            <Text style={styles.text} >Expiration Date: </Text>
+            {show && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                display="default"
+                onChange={onChange}
+              />
+            )}
+
+            <TouchableHighlight
+              onPress={
+                showDatePicker
+              }
+              style={{ width: 320, backgroundColor: "white" }}
+              activeOpacity={0.6}
+              underlayColor={"#DDDDDD"} >
+              <Text style={styles.borderText} onChange={updateExpDate(dateToStr(date), details.batchID)} >{dateToStr(date)}</Text>
+            </TouchableHighlight>
+            <Text>selected: {date.toLocaleString()}</Text>
+
+          </KeyboardAwareScrollView>
+
+
+
+          <TextInput //TODO: allow changing of dateAdded (maybe)
+            value={notes}
+            onChangeText={onChangeNotes}
+            onChange={updateNotes(notes, details.batchID)}
+            style={styles.textBox}
           />
-        )}
 
-
-        <TextInput //TODO: allow changing of dateAdded (maybe)
-          value={notes}
-          onChangeText={onChangeNotes}
-          onChange={updateNotes(notes, details.batchID)}
-          style={styles.textBox}
-        />
-
-        <TouchableOpacity
-          style={styles.redButton}
-          title="Delete"
-          onPress={() =>
-            Alert.alert(
-              "Are you sure you want to delete this item?",
-              "You cannot undo this action.",
-              [
-                {
-                  text: "No",
-                },
-                {
-                  text: "Yes",
-                  onPress: () =>
-                    Alert.alert(
-                      "Are you REALLY sure?",
-                      "There is no going back from this.",
-                      [
-                        {
-                          text: "Wait, take me back!",
-                        },
-                        {
-                          text: "Yes",
-                          onPress: () => deleteItem(details.batchID, navigation) //NOTE/TODO: atm if you do this from foodscreen it will refresh but not canning
-                        }])
-                }])}>
-          <Text style={styles.textForAddItems}>DELETE</Text>
-        </TouchableOpacity>
-        <FloatingButton //This button takes ther user to the homepage 
-          style={styles.floatinBtn}
-          onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
-        />
-      </KeyboardAwareScrollView >
+          <TouchableOpacity
+            style={styles.redButton}
+            title="Delete"
+            onPress={() =>
+              Alert.alert(
+                "Are you sure you want to delete this item?",
+                "You cannot undo this action.",
+                [
+                  {
+                    text: "No",
+                  },
+                  {
+                    text: "Yes",
+                    onPress: () =>
+                      Alert.alert(
+                        "Are you REALLY sure?",
+                        "There is no going back from this.",
+                        [
+                          {
+                            text: "Wait, take me back!",
+                          },
+                          {
+                            text: "Yes",
+                            onPress: () => deleteItem(details.batchID, navigation) //NOTE/TODO: atm if you do this from foodscreen it will refresh but not canning
+                          }])
+                  }])}>
+            <Text style={styles.textForAddItems}>DELETE</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.addToWishListbtn} onPress={() => addToWishList(details.batchID, details.product)}><Image style={styles.addItemToWLPic} source={require("./assets/wishList.png")} /></TouchableOpacity>
+          <FloatingButton //This button takes ther user to the homepage 
+            style={styles.floatinBtn}
+            onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+          />
+          <Text>selected: {date.toLocaleString()}</Text>
+          {show && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode={mode}
+              is24Hour={true}
+              onChange={onChange}
+            />
+          )}
+        </KeyboardAwareScrollView >
+      </KeyboardAwareScrollView>
     </ImageBackground>
   );
 }
+
+
+
+function addToWishList(batchID, product) {
+  db.transaction(tx => {
+    tx.executeSql(
+      'insert into WishList (batchID, product) values (?,?);',
+      [batchID, product]
+    )
+  });
+  return (
+    Alert.alert(
+      "",
+      "Item has been added",
+      [{
+        text: "Ok",
+        onPress: console.log("Success!")
+      }]
+    )
+  )
+}
+
 function Sections({ navigation }) {
   const sections = getSection()
 
@@ -589,7 +629,7 @@ function getWishListItems() {
   const [products, setProducts] = useState('');
   db.transaction((tx) => {
     tx.executeSql(
-      'select productName from WishList natural join Product;',
+      'select * from WishList;',
       [],
       (tx, results) => {
         var temp = [];
@@ -597,7 +637,6 @@ function getWishListItems() {
           temp.push(results.rows.item(i));
         }
         setProducts(temp);
-
       }
     )
   });
@@ -627,7 +666,7 @@ function WishList({ navigation }) {
         keyExtractor={(item) => index}
         renderItem={({ item, index, separators }) =>
           <View>
-            <Text style={styles.item}>{item.productName}</Text>
+            <Text style={styles.item}>{item.product}</Text>
           </View>
         }
       />
@@ -664,7 +703,7 @@ function getSectionID() {
 function insertSection(sectionName, imagePath) {
   let sectionID = getSectionID();
   if (sectionName != '') {
-    console.log('sectionName: ' + sectionName + '\nsectionID: ' + sectionID + '\nimagePath: '+imagePath)
+    console.log('sectionName: ' + sectionName + '\nsectionID: ' + sectionID + '\nimagePath: ' + imagePath)
     db.transaction(tx => {
       tx.executeSql(
         'insert into Section (sectionID, sectionName, imagePath) values (?,?,?);',
@@ -749,16 +788,16 @@ function AddSection({ navigation }) {
         </View>
 
         {image && <Image
-            source={{ uri: image }}
-            style={{ width: 90, height: 120 }}
+          source={{ uri: image }}
+          style={{ width: 90, height: 120 }}
         />}
 
         <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
           style={styles.button}
           onPress=
           {pickImage}
-          //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-          >
+        //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
+        >
           <Text style={styles.textForAddItems}>ADD IMAGE</Text>
         </TouchableOpacity>
 
@@ -893,91 +932,97 @@ function AddItems({ navigation }) {
       source={require('./assets/cart.jpg')}
       style={{ width: '100%', height: '100%' }}
     >
-      <View style={styles.container}>
-        <View styel={styles.pantryButton}>
-          <Text style={styles.textHead}>ADD ITEMS TO YOUR PANTRY</Text>
-        </View>
-        <Text></Text>
-        <Text></Text>
-        <View style={toggleStyles.container}>
-          <TextInput //Stores the name of an item in nameOfItem
-            style={styles.input}
-            placeholder="Add name of Item"
-            onChangeText={(nameOfItem) => setText(nameOfItem)}
-            defaultValue={nameOfItem}
-          />
-          <TextInput //stores the quantitiy of an item in quantity
-            style={styles.input}
-            placeholder="Add quantity"
-            onChangeText={(quantity) => setTextQuan(quantity)}
-            defaultValue={quantity}
-          />
-          <Text style={styles.textAddExpiration}>Would you like to add</Text>
-          <Text style={styles.textAddExpiration}> an expiration date?</Text>
-          <Switch //toggle switch, if on then 
-            style={toggleStyles.space}
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={toggleSwitch}
-            value={isEnabled}
-          />
-          <Text>Expiration Date:</Text>
-          <TouchableHighlight
-            onPress={showDatePicker}
-            activeOpacity={0.6}
-            underlayColor={"#DDDDDD"} >
-            <Text style={styles.input}>{realExpDate}</Text>
-          </TouchableHighlight>
+      <KeyboardAwareScrollView>
+        <View style={styles.container}>
+          <View styel={styles.pantryButton}>
+            <Text style={styles.textHead}>ADD ITEMS TO YOUR PANTRY</Text>
+          </View>
+          <Text></Text>
+          <Text></Text>
+          <View style={toggleStyles.container}>
+            <TextInput //Stores the name of an item in nameOfItem
+              style={styles.input}
+              placeholder="Add name of Item"
+              onChangeText={(nameOfItem) => setText(nameOfItem)}
+              defaultValue={nameOfItem}
+            />
+            <TextInput //stores the quantitiy of an item in quantity
+              style={styles.input}
+              placeholder="Add quantity"
+              onChangeText={(quantity) => setTextQuan(quantity)}
+              defaultValue={quantity}
+            />
+            <Text style={styles.textAddExpiration}>Would you like to add</Text>
+            <Text style={styles.textAddExpiration}> an expiration date?</Text>
+            <Switch //toggle switch, if on then 
+              style={toggleStyles.space}
+              trackColor={{ false: "#767577", true: "#81b0ff" }}
+              thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={toggleSwitch}
+              value={isEnabled}
+            />
+            <Text>Expiration Date:</Text>
+            <TouchableHighlight
+              onPress={showDatePicker}
+              activeOpacity={0.6}
+              underlayColor={"#DDDDDD"} >
+              <Text style={styles.input}>{realExpDate}</Text>
 
-          <TextInput //stores additional info in addntInfo
-            style={styles.textBox}
-            placeholder="Add additional info"
-            onChangeText={(addntInfo) => setaddntInfo(addntInfo)}
-            defaultValue={addntInfo}
-          />
+            </TouchableHighlight>
+            {show && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={expDate}
+                mode={mode}
+                is24Hour={true}
+                display="default"
+                onChange={onChange}
+              />
+            )}
 
-          <View style={styles.row}>
+            <TextInput //stores additional info in addntInfo
+              style={styles.textBox}
+              placeholder="Add additional info"
+              onChangeText={(addntInfo) => setaddntInfo(addntInfo)}
+              defaultValue={addntInfo}
+            />
+
+            <View style={styles.row}>
+              <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
+                style={styles.button}
+                onPress=
+                {pickImage}
+              //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
+              >
+                <Text style={styles.textForAddItems}>ADD IMAGE</Text>
+              </TouchableOpacity>
+              {image && <Image
+                source={{ uri: image }}
+                style={{ width: 45, height: 60 }}
+              />}
+            </View>
+
+          </View>
+
+          <View style={styles.pantryButton}>
             <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
               style={styles.button}
-              onPress=
-              {pickImage}
-            //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-            >
-              <Text style={styles.textForAddItems}>ADD IMAGE</Text>
+              onPress={() => {
+                addItem(nameOfItem, realExpDate, 0, quantity, addntInfo, image)
+                //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
+              }}>
+              <Text style={styles.textForAddItems}>ADD ITEM TO INVENTORY</Text>
             </TouchableOpacity>
-            {image && <Image
-              source={{ uri: image }}
-              style={{ width: 45, height: 60 }}
-            />}
           </View>
 
         </View>
-        {show && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={expDate}
-            mode={mode}
-            is24Hour={true}
-            display="default"
-            onChange={onChange}
-          />
-        )}
-        <View style={styles.pantryButton}>
-          <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
-            style={styles.button}
-            onPress={() => {
-              addItem(nameOfItem, realExpDate, 0, quantity, addntInfo, image)
-              //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-            }}>
-            <Text style={styles.textForAddItems}>ADD ITEM TO INVENTORY</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </KeyboardAwareScrollView>
       <FloatingButton //This button takes ther user to the homepage 
         style={styles.floatinBtn}
         onPress={() => navigation.navigate('INVENTORY TRACKING')}
       />
+
     </ImageBackground>
   );
 }
@@ -1551,7 +1596,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir',
     fontWeight: 'bold',
     color: 'black',
-    paddingBottom: 100,
+  },
+  textHead4Item: {
+    textAlign: 'center',
+    fontSize: 30,
+    fontFamily: 'Avenir',
+    fontWeight: 'bold',
+    color: 'black',
+    paddingBottom: 20,
   },
   textForAddItems: {
     textAlign: 'center',
@@ -1750,5 +1802,13 @@ const styles = StyleSheet.create({
     bottom: 120,
     width: "50%",
     left: 100,
+  },
+  addToWishListbtn: {
+    bottom: 300,
+    left: 130
+  },
+  addItemToWLPic: {
+    height: 70,
+    width: 70,
   }
 });
