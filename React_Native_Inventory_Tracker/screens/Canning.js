@@ -1,24 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, Platform, TouchableWithoutFeedback, ScrollView } from "react-native";
 import * as SQLite from 'expo-sqlite'; //expo install expo-sqlite
-import * as SplashScreen from 'expo-splash-screen'; //expo install expo-splash-screen
-import * as Font from 'expo-font'; //expo install expo-font
-import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
-import { NavigationContainer } from "@react-navigation/native";
-
 import FloatingButton from '../FloatingButton';
-import DropdownMenu from 'react-native-dropdown-menu';
 import DropDownPicker from 'react-native-dropdown-picker';
-import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
-import { Asset } from 'expo-asset';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+
 
 const db = SQLite.openDatabase('db');
 
 function Canning({ navigation, route }) {
-    const starterCans = route.params.starterCans;
-  
     const [open, setOpen] = useState(false);
     const [currValue, setCurrValue] = useState('batchID');
     const [items, setItems] = useState([
@@ -120,7 +109,7 @@ function Canning({ navigation, route }) {
   
     }
   
-    const [cans, setCans] = useState(starterCans);
+    const [cans, setCans] = useState();//NEED TO FIGURE THIS OUT ASAP
   
   
     return ( //"View Empty Jars and "View Batch by Location" and "View Empty Jars" text breaks with more than 4 items

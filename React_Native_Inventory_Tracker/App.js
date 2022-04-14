@@ -10,14 +10,23 @@ import DateTimePicker from '@react-native-community/datetimepicker'; //npm insta
 //import { TouchableHighlight } from "react-native-web";
 import FloatingButton from './FloatingButton';
 //import {Dropdown} from 'react-native-material-dropdown';
-import DropdownMenu from 'react-native-dropdown-menu';
-import DropDownPicker from 'react-native-dropdown-picker';
 //import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 import { Asset } from 'expo-asset';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
+import HomeScreen from "./screens/HomeScreen";
+import FoodScreen from "./screens/FoodScreen";
+import FoodPicScreen from "./screens/FoodPicScreen";
+import Sections from "./screens/Sections";
 import Canning from "./screens/Canning";
+import WishList from "./screens/WishList";
+import AddItems from './screens/AddItems';
+import AddSection from './screens/AddSection';
+import Pantry from './screens/Pantry';
+import EmptyJar from './screens/EmptyJar';
+import BatchLocation from './screens/BatchLocation';
+import ViewLocation from './screens/ViewLocation';
 
 
 
@@ -122,7 +131,7 @@ export default function App() {
   return (
     <><View onLayout={onLayoutRootView}></View>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home"
+        <Stack.Navigator initialRouteName="HomeScreen"
           screenOptions={{
             headerStyle: { backgroundColor: 'rgba(255,180,0,1.0)' }
           }}
@@ -143,72 +152,7 @@ export default function App() {
       </NavigationContainer></>
   );
 }
-/**
- * Displays the homescreeen of the app to the user, the homescreen shows an add new section button, a view canning
- * button and a view pantry button. Each of the buttons take you to a new screen 
- * @param {} param0 
- * @returns 
- */
-function HomeScreen({ navigation }) {
-  const cans = selectCans('batchID');
 
-  const sections = getSection();
-
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <SafeAreaView style={styles.container}>
-        <ScrollView>
-          <View style={styles.pantryButton}>
-            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Sections') }}>
-              <Text style={styles.text}>ADD NEW SECTION</Text>
-              <Image source={require("./assets/newSection.png")} />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.pantryButton}>
-            <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Canning', { starterCans: cans }) }}>
-              <Text style={styles.text}>VIEW CANNING</Text>
-              <Image source={require("./assets/can.png")} />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.pantryButton}>
-            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Pantry') }}>
-              <Text style={styles.text}>VIEW PANTRY</Text>
-              <Image source={require("./assets/pantry.png")} />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.pantryButton}>
-            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
-              <Text style={styles.text}>Wish List</Text>
-              <Image style={styles.homeWihsList} source={require("./assets/wishList.png")} />
-            </TouchableOpacity>
-          </View>
-          <View>
-            {sections.map(sections => {
-              return (
-                <View key={sections.sectionID}>
-                  <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
-                    <Text style={styles.text}>{sections.sectionName}</Text>
-                    <Image source={require("./assets/newSection.png")} />
-                  </TouchableOpacity>
-                </View>
-              )
-            })}
-          </View>
-        </ScrollView>
-        < StatusBar style="auto" />
-        <TouchableOpacity style={styles.editHome} //This button takes ther user to the homepage 
-          onPress={() => navigation.navigate('Sections')}>
-          <Text style={styles.text}>Edit</Text>
-        </TouchableOpacity>
-      </SafeAreaView >
-    </ImageBackground>
-  );
-}
 
 function getSection() {
   let [sections, setSection] = useState([]);
@@ -227,6 +171,9 @@ function getSection() {
   });
   return sections
 }
+
+
+
 //Returns items in a given shelf
 function selectBatch(shelfID, sortBy) {
   let [items, setItems] = useState([]);
@@ -253,49 +200,7 @@ function selectBatch(shelfID, sortBy) {
   return items;
 }
 
-/**
- * The foodScreen shows the user a list of all the items that are shownin the database. The list is sorted
- * in alphabetical order and displayed. When the user clicks on an item it displays the information about the item
- * @param {} param0 
- * @returns 
- */
-function FoodScreen({ route, navigation }) {
-  const { shelfID } = route.params; //receive shelfID
 
-  var items = selectBatch(shelfID, 'batchID'); //query db for items in shelf
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <View style={styles.container}>
-        <View styel={styles.pantryButton}>
-          <Text style={styles.textHead}>YOUR PANTRY:</Text>
-        </View>
-        <FlatList
-          data={items}
-          keyExtractor={(item, index) => index}
-          renderItem={({ item, index, separators }) =>
-            <TouchableHighlight
-              activeOpacity={0.6}
-              underlayColor={"#DDDDDD"}
-              onPress={() => navigation.push('Item', { details: item })}
-            >
-              <View>
-                <Text style={styles.item} > {item.product} </Text>
-              </View>
-            </TouchableHighlight>
-          }
-          renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
-        />
-      </View>
-      <FloatingButton //This button takes ther user to the homepage 
-        style={styles.floatinBtn}
-        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
-      />
-    </ImageBackground>
-  )
-}
 
 /*
 function updateDetails(notes, quantity, expDate, batchID) { //DEPRECATED
@@ -360,219 +265,6 @@ function updateImagePath(image, batchID) {
   });
 }
 
-/**
- * Lists details for an item
- * @param {} param0 
- * @returns 
- */function FoodPicScreen({ route, navigation }) {
-
-  const { details } = route.params; //receive details
-
-
-
-  //image handling
-  const [image, setImage] = useState(details.imagePath);
-  const pickImage = async () => {
-
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [3, 4],
-      quality: 1,
-    });
-
-    if (!result.cancelled) {
-
-      updateImagePath(result.uri, details.batchID);
-
-      setImage(result.uri);
-    }
-  };
-
-  //datePicker
-  const [date, setDate] = useState(new Date(details.expDate));
-  const [mode, setMode] = useState('date');
-  const [show, setShow] = useState(false); //determines when datePicker is shown
-
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShow(Platform.OS === 'ios');
-    setDate(currentDate);
-
-  };
-
-  const showMode = (currentMode) => {
-    setShow(true);
-    setMode(currentMode);
-  };
-
-  const showDatePicker = () => {
-    if (details.expDate != 'N/A') { showMode('date') };
-
-  };
-
-  //notes and quantity
-  const [notes, onChangeNotes] = React.useState(details.notes);
-  const [quan, onChangeQuan] = React.useState(details.quantity + '');
-  //updates quantity field
-  const updateQuantity = (quantity, batchID) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        'update Batch set quantity = ? where batchID = ?;',
-        [quantity, batchID],
-      )
-    });
-  }
-  //updates expDate field
-  const updateExpDate = (expDate, batchID) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        'update Batch set expDate = ? where batchID = ?;',
-        [expDate, batchID],
-      )
-    });
-    return expDate;
-  }
-  //updates notes field
-  const updateNotes = (notes, batchID) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        'update Batch set notes = ? where batchID = ?;',
-        [notes, batchID],
-      )
-    });
-  }
-
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <KeyboardAwareScrollView>
-        <KeyboardAwareScrollView
-          resetScrollToCoords={{ x: 0, y: 0 }}
-          contentContainerStyle={styles.container}
-          scrollEnabled={false}
-        >
-          <Text style={styles.textHead4Item} > {details.product}  </Text>
-
-          {image && <Image
-            source={{ uri: image }}
-            style={{ width: 225, height: 300 }}
-          />}
-          <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
-            style={styles.button}
-            onPress=
-            {pickImage}
-          //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-          >
-            <Text style={styles.textForAddItems}>ADD/REPLACE IMAGE</Text>
-          </TouchableOpacity>
-
-          <KeyboardAwareScrollView
-            resetScrollToCoords={{ x: 0, y: 0 }}
-            contentContainerStyle={styles.container}
-            scrollEnabled={false}>
-            <Text style={styles.text} >Quantity: </Text>
-
-            <TextInput
-              value={quan}
-              onChangeText={onChangeQuan}
-              onChange={updateQuantity(quan, details.batchID)}
-              keyboardType="numeric"
-              style={styles.borderText}
-
-            ></TextInput>
-          </KeyboardAwareScrollView>
-          <Text style={styles.text} >Date added: {details.datePlaced}</Text>
-
-          <KeyboardAwareScrollView
-            resetScrollToCoords={{ x: 0, y: 0 }}
-            contentContainerStyle={styles.container}
-            scrollEnabled={false}>
-            <Text style={styles.text} >Expiration Date: </Text>
-            {show && (
-              <DateTimePicker
-                testID="dateTimePicker"
-                value={date}
-                mode={mode}
-                is24Hour={true}
-                display="default"
-                onChange={onChange}
-              />
-            )}
-
-            <TouchableHighlight
-              onPress={
-                showDatePicker
-              }
-              style={{ width: 320, backgroundColor: "white" }}
-              activeOpacity={0.6}
-              underlayColor={"#DDDDDD"} >
-              <Text style={styles.borderText} onChange={updateExpDate(dateToStr(date), details.batchID)} >{dateToStr(date)}</Text>
-            </TouchableHighlight>
-            <Text>selected: {date.toLocaleString()}</Text>
-
-          </KeyboardAwareScrollView>
-
-
-
-          <TextInput //TODO: allow changing of dateAdded (maybe)
-            value={notes}
-            onChangeText={onChangeNotes}
-            onChange={updateNotes(notes, details.batchID)}
-            style={styles.textBox}
-          />
-
-          <TouchableOpacity
-            style={styles.redButton}
-            title="Delete"
-            onPress={() =>
-              Alert.alert(
-                "Are you sure you want to delete this item?",
-                "You cannot undo this action.",
-                [
-                  {
-                    text: "No",
-                  },
-                  {
-                    text: "Yes",
-                    onPress: () =>
-                      Alert.alert(
-                        "Are you REALLY sure?",
-                        "There is no going back from this.",
-                        [
-                          {
-                            text: "Wait, take me back!",
-                          },
-                          {
-                            text: "Yes",
-                            onPress: () => deleteItem(details.batchID, navigation) //NOTE/TODO: atm if you do this from foodscreen it will refresh but not canning
-                          }])
-                  }])}>
-            <Text style={styles.textForAddItems}>DELETE</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.addToWishListbtn} onPress={() => addToWishList(details.batchID, details.product)}><Image style={styles.addItemToWLPic} source={require("./assets/wishList.png")} /></TouchableOpacity>
-          <FloatingButton //This button takes ther user to the homepage 
-            style={styles.floatinBtn}
-            onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
-          />
-          <Text>selected: {date.toLocaleString()}</Text>
-          {show && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={date}
-              mode={mode}
-              is24Hour={true}
-              onChange={onChange}
-            />
-          )}
-        </KeyboardAwareScrollView >
-      </KeyboardAwareScrollView>
-    </ImageBackground>
-  );
-}
-
 
 
 function addToWishList(batchID, product) {
@@ -594,38 +286,7 @@ function addToWishList(batchID, product) {
   )
 }
 
-function Sections({ navigation }) {
-  const sections = getSection()
 
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <View>
-        <Text style={styles.textHead}>Select Section you want to Delete</Text>
-        <FlatList
-          data={sections}
-          keyExtractor={(item, index) => index}
-          renderItem={({ item, index, separators }) =>
-            <TouchableOpacity style={styles.sections} onPress={() => { removeSection(item.sectionID) }}>
-              <Text style={styles.text}>{item.sectionName}</Text>
-            </TouchableOpacity>
-          }
-        />
-        <TouchableOpacity
-          style={styles.addToWishList}
-          onPress={() => navigation.navigate('AddSection')}>
-          <Text style={styles.text} >Add Section</Text>
-        </TouchableOpacity>
-      </View>
-      <FloatingButton
-        style={styles.floatinBtn}
-        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
-      />
-    </ImageBackground>
-  );
-}
 
 function getWishListItems() {
   const [products, setProducts] = useState('');
@@ -645,46 +306,8 @@ function getWishListItems() {
   return products
 }
 
-function WishList({ navigation }) {
-  const products = getWishListItems()
 
-  const NoItemsInList = ({ item, navigation }) => {
-    return (
-      <View>
-        <Text style={styles.emptyList}>
-          Your Wish List is Empty
-        </Text>
-      </View>
-    );
-  };
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <FlatList
-        data={products}
-        ListEmptyComponent={NoItemsInList}
-        keyExtractor={(item) => index}
-        renderItem={({ item, index, separators }) =>
-          <View>
-            <Text style={styles.item}>{item.product}</Text>
-          </View>
-        }
-      />
-      <TouchableOpacity
-        style={styles.addItemToWishList}
-        onPress={() => navigation.navigate('Pantry')}>
-        <Text style={styles.text} >Add Items</Text>
-      </TouchableOpacity>
-      <FloatingButton
-        style={styles.floatinBtn}
-        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
-      />
-    </ImageBackground>
-  );
-}
-function getSectionID() {
+function insertSection(sectionName, imagePath) {
   let sectionID = 0
   db.transaction((tx) => {
     tx.executeSql(
@@ -699,11 +322,6 @@ function getSectionID() {
       }
     )
   });
-  return sectionID
-}
-
-function insertSection(sectionName, imagePath) {
-  let sectionID = getSectionID();
   if (sectionName != '') {
     console.log('sectionName: ' + sectionName + '\nsectionID: ' + sectionID + '\nimagePath: ' + imagePath)
     db.transaction(tx => {
@@ -758,72 +376,7 @@ function removeSection(sectionID) {
   )
 }
 
-function AddSection({ navigation }) {
-  const [sectionName, setSectionName] = useState('');
 
-  //image handling
-  const [image, setImage] = useState(defaultPic);
-  const pickImage = async () => {
-
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [3, 4],
-      quality: 1,
-    });
-
-    if (!result.cancelled) {
-
-      setImage(result.uri);
-    }
-  };
-
-
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <View style={toggleStyles.container}>
-        <View>
-          <Text style={styles.textHead}>Enter Section Information</Text>
-        </View>
-
-        {image && <Image
-          source={{ uri: image }}
-          style={{ width: 90, height: 120 }}
-        />}
-
-        <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
-          style={styles.button}
-          onPress=
-          {pickImage}
-        //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-        >
-          <Text style={styles.textForAddItems}>ADD IMAGE</Text>
-        </TouchableOpacity>
-
-        <TextInput
-          style={styles.inputAddSection}
-          placeholder="Section Name" //ENTER NAME OF CATGEORY
-          //onChangeText={(sectionName) => setText(sectionName)}
-          onChangeText={(sectionName) => setSectionName(sectionName)}
-          defaultValue={sectionName}
-        />
-        <TouchableOpacity
-          style={styles.AddSection}
-          onPress={() => { insertSection(sectionName, image) }}>
-          <Text style={styles.text} >Add New Secction</Text>
-        </TouchableOpacity>
-
-      </View>
-      <FloatingButton //This button takes ther user to the homepage 
-        style={styles.floatinBtn}
-        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
-      />
-    </ImageBackground>
-  );
-}
 
 function addItem(product, expDate, shelfID, quantity, notes, imagePath) {
   var datePlaced = dateToStr(new Date());
@@ -874,270 +427,9 @@ function addItem(product, expDate, shelfID, quantity, notes, imagePath) {
   }
 }
 
-function AddItems({ navigation }) {
-  const [nameOfItem, setText] = useState('');
-  const [quantity, setTextQuan] = useState('');
-  //const [expDate, setExpDate] = useState('');
-  const [addntInfo, setaddntInfo] = useState('');
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => {
-    setIsEnabled(previousState => !previousState);
-    toggleExpDate(isEnabled);
-  }
-  //image handling
-
-  const [image, setImage] = useState(defaultPic);
-  const pickImage = async () => {
-
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [3, 4],
-      quality: 1,
-    });
-
-    if (!result.cancelled) {
-
-      setImage(result.uri);
-    }
-  };
-
-  //datePicker
-  const [expDate, setExpDate] = useState(new Date());
-  const [mode, setMode] = useState('date');
-  const [show, setShow] = useState(false); //determines when datePicker is shown
-
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || expDate;
-    setShow(Platform.OS === 'ios');
-    setExpDate(currentDate);
-  };
-
-  const showMode = (currentMode) => {
-    setShow(true);
-    setMode(currentMode);
-  };
-
-  const showDatePicker = () => {
-    showMode('date');
-  };
-
-  //Toggle expDate between date and N/A
-  const [realExpDate, setRealExpDate] = useState('N/A');
-  const toggleExpDate = (isEnabled) => {
-    if (isEnabled) { setRealExpDate('N/A'); }
-    else { setRealExpDate(dateToStr(expDate)); }
-  }
-
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <KeyboardAwareScrollView>
-        <View style={styles.container}>
-          <View styel={styles.pantryButton}>
-            <Text style={styles.textHead}>ADD ITEMS TO YOUR PANTRY</Text>
-          </View>
-          <Text></Text>
-          <Text></Text>
-          <View style={toggleStyles.container}>
-            <TextInput //Stores the name of an item in nameOfItem
-              style={styles.input}
-              placeholder="Add name of Item"
-              onChangeText={(nameOfItem) => setText(nameOfItem)}
-              defaultValue={nameOfItem}
-            />
-            <TextInput //stores the quantitiy of an item in quantity
-              style={styles.input}
-              placeholder="Add quantity"
-              onChangeText={(quantity) => setTextQuan(quantity)}
-              defaultValue={quantity}
-            />
-            <Text style={styles.textAddExpiration}>Would you like to add</Text>
-            <Text style={styles.textAddExpiration}> an expiration date?</Text>
-            <Switch //toggle switch, if on then 
-              style={toggleStyles.space}
-              trackColor={{ false: "#767577", true: "#81b0ff" }}
-              thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-              ios_backgroundColor="#3e3e3e"
-              onValueChange={toggleSwitch}
-              value={isEnabled}
-            />
-            <Text>Expiration Date:</Text>
-            <TouchableHighlight
-              onPress={showDatePicker}
-              activeOpacity={0.6}
-              underlayColor={"#DDDDDD"} >
-              <Text style={styles.input}>{realExpDate}</Text>
-
-            </TouchableHighlight>
-            {show && (
-              <DateTimePicker
-                testID="dateTimePicker"
-                value={expDate}
-                mode={mode}
-                is24Hour={true}
-                display="default"
-                onChange={onChange}
-              />
-            )}
-
-            <TextInput //stores additional info in addntInfo
-              style={styles.textBox}
-              placeholder="Add additional info"
-              onChangeText={(addntInfo) => setaddntInfo(addntInfo)}
-              defaultValue={addntInfo}
-            />
-
-            <View style={styles.row}>
-              <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
-                style={styles.button}
-                onPress=
-                {pickImage}
-              //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-              >
-                <Text style={styles.textForAddItems}>ADD IMAGE</Text>
-              </TouchableOpacity>
-              {image && <Image
-                source={{ uri: image }}
-                style={{ width: 45, height: 60 }}
-              />}
-            </View>
-
-          </View>
-
-          <View style={styles.pantryButton}>
-            <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
-              style={styles.button}
-              onPress={() => {
-                addItem(nameOfItem, realExpDate, 0, quantity, addntInfo, image)
-                //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
-              }}>
-              <Text style={styles.textForAddItems}>ADD ITEM TO INVENTORY</Text>
-            </TouchableOpacity>
-          </View>
-
-        </View>
-      </KeyboardAwareScrollView>
-      <FloatingButton //This button takes ther user to the homepage 
-        style={styles.floatinBtn}
-        onPress={() => navigation.navigate('INVENTORY TRACKING')}
-      />
-
-    </ImageBackground>
-  );
-}
-
-
-function Pantry({ navigation }) {
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <SafeAreaView style={styles.container}>
-        <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Food', { shelfID: 0 }) }}>
-            <Text style={styles.text}>VIEW INVENTORY</Text>
-            <Image source={require("./assets/ViewPantry.png")} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('AddItems') }}>
-            <Text style={styles.text}>ADD A NEW ITEM</Text>
-            <Image source={require("./assets/plusButton.png")} />
-          </TouchableOpacity>
-
-        </View>
-        < StatusBar style="auto" />
-
-      </SafeAreaView >
-      <FloatingButton //This button takes ther user to the homepage 
-        style={styles.floatinBtn}
-        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
-      />
-    </ImageBackground>
-
-
-  );
-}
 
 
 
-//Returns all items in Batch table sorted on an input
-function selectCans(sortBy) {
-  let [items, setItems] = useState([]);
-  useEffect(() => {
-    let isUnfin = true;
-    db.transaction((tx) => {
-      tx.executeSql(
-        'SELECT * FROM Batch ORDER BY ? ASC;',
-        [sortBy],
-        (tx, results) => {
-          if (isUnfin) {
-            var temp = [];
-            for (var i = 0; i < results.rows.length; i++) {
-              temp.push(results.rows.item(i));
-            }
-            setItems(temp);
-          }
-        }
-      )
-    });
-    return () => isUnfin = false;
-  });
-  return items;
-}
-
-
-
-
-
-function EmptyJar({ navigation, route }) {
-  let [jars, setJars] = useState([]);
-  db.transaction((tx) => {
-    tx.executeSql(
-      'SELECT jarID, size, mouth, count(mouth) as count FROM jars WHERE jarID NOT IN (SELECT jarID FROM jars Natural JOIN CannedGoods) GROUP BY size;',
-      [],
-      (tx, results) => {
-        var temp = [];
-        for (var i = 0; i < results.rows.length; i++) {
-          temp.push(results.rows.item(i));
-        }
-        setJars(temp);
-
-      }
-    )
-  });
-  const NoEmptyJarsMessage = ({ item }) => {
-    return (
-      // Flat List Item
-      <Text style={styles.emptyList} onPress={() => getItem(item)}>
-        All jars are currently in use
-      </Text>
-    );
-  };
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <View style={styles.item}><Text style={{ fontSize: 28 }}>Size - Mouth - Quantity</Text></View>
-      <FlatList
-        data={jars}
-        ListEmptyComponent={NoEmptyJarsMessage}
-        keyExtractor={(item, index) => index}
-        renderItem={({ item, index, separators }) =>
-          <View>
-            <Text style={[styles.item, { fontSize: 26 }]}>{item.size} - {item.mouth} - {item.count}</Text>
-          </View>
-        }
-      />
-    </ImageBackground>
-  );
-}
 
 
 const sort_Array_Alphabetically = () => {
@@ -1146,124 +438,9 @@ const sort_Array_Alphabetically = () => {
 
 }
 
-function BatchLocation({ navigation, route }) {
-  let [shelves, setShelves] = useState([]);
-  db.transaction((tx) => {
-    tx.executeSql(
-      'SELECT shelfID,shelfName FROM Shelves ORDER BY shelfID;',
-      [],
-      (tx, results) => {
-        var temp = [];
-        for (var i = 0; i < results.rows.length; i++) {
-          temp.push(results.rows.item(i));
-        }
-        setShelves(temp);
-      }
-    )
-  });
-
-  const EmptyPantry = ({ item }) => {
-    return (
-      // Flat List Item
-      <Text style={styles.emptyList} onPress={() => getItem(item)}>
-        Your Pantry is Empty
-      </Text>
-    );
-  };
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <View><Text style={styles.item}> Name        |        Shelf #</Text></View>
-      <FlatList
-        data={shelves}
-        ListEmptyComponent={EmptyPantry}
-        keyExtractor={(item, index) => index}
-        renderItem={({ item, index, separators }) =>
-          <View>
-            <TouchableHighlight
-              activeOpacity={0.6}
-              underlayColor={"darkgrey"}
-              onPress={() => navigation.push('ViewLocation', { details: item })}
-            //style={{flex: 1}}
-            >
-              <Text style={styles.item}>{item.shelfName}                     {item.shelfID} </Text>
-            </TouchableHighlight>
-          </View>
-        }
-      />
-    </ImageBackground>
-  );
-}
-
-function ViewLocation({ navigation, route }) {
-  const item = route.params; //receive shelfID
-  const details = item.details;
-  const shelfName = details.shelfName;
-  const shelfID = details.shelfID;
-
-  let [batches, setBatches] = useState([]);
-
-  db.transaction((tx) => {
-    tx.executeSql(
-      'SELECT shelfID,batchID,product,quantity FROM Batch NATURAL JOIN Shelves WHERE shelfID == ? ORDER BY batchID;',
-      [shelfID],
-      (tx, results) => {
-        var temp = [];
-        for (var i = 0; i < results.rows.length; i++) {
-          temp.push(results.rows.item(i));
-        }
-        setBatches(temp);
-      }
-    )
-  });
-  //for() 
 
 
-  const EmptyPantry = ({ item }) => {
-    return (
-      // Flat List Item
-      <Text style={styles.emptyList} onPress={() => getItem(item)}>
-        Your Pantry is Empty
-      </Text>
-    );
-  };
-  return (
-    <ImageBackground
-      source={require('./assets/cart.jpg')}
-      style={{ width: '100%', height: '100%' }}
-    >
-      <View>
-        <View style={styles.item}>
-          <Text style={{ fontSize: 30, textAlign: 'center' }}> {shelfName} </Text>
-          <Text style={{ fontSize: 24 }}> BatchID | Product | Quantity </Text>
-        </View>
 
-
-        <FlatList
-          data={batches}
-          ListEmptyComponent={EmptyPantry}
-          keyExtractor={(item, index) => index}
-          renderItem={({ item, index, separators }) =>
-            <View>
-              <TouchableHighlight
-                activeOpacity={0.6}
-                underlayColor={"darkgrey"}
-                onPress={() => navigation.push('Item', { details: item })}
-              //style={{flex: 1}}
-              >
-                <Text style={styles.item}>{item.batchID} | {item.product} | {item.quantity}</Text>
-              </TouchableHighlight>
-            </View>
-          }
-        />
-      </View>
-
-
-    </ImageBackground>
-  );
-}
 
 /*
 
@@ -1280,9 +457,7 @@ const toggleStyles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 50,
   },
-  space: {
-    margin: 20,
-  },
+  
 });
 
 const styles = StyleSheet.create({
@@ -1295,12 +470,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
-  pantryButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-  },
+  
   button: {
     backgroundColor: '#859a9b',
     borderRadius: 20,
@@ -1314,6 +484,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     //marginBottom: 60, //originally was marginBottom20 with no marginTop and marginBottom 60 uncommented, feel free to revert
   },
+
   redButton: {
     backgroundColor: '#d43215',
     borderRadius: 20,
@@ -1326,14 +497,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     justifyContent: 'flex-end',
   },
-  sectionHeader: {
-    textAlign: "center",
-    fontWeight: 'bold',
-    backgroundColor: 'rgba(153,204,255,1.0)',
-    fontSize: 30,
-    borderWidth: 1,
-    borderColor: "darkgrey",
-  },
+
   item: {
     textAlign: "auto",
     borderWidth: 5,
@@ -1343,56 +507,7 @@ const styles = StyleSheet.create({
     height: 75,
     width: 300,
   },
-
-  input: {
-    borderColor: "gray",
-    width: "100%",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    justifyContent: 'flex-end',
-    marginBottom: 30,
-  },
-  text: {
-    textAlign: 'center',
-    fontSize: 14,
-    fontFamily: 'Avenir',
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  textHead: {
-    textAlign: 'center',
-    fontSize: 30,
-    fontFamily: 'Avenir',
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  textHead4Item: {
-    textAlign: 'center',
-    fontSize: 30,
-    fontFamily: 'Avenir',
-    fontWeight: 'bold',
-    color: 'black',
-    paddingBottom: 20,
-  },
-  textForAddItems: {
-    textAlign: 'center',
-    fontSize: 14,
-
-    fontFamily: 'Avenir',
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  textBox: {
-    height: 150,
-    width: 200,
-    margin: 6,
-    borderWidth: 1,
-    borderColor: "darkgrey",
-    padding: 10,
-    textAlignVertical: "top",
-    color: "black",
-  },
+  
   textAddItems: {
     textAlignVertical: 'top',
     textAlign: 'center',
@@ -1402,45 +517,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
   },
-  textAddExpiration: {
-    textAlignVertical: 'top',
-    textAlign: 'center',
-    fontSize: 14,
-    fontFamily: 'Avenir',
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  inputAddSection: {
-    borderColor: "gray",
-    width: "60%",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    justifyContent: 'flex-end',
-    marginBottom: 70,
-  },
-  floatinBtn: {
-    color: 'grey',
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-  },
-  emptyList: {
-    top: 200,
-    padding: 10,
-    fontSize: 18,
-    textAlign: "center",
-    fontWeight: "bold",
-  },
+
+  
+
   row: {
     flexDirection: "row",
-  },
-  borderText: {
-    borderWidth: 1,
-    borderColor: "darkgrey",
-    justifyContent: 'center',
-    textAlign: 'center',
-
   },
 
   addToWishList: {
@@ -1456,65 +537,6 @@ const styles = StyleSheet.create({
     width: "50%",
     left: 90,
   },
-  AddSection: {
-    backgroundColor: '#859a9b',
-    borderRadius: 20,
-    padding: 10,
-    shadowColor: '#303838',
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 10,
-    shadowOpacity: 0.35,
-    justifyContent: 'flex-end',
-    top: 80,
-    width: "50%",
-    left: 10,
-  },
-  editHome: {
-    backgroundColor: '#859a9b',
-    borderRadius: 30,
-    padding: 10,
-    marginBottom: 20,
-    shadowColor: '#303838',
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 10,
-    shadowOpacity: 0.35,
-    justifyContent: 'flex-end',
-    marginBottom: 10,
-    left: 125
-  },
-  sections: {
-    textAlign: "center",
-    borderWidth: 3,
-    borderColor: "darkgrey",
-    fontSize: 40,
-    color: "black",
-    height: 60,
-    width: 250,
-    left: 70,
-  },
-  homeWihsList: {
-    height: 150,
-    width: 150,
-  },
-  addItemToWishList: {
-    backgroundColor: '#859a9b',
-    borderRadius: 20,
-    padding: 10,
-    shadowColor: '#303838',
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 10,
-    shadowOpacity: 0.35,
-    justifyContent: 'flex-end',
-    bottom: 120,
-    width: "50%",
-    left: 100,
-  },
-  addToWishListbtn: {
-    bottom: 300,
-    left: 130
-  },
-  addItemToWLPic: {
-    height: 70,
-    width: 70,
-  }
 });
+
+export {getSection, selectBatch, deleteItem, dateToStr, updateImagePath, addToWishList, getWishListItems, insertSection, removeSection, addItem};
