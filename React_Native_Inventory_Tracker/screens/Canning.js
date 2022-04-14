@@ -6,14 +6,15 @@ import * as SplashScreen from 'expo-splash-screen'; //expo install expo-splash-s
 import * as Font from 'expo-font'; //expo install expo-font
 import { createNativeStackNavigator, NativeStackView } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-import DateTimePicker from '@react-native-community/datetimepicker'; //npm install @react-native-community/datetimepicker
-import FloatingButton from './FloatingButton';
+
+import FloatingButton from '../FloatingButton';
 import DropdownMenu from 'react-native-dropdown-menu';
 import DropDownPicker from 'react-native-dropdown-picker';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 import { Asset } from 'expo-asset';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
+const db = SQLite.openDatabase('db');
 
 function Canning({ navigation, route }) {
     const starterCans = route.params.starterCans;
@@ -124,7 +125,7 @@ function Canning({ navigation, route }) {
   
     return ( //"View Empty Jars and "View Batch by Location" and "View Empty Jars" text breaks with more than 4 items
       <ImageBackground
-        source={require('./assets/cart.jpg')}
+        source={require('../assets/cart.jpg')}
         style={{ width: '100%', height: '100%' }}
       >
         <SafeAreaView style={styles.container}>
@@ -232,7 +233,33 @@ function Canning({ navigation, route }) {
         </SafeAreaView >
       </ImageBackground>
     );
+} 
+
+//Returns all items in Batch table sorted on an input
+function selectCans(sortBy) {
+    let [items, setItems] = useState([]);
+    useEffect(() => {
+      let isUnfin = true;
+      db.transaction((tx) => {
+        tx.executeSql(
+          'SELECT * FROM Batch ORDER BY ? ASC;',
+          [sortBy],
+          (tx, results) => {
+            if (isUnfin) {
+              var temp = [];
+              for (var i = 0; i < results.rows.length; i++) {
+                temp.push(results.rows.item(i));
+              }
+              setItems(temp);
+            }
+          }
+        )
+      });
+      return () => isUnfin = false;
+    });
+    return items;
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -312,7 +339,8 @@ const styles = StyleSheet.create({
         bottom: 10,
         right: 10,
     },
-    
+
 
 });
 
+export default Canning;

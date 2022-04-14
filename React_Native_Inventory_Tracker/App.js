@@ -15,7 +15,9 @@ import DropDownPicker from 'react-native-dropdown-picker';
 //import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 import { Asset } from 'expo-asset';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
+import Canning from "./screens/Canning";
 
 
 
