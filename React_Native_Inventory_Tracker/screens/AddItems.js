@@ -47,6 +47,7 @@ function AddItems({ navigation }) {
       const currentDate = selectedDate || expDate;
       setShow(Platform.OS === 'ios');
       setExpDate(currentDate);
+      if (isEnabled) { setRealExpDate(dateToStr(currentDate)); }
     };
   
     const showMode = (currentMode) => {
@@ -121,6 +122,7 @@ function AddItems({ navigation }) {
   
               <TextInput //stores additional info in addntInfo
                 style={styles.textBox}
+                multiline = {true}
                 placeholder="Add additional info"
                 onChangeText={(addntInfo) => setaddntInfo(addntInfo)}
                 defaultValue={addntInfo}

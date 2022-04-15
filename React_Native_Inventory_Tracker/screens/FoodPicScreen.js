@@ -169,6 +169,7 @@ const db = SQLite.openDatabase('db');
               value={notes}
               onChangeText={onChangeNotes}
               onChange={updateNotes(notes, details.batchID)}
+              multiline = {true}
               style={styles.textBox}
             />
   
