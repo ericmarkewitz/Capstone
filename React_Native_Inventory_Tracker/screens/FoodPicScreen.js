@@ -141,6 +141,7 @@ const db = SQLite.openDatabase('db');
               <Text style={styles.text} >Expiration Date: </Text>
               {show && (
                 <DateTimePicker
+                  style = {{width: '100%'}}
                   testID="dateTimePicker"
                   value={date}
                   mode={mode}
