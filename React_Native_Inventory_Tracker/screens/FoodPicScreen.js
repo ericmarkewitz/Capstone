@@ -6,7 +6,7 @@ import FloatingButton from '../FloatingButton';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
-import {dateToStr, addToWishList} from '../App';
+import {dateToStr, addToWishList, updateImagePath} from '../App';
 
 const db = SQLite.openDatabase('db');
 
