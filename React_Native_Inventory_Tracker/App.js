@@ -226,22 +226,6 @@ function updateDetails(notes, quantity, expDate, batchID) { //DEPRECATED
 */
 
 /**
- * Deletes Items from a batch ID
- * @param {} param0 
- * @returns 
- */
-function deleteItem(batchID, navigation) {
-  db.transaction((tx) => {
-    tx.executeSql(
-      'delete from Batch where batchID = ?;',
-      [batchID],
-    )
-  });
-  console.log("Deleted Item " + batchID);
-  navigation.goBack(null);
-}
-
-/**
  * Returns a string in MM/DD/YY format for a given date 
  * @param {} param0 
  * @returns 
@@ -539,4 +523,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export {getSection, selectBatch, deleteItem, dateToStr, updateImagePath, addToWishList, getWishListItems, insertSection, removeSection, addItem};
+export {getSection, selectBatch, dateToStr, updateImagePath, addToWishList, getWishListItems, insertSection, removeSection, addItem};

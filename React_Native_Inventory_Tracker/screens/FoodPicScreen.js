@@ -221,6 +221,22 @@ const db = SQLite.openDatabase('db');
     );
 }
 
+/**
+ * Deletes Items from a batch ID
+ * @param {} param0 
+ * @returns 
+ */
+ function deleteItem(batchID, navigation) {
+  db.transaction((tx) => {
+    tx.executeSql(
+      'delete from Batch where batchID = ?;',
+      [batchID],
+    )
+  });
+  console.log("Deleted Item " + batchID);
+  navigation.goBack(null);
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
