@@ -75,7 +75,7 @@ function setupDB() {
     tx.executeSql('insert into Batch values (1, \'Peas\', \'01/17/22\',\'03/18/23\', 0, 12,\'also green\',\'' + defaultPic + '\');');
     tx.executeSql('insert into Batch values (2, \'Walnuts\', \'01/11/22\',\'03/23/22\', 0, 123,\'\',\'' + defaultPic + '\');');
     tx.executeSql('insert into Batch values (3, \'Peanuts\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\'' + defaultPic + '\');');
-    tx.executeSql('insert into Batch values (4, \'delete me\', \'12/04/21\',\'03/04/22\', 0, 456,\'\',\'' + defaultPic + '\');');
+    tx.executeSql('insert into Batch values (4, \'delete me\', \'12/04/21\',\'N/A\', 0, 456,\'\',\'' + defaultPic + '\');');
 
     tx.executeSql('insert into Jars values (0, \'16oz\', \'regular\');');
     tx.executeSql('insert into Jars values (1, \'20oz\', \'wide\');');

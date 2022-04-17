@@ -40,13 +40,15 @@ const db = SQLite.openDatabase('db');
     //datePicker
     const [date, setDate] = useState(new Date(details.expDate));
     const [mode, setMode] = useState('date');
-    const [show, setShow] = useState(false); //determines when datePicker is shown
+    const [show, setShow] = useState(Platform.OS === 'ios' && details.expDate !== 'N/A'); //determines when datePicker is shown, will be persistent on iOS
+    const [showAndroid] = useState(Platform.OS === 'android');
+    //TODO: Allow iOS to change N/A expdate 
   
     const onChange = (event, selectedDate) => {
       const currentDate = selectedDate || date;
       setShow(Platform.OS === 'ios');
       setDate(currentDate);
-  
+      updateExpDate(dateToStr(currentDate), details.batchID);
     };
   
     const showMode = (currentMode) => {
@@ -55,7 +57,8 @@ const db = SQLite.openDatabase('db');
     };
   
     const showDatePicker = () => {
-      if (details.expDate != 'N/A') { showMode('date') };
+      //if (details.expDate != 'N/A') { showMode('date') };
+      showMode('date');
   
     };
   
@@ -142,6 +145,7 @@ const db = SQLite.openDatabase('db');
               {show && (
                 <DateTimePicker
                   style = {{width: '100%'}}
+                  neutralButtonLabel="clear" 
                   testID="dateTimePicker"
                   value={date}
                   mode={mode}
@@ -150,7 +154,7 @@ const db = SQLite.openDatabase('db');
                   onChange={onChange}
                 />
               )}
-  
+              {showAndroid && (
               <TouchableHighlight
                 onPress={
                   showDatePicker
@@ -159,7 +163,8 @@ const db = SQLite.openDatabase('db');
                 activeOpacity={0.6}
                 underlayColor={"#DDDDDD"} >
                 <Text style={styles.borderText} onChange={updateExpDate(dateToStr(date), details.batchID)} >{dateToStr(date)}</Text>
-              </TouchableHighlight>
+              </TouchableHighlight>)}
+
               <Text>selected: {date.toLocaleString()}</Text>
   
             </KeyboardAwareScrollView>
@@ -207,17 +212,9 @@ const db = SQLite.openDatabase('db');
               style={styles.floatinBtn}
               onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
             />
-            <Text>selected: {date.toLocaleString()}</Text>
-            {show && (
-              <DateTimePicker
-                style = {{width: '100%'}}
-                testID="dateTimePicker"
-                value={date}
-                mode={mode}
-                is24Hour={true}
-                onChange={onChange}
-              />
-            )}
+            <Text>selected: {date.toLocaleString()//there was another datetimepicker right after this that I deleted (was getting in the way), lmk what it was for if it was needed
+            }</Text> 
+
           </KeyboardAwareScrollView >
         </KeyboardAwareScrollView>
       </ImageBackground>
