@@ -41,7 +41,9 @@ function AddItems({ navigation }) {
     //datePicker
     const [expDate, setExpDate] = useState(new Date());
     const [mode, setMode] = useState('date');
-    const [show, setShow] = useState(false); //determines when datePicker is shown
+    const [show, setShow] = useState(Platform.OS === 'ios'); //determines when datePicker is shown
+    const [showAndroid] = useState(Platform.OS === 'android');
+    const [showiOS] = useState(Platform.OS === 'ios');
   
     const onChange = (event, selectedDate) => {
       const currentDate = selectedDate || expDate;
@@ -73,7 +75,7 @@ function AddItems({ navigation }) {
       >
         <KeyboardAwareScrollView>
           <View style={styles.container}>
-            <View styel={styles.pantryButton}>
+            <View style={styles.pantryButton}>
               <Text style={styles.textHead}>ADD ITEMS TO YOUR PANTRY</Text>
             </View>
             <Text></Text>
@@ -101,24 +103,32 @@ function AddItems({ navigation }) {
                 onValueChange={toggleSwitch}
                 value={isEnabled}
               />
-              <Text>Expiration Date:</Text>
-              <TouchableHighlight
-                onPress={showDatePicker}
-                activeOpacity={0.6}
-                underlayColor={"#DDDDDD"} >
-                <Text style={styles.input}>{realExpDate}</Text>
-  
-              </TouchableHighlight>
-              {show && (
-                <DateTimePicker
-                  testID="dateTimePicker"
-                  value={expDate}
-                  mode={mode}
-                  is24Hour={true}
-                  display="default"
-                  onChange={onChange}
-                />
-              )}
+              <View style={styles.row}>
+                <Text>Expiration Date:</Text>
+
+                { (showAndroid &&
+                <TouchableHighlight
+                  onPress={showDatePicker}
+                  activeOpacity={0.6}
+                  underlayColor={"#DDDDDD"} >
+                  <Text style={styles.input}>{realExpDate}</Text>
+                </TouchableHighlight>
+                )}
+
+                {show && ((isEnabled && showiOS) || showAndroid) && (
+                  <DateTimePicker
+                    style = {{width: '100%'}}
+                    testID="dateTimePicker"
+                    value={expDate}
+                    mode={mode}
+                    is24Hour={true}
+                    display="default"
+                    onChange={onChange}
+                  />
+                )}
+
+                { showiOS && !isEnabled && (<Text>N/A</Text>) }
+              </View>
   
               <TextInput //stores additional info in addntInfo
                 style={styles.textBox}
