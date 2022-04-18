@@ -7,7 +7,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { Asset } from 'expo-asset';
 import * as SQLite from 'expo-sqlite';
 
-import { dateToStr } from './FoodPicScreen';
+
 
 const db = SQLite.openDatabase('db');
 
@@ -227,6 +227,20 @@ function AddItems({ navigation }) {
 
     </ImageBackground>
   );
+}
+
+/**
+ * Returns a string in MM/DD/YY format for a given date 
+ * @param {} param0 
+ * @returns 
+ */
+ function dateToStr(date) {
+  function addZeroes(str) { //adds 0s to month and date to fit schema format
+    if (str.length < 2) { return "0" + str; }
+    else return str;
+  }
+  if (date + "" == 'Invalid Date') { return 'N/A'; }
+  else { return ((addZeroes((date.getMonth() + 1).toString())) + '/' + (addZeroes(date.getDate().toString())) + '/' + (date.getFullYear().toString().substring(2))); }
 }
 
 const toggleStyles = StyleSheet.create({
