@@ -1,8 +1,28 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, Platform, TouchableWithoutFeedback, ScrollView } from "react-native";
 import FloatingButton from '../FloatingButton';
+import * as SQLite from 'expo-sqlite';
 
-import { getWishListItems } from '../App';
+const db = SQLite.openDatabase('db');
+
+
+function getWishListItems() {
+  const [products, setProducts] = useState('');
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select * from WishList;',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++) {
+          temp.push(results.rows.item(i));
+        }
+        setProducts(temp);
+      }
+    )
+  });
+  return products
+}
 
 function WishList({ navigation }) {
     const products = getWishListItems()

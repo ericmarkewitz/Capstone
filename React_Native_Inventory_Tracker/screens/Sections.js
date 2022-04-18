@@ -1,9 +1,51 @@
-import React from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, Platform, TouchableWithoutFeedback, ScrollView } from "react-native";
 import FloatingButton from '../FloatingButton';
+import * as SQLite from 'expo-sqlite';
 
-import {getSection, removeSection} from '../App';
 
+const db = SQLite.openDatabase('db');
+
+function removeSection(sectionID) {
+  console.log("removing section")
+  console.log(sectionID)
+  db.transaction((tx) => {
+    tx.executeSql(
+      'delete from Section where sectionID = ?;',
+      [sectionID],
+    )
+    console.log("Deleting")
+  });
+  return (
+    Alert.alert(
+      "",
+      "Section has been deleted",
+      [{
+        text: "Ok",
+        onPress: console.log("Success!")
+      }]
+    )
+  )
+}
+
+
+function getSection() {
+  let [sections, setSection] = useState([]);
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select * from Section;',
+      [],
+      (tx, results) => {
+        var temp = [];
+        for (var i = 0; i < results.rows.length; i++) {
+          temp.push(results.rows.item(i));
+        }
+        setSection(temp);
+      }
+    )
+  });
+  return sections
+}
 
 function Sections({ navigation }) {
     const sections = getSection()
@@ -87,3 +129,4 @@ const styles = StyleSheet.create({
 });
 
 export default Sections;
+export {getSection};

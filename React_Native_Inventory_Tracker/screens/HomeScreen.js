@@ -3,7 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, Platform, TouchableWithoutFeedback, ScrollView } from "react-native";
 import * as SQLite from 'expo-sqlite'; //expo install expo-sqlite
 
-import {getSection} from '../App'; 
+import {getSection} from './Sections'; 
 
 /**
  * Displays the homescreeen of the app to the user, the homescreen shows an add new section button, a view canning

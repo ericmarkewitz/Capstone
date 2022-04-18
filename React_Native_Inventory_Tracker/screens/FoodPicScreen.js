@@ -6,9 +6,50 @@ import FloatingButton from '../FloatingButton';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
-import {dateToStr, addToWishList, updateImagePath} from '../App';
-
 const db = SQLite.openDatabase('db');
+
+/**
+ * Returns a string in MM/DD/YY format for a given date 
+ * @param {} param0 
+ * @returns 
+ */
+ function dateToStr(date) {
+  function addZeroes(str) { //adds 0s to month and date to fit schema format
+    if (str.length < 2) { return "0" + str; }
+    else return str;
+  }
+  if (date + "" == 'Invalid Date') { return 'N/A'; }
+  else { return ((addZeroes((date.getMonth() + 1).toString())) + '/' + (addZeroes(date.getDate().toString())) + '/' + (date.getFullYear().toString().substring(2))); }
+}
+
+function addToWishList(batchID, product) {
+  db.transaction(tx => {
+    tx.executeSql(
+      'insert into WishList (batchID, product) values (?,?);',
+      [batchID, product]
+    )
+  });
+  return (
+    Alert.alert(
+      "",
+      "Item has been added",
+      [{
+        text: "Ok",
+        onPress: console.log("Success!")
+      }]
+    )
+  )
+}
+
+//updates imagePath field
+function updateImagePath(image, batchID) {
+  db.transaction((tx) => {
+    tx.executeSql(
+      'update Batch set imagePath = ? where batchID = ?;',
+      [image, batchID],
+    )
+  });
+}
 
 /**
  * Lists details for an item

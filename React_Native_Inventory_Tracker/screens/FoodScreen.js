@@ -1,8 +1,36 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, Platform, TouchableWithoutFeedback, ScrollView } from "react-native";
 import FloatingButton from '../FloatingButton';
+import * as SQLite from 'expo-sqlite';
 
-import {selectBatch} from '../App';
+const db = SQLite.openDatabase('db');
+
+//Returns items in a given shelf
+function selectBatch(shelfID, sortBy) {
+  let [items, setItems] = useState([]);
+  useEffect(() => {
+    let isUnfin = true;
+    db.transaction((tx) => {
+      tx.executeSql(
+        'select batchID,product,datePlaced,expDate,notes,quantity,imagePath from Batch natural join Shelves where shelfID = ? ORDER BY ? ASC;',
+        [shelfID, sortBy],
+        (tx, results) => {
+          if (isUnfin) {
+            var temp = [];
+            for (var i = 0; i < results.rows.length; i++) {
+              temp.push(results.rows.item(i));
+            }
+            setItems(temp);
+          }
+
+        }
+      )
+    });
+    return () => isUnfin = false;
+  });
+  return items;
+}
+
 /**
  * The foodScreen shows the user a list of all the items that are shownin the database. The list is sorted
  * in alphabetical order and displayed. When the user clicks on an item it displays the information about the item

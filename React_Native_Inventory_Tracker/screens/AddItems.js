@@ -5,10 +5,65 @@ import FloatingButton from '../FloatingButton';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Asset } from 'expo-asset';
+import * as SQLite from 'expo-sqlite';
 
-import { dateToStr, addItem } from '../App';
+import { dateToStr } from './FoodPicScreen';
+
+const db = SQLite.openDatabase('db');
 
 const defaultPic = Asset.fromModule(require('../assets/default.jpg')).uri;
+
+
+function addItem(product, expDate, shelfID, quantity, notes, imagePath) {
+  var datePlaced = dateToStr(new Date());
+  if (quantity === '') { quantity = 0; }
+
+  console.log('product: ' + product + '\ndatePlaced: ' + datePlaced + '\nexpDate: ' + expDate + '\nshelfID: ' + shelfID + '\nquantity: ' + quantity + '\nnotes: ' + notes + '\nimagePath: ' + imagePath);
+
+  if (product != '') {
+    db.transaction(tx => {
+      tx.executeSql('insert into Batch (product, datePlaced, expDate, shelfID, quantity, notes, imagePath) values (?, ?, ?, ?, ?, ?, ?);',
+        [product, datePlaced, expDate, shelfID, quantity, notes, imagePath],
+      )
+    });
+    /* //making sure was actually added
+    db.transaction(tx => {
+      tx.executeSql('select * from Batch where product = ?;',
+      [product],
+      (tx, results) => {
+          console.log(results.rows.item(0))
+      }
+      )
+    });
+    */
+    return (
+      Alert.alert(
+        "Product added.",
+        "",
+        [
+          {
+            text: "OK",
+          }
+        ]
+      )
+    );
+  }
+  else {
+    return (
+      Alert.alert(
+        "Please enter an item name.",
+        "",
+        [
+          {
+            text: "OK",
+          }
+        ]
+      )
+    );
+  }
+}
+
+
 
 function AddItems({ navigation }) {
   const [nameOfItem, setText] = useState('');

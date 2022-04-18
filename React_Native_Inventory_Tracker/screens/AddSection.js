@@ -3,10 +3,59 @@ import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatL
 import FloatingButton from '../FloatingButton';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 import { Asset } from 'expo-asset';
+import * as SQLite from 'expo-sqlite';
 
-import { insertSection } from '../App';
+const db = SQLite.openDatabase('db');
 
 const defaultPic = Asset.fromModule(require('../assets/default.jpg')).uri;
+
+function insertSection(sectionName, imagePath) {
+  let sectionID = 0
+  db.transaction((tx) => {
+    tx.executeSql(
+      'select sectionID from Section;',
+      [],
+      (tx, results) => {
+        var temp = 0;
+        temp = 0
+        temp = results.rows.length
+        temp += 1
+        sectionID = temp;
+      }
+    )
+  });
+  if (sectionName != '') {
+    console.log('sectionName: ' + sectionName + '\nsectionID: ' + sectionID + '\nimagePath: ' + imagePath)
+    db.transaction(tx => {
+      tx.executeSql(
+        'insert into Section (sectionID, sectionName, imagePath) values (?,?,?);',
+        [sectionID, sectionName, imagePath]
+      )
+    });
+    return (
+      Alert.alert(
+        "",
+        "Section has been added",
+        [{
+          text: "Ok",
+          onPress: console.log("Success!")
+        }]
+      )
+    )
+  } else {
+    return (
+      Alert.alert(
+        "",
+        "Enter valid name",
+        [{
+          text: "Ok",
+          onPress: console.log("Request Valid Name"),
+        }]
+      )
+    )
+  }
+};
+
 
 function AddSection({ navigation }) {
     const [sectionName, setSectionName] = useState('');

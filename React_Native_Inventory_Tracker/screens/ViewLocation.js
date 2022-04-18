@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from 'react';
-
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, Platform, TouchableWithoutFeedback, ScrollView } from "react-native";
 import * as SQLite from 'expo-sqlite'; //expo install expo-sqlite
 
