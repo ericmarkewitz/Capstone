@@ -14,6 +14,7 @@ import {getSection} from './Sections';
  function HomeScreen({ navigation }) {
   
     const sections = getSection();
+    
   
     return (
       <ImageBackground
@@ -37,7 +38,7 @@ import {getSection} from './Sections';
             </View>
   
             <View style={styles.pantryButton}>
-              <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Pantry') }}>
+              <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Pantry', { sectionID: 0 }) }}>
                 <Text style={styles.text}>VIEW PANTRY</Text>
                 <Image source={require("../assets/pantry.png")} />
               </TouchableOpacity>
@@ -49,7 +50,7 @@ import {getSection} from './Sections';
               </TouchableOpacity>
             </View>
             <View>
-              {sections.map(sections => {
+              {sections.slice(1).map(sections => {
                 return (
                   <View key={sections.sectionID}>
                     <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>

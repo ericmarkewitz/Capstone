@@ -4,7 +4,8 @@ import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatL
 import FloatingButton from '../FloatingButton';
 
 
-function Pantry({ navigation }) {
+function Pantry({ route, navigation }) {
+  const { sectionID } = route.params;
   return (
     <ImageBackground
       source={require('../assets/cart.jpg')}
@@ -12,14 +13,14 @@ function Pantry({ navigation }) {
     >
       <SafeAreaView style={styles.container}>
         <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Food', { shelfID: 0 }) }}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Food', { sectionID: sectionID }) }}>
             <Text style={styles.text}>VIEW INVENTORY</Text>
             <Image source={require("../assets/ViewPantry.png")} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('AddItems') }}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('AddItemsGeneral', { sectionID: sectionID }) }}>
             <Text style={styles.text}>ADD A NEW ITEM</Text>
             <Image source={require("../assets/plusButton.png")} />
           </TouchableOpacity>
