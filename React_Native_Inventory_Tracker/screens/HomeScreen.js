@@ -5,6 +5,8 @@ import * as SQLite from 'expo-sqlite'; //expo install expo-sqlite
 
 import {getSection} from './Sections'; 
 
+const db = SQLite.openDatabase('db');
+
 /**
  * Displays the homescreeen of the app to the user, the homescreen shows an add new section button, a view canning
  * button and a view pantry button. Each of the buttons take you to a new screen 
@@ -12,9 +14,8 @@ import {getSection} from './Sections';
  * @returns 
  */
  function HomeScreen({ navigation }) {
-  
     const sections = getSection();
-  
+
     return (
       <ImageBackground
         source={require('../assets/cart.jpg')}
@@ -69,7 +70,6 @@ import {getSection} from './Sections';
         </SafeAreaView >
       </ImageBackground>
     );
-  
 }
 
 const styles = StyleSheet.create({

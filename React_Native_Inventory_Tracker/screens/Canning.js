@@ -108,8 +108,8 @@ function Canning({ navigation, route }) {
       }
   
     }
-  
-    const [cans, setCans] = useState();//NEED TO FIGURE THIS OUT ASAP
+
+    const [cans, setCans] = useState(getStarterCans());//NEED TO FIGURE THIS OUT ASAP
   
   
     return ( //"View Empty Jars and "View Batch by Location" and "View Empty Jars" text breaks with more than 4 items
@@ -249,6 +249,25 @@ function selectCans(sortBy) {
     return items;
 }
 
+
+//Returns the starting cans
+function getStarterCans() {
+    var temp = []
+    db.transaction((tx) => {
+      tx.executeSql(
+        'SELECT * FROM Batch ORDER BY batchID ASC;',
+        [],
+        (tx, results) => {
+          
+          for (var i = 0; i < results.rows.length; i++) {
+            temp.push(results.rows.item(i));
+          }
+          
+        }
+      );
+    });
+    return temp;    
+}
 
 const styles = StyleSheet.create({
     container: {
