@@ -18,7 +18,7 @@ function addItemGeneral(productName, expDate, sectionID, quantity, notes, imageP
   var datePlaced = dateToStr(new Date());
   if (quantity === '') { quantity = 0; }
 
-  console.log('productName: ' + productName + '\ndatePlaced: ' + datePlaced + '\nexpDate: ' + expDate + '\nsectionID: ' + sectionID + '\nquantity: ' + quantity + '\nnotes: ' + notes + '\nimagePath: ' + imagePath);
+  //console.log('productName: ' + productName + '\ndatePlaced: ' + datePlaced + '\nexpDate: ' + expDate + '\nsectionID: ' + sectionID + '\nquantity: ' + quantity + '\nnotes: ' + notes + '\nimagePath: ' + imagePath);
 
   if (productName != '') {
     db.transaction(tx => {
@@ -28,7 +28,7 @@ function addItemGeneral(productName, expDate, sectionID, quantity, notes, imageP
     });
     /* //making sure was actually added
     db.transaction(tx => {
-      tx.executeSql('select * from Product where productID = ?;',
+      tx.executeSql('select * from Product where productName = ?;',
       [productName],
       (tx, results) => {
           console.log(results.rows.item(0))
@@ -36,6 +36,7 @@ function addItemGeneral(productName, expDate, sectionID, quantity, notes, imageP
       )
     });
     */
+    
     return (
       Alert.alert(
         "Product added.",

@@ -43,6 +43,7 @@ function setupDB() {
 
   db.transaction(tx => {
 
+    
     tx.executeSql('drop table if exists Stock;');
     tx.executeSql('drop table if exists Expiration;');
     tx.executeSql('drop table if exists WishList;');
@@ -54,6 +55,7 @@ function setupDB() {
     tx.executeSql('drop table if exists Batch;');
     tx.executeSql('drop table if exists Shelves;');
     tx.executeSql('drop table if exists Storage;');
+    
 
     tx.executeSql('create table if not exists Storage(locationID integer primary key,locationName text);');
     tx.executeSql('create table if not exists Shelves(shelfID integer primary key,locationID integer,shelfName text,foreign key (locationID) references Storage (locationID));');

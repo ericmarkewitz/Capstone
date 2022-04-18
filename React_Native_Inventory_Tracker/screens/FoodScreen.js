@@ -13,7 +13,7 @@ function selectBatch(sectionID, sortBy) {
     db.transaction((tx) => {
       tx.executeSql(
         
-        'select * from Section natural join Product where sectionID = ? ORDER BY ? ASC;',
+        'select * from Product where sectionID = ? ORDER BY ? ASC;',
         [sectionID, sortBy],
         (tx, results) => {
           if (isUnfin) {
