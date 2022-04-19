@@ -6,14 +6,15 @@ import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabase('db');
 
 //Returns items in a given shelf
-function selectBatch(shelfID, sortBy) {
+function selectBatch(sectionID, sortBy) {
   let [items, setItems] = useState([]);
   useEffect(() => {
     let isUnfin = true;
     db.transaction((tx) => {
       tx.executeSql(
-        'select batchID,product,datePlaced,expDate,notes,quantity,imagePath from Batch natural join Shelves where shelfID = ? ORDER BY ? ASC;',
-        [shelfID, sortBy],
+        
+        'select * from Product where sectionID = ? ORDER BY ? ASC;',
+        [sectionID, sortBy],
         (tx, results) => {
           if (isUnfin) {
             var temp = [];
@@ -24,6 +25,7 @@ function selectBatch(shelfID, sortBy) {
           }
 
         }
+        
       )
     });
     return () => isUnfin = false;
@@ -38,9 +40,9 @@ function selectBatch(shelfID, sortBy) {
  * @returns 
  */
  function FoodScreen({ route, navigation }) {
-    const { shelfID } = route.params; //receive shelfID
-  
-    var items = selectBatch(shelfID, 'batchID'); //query db for items in shelf
+    const { sectionID } = route.params; //receive sectionID
+
+    var items = selectBatch(sectionID, 'productID'); //query db for items in shelf
     return (
       <ImageBackground
         source={require('../assets/cart.jpg')}
@@ -48,7 +50,7 @@ function selectBatch(shelfID, sortBy) {
       >
         <View style={styles.container}>
           <View styel={styles.pantryButton}>
-            <Text style={styles.textHead}>YOUR PANTRY:</Text>
+            <Text style={styles.textHead}>YOUR SECTION {sectionID}:</Text>
           </View>
           <FlatList
             data={items}
@@ -57,10 +59,10 @@ function selectBatch(shelfID, sortBy) {
               <TouchableHighlight
                 activeOpacity={0.6}
                 underlayColor={"#DDDDDD"}
-                onPress={() => navigation.push('Item', { details: item })}
+                onPress={() => navigation.push('SectionItem', { details: item })}
               >
                 <View>
-                  <Text style={styles.item} > {item.product} </Text>
+                  <Text style={styles.item} > {item.productName} </Text>
                 </View>
               </TouchableHighlight>
             }

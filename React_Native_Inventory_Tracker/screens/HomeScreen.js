@@ -15,6 +15,8 @@ const db = SQLite.openDatabase('db');
  */
  function HomeScreen({ navigation }) {
     const sections = getSection();
+    
+  
 
     return (
       <ImageBackground
@@ -38,7 +40,7 @@ const db = SQLite.openDatabase('db');
             </View>
   
             <View style={styles.pantryButton}>
-              <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Pantry') }}>
+              <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Pantry', { sectionID: 0 }) }}>
                 <Text style={styles.text}>VIEW PANTRY</Text>
                 <Image source={require("../assets/pantry.png")} />
               </TouchableOpacity>
@@ -50,7 +52,7 @@ const db = SQLite.openDatabase('db');
               </TouchableOpacity>
             </View>
             <View>
-              {sections.map(sections => {
+              {sections.slice(1).map(sections => {
                 return (
                   <View key={sections.sectionID}>
                     <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>

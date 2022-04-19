@@ -5,7 +5,33 @@ import * as SQLite from 'expo-sqlite';
 
 const db = SQLite.openDatabase('db');
 
+//Returns items in a given shelf
+function getWishListItems() {
+  let [items, setItems] = useState([]);
+  useEffect(() => {
+    let isUnfin = true;
+    db.transaction((tx) => {
+      tx.executeSql(
+        'select * from WishList;',
+        [],
+        (tx, results) => {
+          if (isUnfin) {
+            var temp = [];
+            for (var i = 0; i < results.rows.length; i++) {
+              temp.push(results.rows.item(i));
+            }
+            setItems(temp);
+          }
 
+        }
+      )
+    });
+    return () => isUnfin = false;
+  });
+  return items;
+}
+
+/*
 function getWishListItems() {
   const [products, setProducts] = useState('');
   db.transaction((tx) => {
@@ -23,6 +49,7 @@ function getWishListItems() {
   });
   return products
 }
+*/
 
 function WishList({ navigation }) {
     const products = getWishListItems()
