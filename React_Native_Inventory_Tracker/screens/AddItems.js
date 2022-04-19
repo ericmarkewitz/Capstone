@@ -131,36 +131,59 @@ function AddItems({ navigation }) {
       <KeyboardAwareScrollView>
         <View style={styles.container}>
           <View style={styles.pantryButton}>
-            <Text style={styles.textHead}>ADD ITEMS TO YOUR PANTRY</Text>
+            <Text style={styles.textHead}>ADD A NEW BATCH</Text>
           </View>
           <Text></Text>
           <Text></Text>
           <View style={toggleStyles.container}>
             <TextInput //Stores the name of an item in nameOfItem
               style={styles.input}
+              keyboardAppearance={'dark'}
               placeholder="Add name of Item"
               onChangeText={(nameOfItem) => setText(nameOfItem)}
               defaultValue={nameOfItem}
             />
             <TextInput //stores the quantitiy of an item in quantity
               style={styles.input}
+              keyboardAppearance={'dark'}
+              keyboardType={'number-pad'}
               placeholder="Add quantity"
-              onChangeText={(quantity) => setTextQuan(quantity)}
+              onChangeText={(quantity) => 
+                {
+                  setTextQuan(quantity)
+                  if(quantity > 0 && quantity !== null){
+                    //toggle add cans page
+                    
+                  }
+                  else{
+                    //dont need to toggle the cans page
+                    
+                  }
+                }}
               defaultValue={quantity}
             />
-            <Text style={styles.textAddExpiration}>Would you like to add</Text>
-            <Text style={styles.textAddExpiration}> an expiration date?</Text>
-            <Switch //toggle switch, if on then 
-              style={styles.space}
-              trackColor={{ false: "#767577", true: "#81b0ff" }}
-              thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-              ios_backgroundColor="#3e3e3e"
-              onValueChange={toggleSwitch}
-              value={isEnabled}
-            />
+            <View style={{flexDirection: 'row'}}>
+              <View style={{justifyContent: 'center'}}>
+                <Text style={styles.textAddExpiration}>Would you like to add</Text>
+                <Text style={styles.textAddExpiration}> an expiration date?</Text>
+              </View>
+              <Switch //toggle switch, if on then 
+                style={styles.space}
+                trackColor={{ false: "#767577", true: "#81b0ff" }}
+                thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={toggleSwitch}
+                value={isEnabled}
+              />
+            </View>
+            
             <View style={styles.row}>
-              <Text>{'Expiration Date:\n'}</Text>
-
+              <View style={{flexDirection: 'row'}}>
+                <View style={{justifyContent: 'center'}}>
+                  <Text>{'Expiration Date:'}</Text>
+                </View>
+              </View>
+              
               {(showAndroid &&
                 <TouchableHighlight
                   onPress={showDatePicker}
@@ -187,6 +210,7 @@ function AddItems({ navigation }) {
 
             <TextInput //stores additional info in addntInfo
               style={styles.textBox}
+              keyboardAppearance={'dark'}
               multiline={true}
               placeholder="Add additional info"
               onChangeText={(addntInfo) => setaddntInfo(addntInfo)}
@@ -278,7 +302,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     justifyContent: 'flex-end',
-    marginBottom: 30,
+    marginBottom: 5,
   },
   textAddExpiration: {
     textAlignVertical: 'top',
