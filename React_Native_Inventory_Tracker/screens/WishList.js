@@ -69,9 +69,10 @@ function WishList({ navigation }) {
         style={{ width: '100%', height: '100%' }}
       >
         <FlatList
+          style={styles.table}
           data={products}
           ListEmptyComponent={NoItemsInList}
-          keyExtractor={(item) => index}
+          keyExtractor={(item, index) => index}
           renderItem={({ item, index, separators }) =>
             <View>
               <Text style={styles.item}>{item.product}</Text>
@@ -92,21 +93,28 @@ function WishList({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    table:{
+      top: 100,
+      left:20,
+    },
     emptyList: {
-        top: 200,
+        top: 100,
         padding: 10,
         fontSize: 18,
+        right:15,
         textAlign: "center",
         fontWeight: "bold",
     },
     item: {
-        textAlign: "auto",
+        textAlign: "center",
         borderWidth: 5,
-        borderColor: "darkgrey",
+        borderColor: "#8D9797",
+        backgroundColor: "#8D9797",
         fontSize: 30,
         color: "black",
         height: 75,
         width: 300,
+        margin: 10,
     },
     addItemToWishList: {
         backgroundColor: '#859a9b',

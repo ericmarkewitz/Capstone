@@ -22,23 +22,38 @@ const db = SQLite.openDatabase('db');
   else { return ((addZeroes((date.getMonth() + 1).toString())) + '/' + (addZeroes(date.getDate().toString())) + '/' + (date.getFullYear().toString().substring(2))); }
 }
 
-function addToWishList(productID, product) {
+function addToWishList(product) {
   db.transaction(tx => {
     tx.executeSql(
-      'insert into WishList (productID, product) values (?,?);',
-      [productID, product]
+      'insert into WishList (product) values (?);',
+      [product],
+      (tx, results) => {
+        if (results.rowsAffected>0){
+          return(
+            Alert.alert(
+              "",
+              "Item was added to Wish List",
+              [{
+                text: "Ok",
+                onPress: console.log("Success!")
+              }]
+            )
+          )
+        } else{
+            return (
+              Alert.alert(
+                "",
+                "Something went wrong",
+                [{
+                  text: "Ok",
+                  onPress: console.log("Failed!")
+                }]
+              )
+            )
+        }
+      }
     )
   });
-  return (
-    Alert.alert(
-      "",
-      "Item has been added",
-      [{
-        text: "Ok",
-        onPress: console.log("Success!")
-      }]
-    )
-  )
 }
 
 //updates imagePath field
@@ -248,7 +263,7 @@ function updateImagePath(image, productID) {
                     }])}>
               <Text style={styles.textForAddItems}>DELETE</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.addToWishListbtn} onPress={() => addToWishList(details.productID, details.productName)}><Image style={styles.addItemToWLPic} source={require("../assets/wishList.png")} /></TouchableOpacity>
+            <TouchableOpacity style={styles.addToWishListbtn} onPress={() => addToWishList(details.productName)}><Image style={styles.addItemToWLPic} source={require("../assets/wishList.png")} /></TouchableOpacity>
             <FloatingButton //This button takes ther user to the homepage 
               style={styles.floatinBtn}
               onPress={() => navigation.navigate('INVENTORY TRACKING APP')}

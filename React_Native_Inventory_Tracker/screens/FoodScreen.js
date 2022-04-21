@@ -33,6 +33,28 @@ function selectBatch(sectionID, sortBy) {
   return items;
 }
 
+function getSectionName(sectionID){
+  let [name, setName] = useState("");
+  useEffect(() => {
+    let isUnfin = true;
+    db.transaction((tx) => {
+      tx.executeSql(
+        
+        'select sectionName from Section where sectionID = ?;',
+        [sectionID],
+        (tx, results) => {
+          if (isUnfin) {
+            setName(results);
+          }
+        }
+        
+      )
+    });
+    return () => isUnfin = false;
+  });
+  return name;
+}
+
 /**
  * The foodScreen shows the user a list of all the items that are shownin the database. The list is sorted
  * in alphabetical order and displayed. When the user clicks on an item it displays the information about the item
@@ -43,6 +65,16 @@ function selectBatch(sectionID, sortBy) {
     const { sectionID } = route.params; //receive sectionID
 
     var items = selectBatch(sectionID, 'productID'); //query db for items in shelf
+    var sectionName = getSectionName(sectionID);
+    const NoItemsInSection = ({ item, navigation }) => {
+      return (
+        <View>
+          <Text style={styles.emptyList}>
+            This Section is Empty
+          </Text>
+        </View>
+      );
+    };
     return (
       <ImageBackground
         source={require('../assets/cart.jpg')}
@@ -50,10 +82,11 @@ function selectBatch(sectionID, sortBy) {
       >
         <View style={styles.container}>
           <View styel={styles.pantryButton}>
-            <Text style={styles.textHead}>YOUR SECTION {sectionID}:</Text>
+            <Text style={styles.textHead}>YOUR SECTION {sectionName}:</Text>
           </View>
           <FlatList
             data={items}
+            ListEmptyComponent={NoItemsInSection}
             keyExtractor={(item, index) => index}
             renderItem={({ item, index, separators }) =>
               <TouchableHighlight
@@ -69,6 +102,11 @@ function selectBatch(sectionID, sortBy) {
             renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
           />
         </View>
+        <TouchableOpacity
+          style={styles.addItem}
+          onPress={() => console.log("Go to page to add items to section")}>
+          <Text style={styles.text} >Add Items</Text>
+        </TouchableOpacity>
         <FloatingButton //This button takes ther user to the homepage 
           style={styles.floatinBtn}
           onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
@@ -119,5 +157,32 @@ const styles = StyleSheet.create({
         bottom: 10,
         right: 10,
     },
+    emptyList: {
+      top: 200,
+      padding: 10,
+      fontSize: 18,
+      textAlign: "center",
+      fontWeight: "bold",
+  },
+  addItem: {
+    backgroundColor: '#859a9b',
+    borderRadius: 20,
+    padding: 10,
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    bottom: 120,
+    width: "50%",
+    left: 100,
+  },
+  text: {
+    textAlign: 'center',
+    fontSize: 14,
+    fontFamily: 'Avenir',
+    fontWeight: 'bold',
+    color: 'black',
+},
 });
 export default FoodScreen;

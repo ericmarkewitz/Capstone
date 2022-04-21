@@ -45,23 +45,23 @@ const db = SQLite.openDatabase('db');
                 <Image source={require("../assets/pantry.png")} />
               </TouchableOpacity>
             </View>
-            <View style={styles.pantryButton}>
-              <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
-                <Text style={styles.text}>Wish List</Text>
-                <Image style={styles.homeWishList} source={require("../assets/wishList.png")} />
-              </TouchableOpacity>
-            </View>
             <View>
               {sections.slice(1).map(sections => {
                 return (
                   <View key={sections.sectionID}>
-                    <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
+                    <TouchableOpacity style={styles.button} onPress={() => { navigation.push( 'Food', { sectionID: sections.sectionID } ) }}>
                       <Text style={styles.text}>{sections.sectionName}</Text>
                       <Image source={require("../assets/newSection.png")} />
                     </TouchableOpacity>
                   </View>
                 )
               })}
+            </View>
+            <View style={styles.pantryButton}>
+              <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('WishList') }}>
+                <Text style={styles.text}>Wish List</Text>
+                <Image style={styles.homeWishList} source={require("../assets/wishList.png")} />
+              </TouchableOpacity>
             </View>
           </ScrollView>
           < StatusBar style="auto" />

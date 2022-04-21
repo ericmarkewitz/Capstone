@@ -26,6 +26,7 @@ function removeSection(sectionID) {
       }]
     )
   )
+  
 }
 
 
@@ -56,12 +57,24 @@ function Sections({ navigation }) {
         style={{ width: '100%', height: '100%' }}
       >
         <View>
-          <Text style={styles.textHead}>Select Section you want to Delete</Text>
+          <Text style={styles.textHead}>Delete Section: </Text>
           <FlatList
             data={sections}
             keyExtractor={(item, index) => index}
             renderItem={({ item, index, separators }) =>
-              <TouchableOpacity style={styles.sections} onPress={() => { removeSection(item.sectionID) }}>
+              <TouchableOpacity style={styles.sections} 
+                onPress={() =>
+                  Alert.alert(
+                    "Are you sure you want to delete this section?",
+                    "You cannot undo this action.",
+                    [
+                      {
+                        text: "No",
+                      },
+                      {
+                        text: "Yes",
+                        onPress: () => removeSection(item.sectionID)
+                      }])}>
                 <Text style={styles.text}>{item.sectionName}</Text>
               </TouchableOpacity>
             }

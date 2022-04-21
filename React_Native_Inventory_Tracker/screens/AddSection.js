@@ -11,37 +11,39 @@ const defaultPic = Asset.fromModule(require('../assets/default.jpg')).uri;
 
 function insertSection(sectionName, imagePath) {
   let sectionID = 0
-  db.transaction((tx) => {
-    tx.executeSql(
-      'select sectionID from Section;',
-      [],
-      (tx, results) => {
-        var temp = 0;
-        temp = 0
-        temp = results.rows.length
-        temp += 1
-        sectionID = temp;
-      }
-    )
-  });
   if (sectionName != '') {
     console.log('sectionName: ' + sectionName + '\nsectionID: ' + sectionID + '\nimagePath: ' + imagePath)
     db.transaction(tx => {
       tx.executeSql(
-        'insert into Section (sectionID, sectionName, imagePath) values (?,?,?);',
-        [sectionID, sectionName, imagePath]
+        'insert into Section (sectionName, imagePath) values (?,?);',
+        [sectionName, imagePath],
+        (tx, results) => {
+          if (results.rowsAffected>0){
+            return(
+              Alert.alert(
+                "",
+                "Section has been added",
+                [{
+                  text: "Ok",
+                  onPress: console.log("Success!")
+                }]
+              )
+            )
+          } else{
+              return (
+                Alert.alert(
+                  "",
+                  "Something went wrong",
+                  [{
+                    text: "Ok",
+                    onPress: console.log("Failed!")
+                  }]
+                )
+              )
+          }
+        } 
       )
     });
-    return (
-      Alert.alert(
-        "",
-        "Section has been added",
-        [{
-          text: "Ok",
-          onPress: console.log("Success!")
-        }]
-      )
-    )
   } else {
     return (
       Alert.alert(

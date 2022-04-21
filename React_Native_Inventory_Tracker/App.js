@@ -66,7 +66,7 @@ function setupDB() {
     //General db
     tx.executeSql('create table if not exists Section(sectionID integer primary key, sectionName text, imagePath text);');
     tx.executeSql('create table if not exists Product(productID integer primary key,productName text,datePlaced text check (datePlaced glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),expDate text check (expDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expDate glob \'N/A\'),sectionID integer, quantity integer check (quantity >= 0), notes text, imagePath text, foreign key (sectionID) references Section(sectionID)););');
-    tx.executeSql('create table if not exists WishList(batchID integer primary key, product text, foreign key (batchID) references Batch(batchID));');
+    tx.executeSql('create table if not exists WishList(productID integer primary key, product text, foreign key (productID) references Product(productID));');
     tx.executeSql('create table if not exists Expiration(productID integer primary key, expirationDate text check (expirationDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expirationDate glob \'N/A\'),foreign key (productID) references Product (productID));');
     tx.executeSql('create table if not exists Stock(productID integer,shelfID integer,locationID integer,datePurchased text check (datePurchased glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),quantity integer check (quantity >= 0),primary key(productID,shelfID,locationID),foreign key (productID) references Product(productID),foreign key (shelfID, locationID) references Shelf(shelfID,locationID));');
 
@@ -88,11 +88,13 @@ function setupDB() {
     tx.executeSql('insert into Jars values (?,?,?);',[2, '48oz', 'regular']);
     tx.executeSql('insert into Jars values (?,?,?);',[3, '12oz', 'wide']);
 
-
     //tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);',[0, 'test', '02/18/22','05/27/22', 0, 4,'definitely not green',defaultPic]);
   
-
-    tx.executeSql('insert into WishList values (?,?);', [2, 'Walnuts']);
+    tx.executeSql('insert into WishList values (?,?);', [0,'Walnuts']);
+    tx.executeSql('insert into WishList values (?,?);', [1,'Medicine']);
+    tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);',[0, 'Pickles', '02/18/22','05/27/22', 0, 4,'Green',defaultPic]);
+    tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);',[1, 'Peas', '01/17/22','03/18/23', 0, 12,'Also green',defaultPic]);
+    
 
 
 
