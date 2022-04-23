@@ -29,6 +29,7 @@ import BatchLocation from './screens/BatchLocation';
 import ViewLocation from './screens/ViewLocation';
 import AddItemsGeneral from './screens/AddItemsGeneral';
 import FoodPicScreenGeneral from "./screens/FoodPicScreenGeneral";
+import AddItemSection from "./screens/AddItemSection";
 
 
 
@@ -94,7 +95,7 @@ function setupDB() {
     tx.executeSql('insert into WishList values (?,?);', [1,'Medicine']);
     tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);',[0, 'Pickles', '02/18/22','05/27/22', 0, 4,'Green',defaultPic]);
     tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);',[1, 'Peas', '01/17/22','03/18/23', 0, 12,'Also green',defaultPic]);
-    
+
 
 
 
@@ -165,6 +166,7 @@ export default function App() {
           <Stack.Screen name="WishList" component={WishList} />
           <Stack.Screen name="AddItemsGeneral" component={AddItemsGeneral} />
           <Stack.Screen name="SectionItem" component={FoodPicScreenGeneral} />
+          <Stack.Screen name="AddItemSection" component={AddItemSection} />
         </Stack.Navigator>
       </NavigationContainer></>
   );

@@ -31,6 +31,26 @@ function getWishListItems() {
   return items;
 }
 
+function deleteItem(productID){
+  db.transaction((tx) => {
+    tx.executeSql(
+      'delete from WishList where productID = ?;',
+      [productID],
+    )
+  });
+  return (
+    Alert.alert(
+      "", 
+      "Item has been deleted",
+      [{
+        text: "Ok",
+        onPress: console.log("Success!")
+      }]
+    )
+  )
+  
+}
+
 /*
 function getWishListItems() {
   const [products, setProducts] = useState('');
@@ -74,9 +94,9 @@ function WishList({ navigation }) {
           ListEmptyComponent={NoItemsInList}
           keyExtractor={(item, index) => index}
           renderItem={({ item, index, separators }) =>
-            <View>
+            <TouchableOpacity onPress={()=> deleteItem(item.productID)}>
               <Text style={styles.item}>{item.product}</Text>
-            </View>
+            </TouchableOpacity>
           }
         />
         <TouchableOpacity

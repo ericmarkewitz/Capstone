@@ -26,13 +26,6 @@ const db = SQLite.openDatabase('db');
         <SafeAreaView style={styles.container}>
           <ScrollView>
             <View style={styles.pantryButton}>
-              <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Sections') }}>
-                <Text style={styles.text}>ADD NEW SECTION</Text>
-                <Image source={require("../assets/newSection.png")} />
-              </TouchableOpacity>
-            </View>
-  
-            <View style={styles.pantryButton}>
               <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Canning') }}>
                 <Text style={styles.text}>VIEW CANNING</Text>
                 <Image source={require("../assets/can.png")} />

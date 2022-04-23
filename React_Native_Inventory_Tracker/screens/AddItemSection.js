@@ -6,15 +6,15 @@ import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabase('db');
 
 //Returns items in a given shelf
-function selectBatch(sectionID, sortBy) {
+function getProducts() {
   let [items, setItems] = useState([]);
   useEffect(() => {
     let isUnfin = true;
     db.transaction((tx) => {
       tx.executeSql(
-
-        'select * from Product where sectionID = ? ORDER BY ? ASC;;',
-        [sectionID, sortBy],
+        
+        'select * from Product ORDER BY ? ASC;',
+        ['productName'], 
         (tx, results) => {
           if (isUnfin) {
             var temp = [];
@@ -33,22 +33,86 @@ function selectBatch(sectionID, sortBy) {
   return items;
 }
 
+function changeSection(productID, sectionID){
+    db.transaction((tx) => {
+        tx.executeSql(
+          'update Product set sectionID = ? where productID = ?;',
+          [sectionID, productID],
+          (tx, results) => {
+            if (results.rowsAffected>0){
+              return(
+                Alert.alert(
+                  "",
+                  "Item was added to section",
+                  [{
+                    text: "Ok",
+                    onPress: console.log("Success!")
+                  }]
+                )
+              )
+            } else{
+                return (
+                  Alert.alert(
+                    "",
+                    "Something went wrong",
+                    [{
+                      text: "Ok",
+                      onPress: console.log("Failed!")
+                    }]
+                  )
+                )
+            }
+          } 
+        )
+    });
+}
+
+function setSection(productID, sectionID){
+    var current_section = 0
+    db.transaction((tx) => {
+        tx.executeSql(
+          'select sectionID from Product where productID = ?;',
+          [productID],
+        
+        (tx, results) => {
+            current_section = results;
+        }
+        )
+      });
+    if (current_section == 0){
+        changeSection(productID, sectionID);
+    } else{
+        return(
+            Alert.alert(
+              "This item already belongs to another section",
+              "Would you like to move it?",
+              [{
+                text: "Yes",
+                onPress: () => changeSection(productID, sectionID)
+              },
+              {
+                text: "No",
+            }])
+
+        )
+    }
+}
+
 
 /**
- * The foodScreen shows the user a list of all the items that are shownin the database. The list is sorted
- * in alphabetical order and displayed. When the user clicks on an item it displays the information about the item
+ * 
  * @param {} param0 
  * @returns 
  */
- function FoodScreen({ route, navigation }) {
+ function AddItemSection({ route, navigation }) {
     const { sectionID } = route.params; //receive sectionID
-    var items = selectBatch(sectionID, 'productID'); //query db for items in shelf
 
-    const NoItemsInSection = ({ item, navigation }) => {
+    var items = getProducts(); //query db for items in shelf
+    const NoItemsInPantry = ({ item, navigation }) => {
       return (
         <View>
           <Text style={styles.emptyList}>
-            This Section is Empty
+            Your Pantry is Empty
           </Text>
         </View>
       );
@@ -60,31 +124,26 @@ function selectBatch(sectionID, sortBy) {
       >
         <View style={styles.container}>
           <View styel={styles.pantryButton}>
-            <Text style={styles.textHead}>YOUR SECTION {sectionID}:</Text>
+            <Text style={styles.textHead}>Adding Items to Section {sectionID}:</Text>
           </View>
           <FlatList
             data={items}
-            ListEmptyComponent={NoItemsInSection}
+            ListEmptyComponent={NoItemsInPantry}
             keyExtractor={(item, index) => index}
             renderItem={({ item, index, separators }) =>
               <TouchableHighlight
                 activeOpacity={0.6}
                 underlayColor={"#DDDDDD"}
-                onPress={() => navigation.push('SectionItem', { details: item })}
+                onPress={() => setSection(item.productID, sectionID)}
               >
                 <View>
-                  <Text style={styles.item} > {item.productName} </Text>
+                  <Text style={styles.item} > {item.productName}  </Text>
                 </View>
               </TouchableHighlight>
             }
             renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
           />
         </View>
-        <TouchableOpacity
-          style={styles.addItem}
-          onPress={() => navigation.push('AddItemSection', {details: sectionID})}>
-          <Text style={styles.text} >Add Items</Text>
-        </TouchableOpacity>
         <FloatingButton //This button takes ther user to the homepage 
           style={styles.floatinBtn}
           onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
@@ -163,4 +222,4 @@ const styles = StyleSheet.create({
     color: 'black',
 },
 });
-export default FoodScreen;
+export default AddItemSection;
