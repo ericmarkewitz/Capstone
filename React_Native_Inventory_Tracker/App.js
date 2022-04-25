@@ -29,7 +29,6 @@ import BatchLocation from './screens/BatchLocation';
 import ViewLocation from './screens/ViewLocation';
 import AddItemsGeneral from './screens/AddItemsGeneral';
 import FoodPicScreenGeneral from "./screens/FoodPicScreenGeneral";
-import AddItemSection from "./screens/AddItemSection";
 
 
 
@@ -166,7 +165,6 @@ export default function App() {
           <Stack.Screen name="WishList" component={WishList} />
           <Stack.Screen name="AddItemsGeneral" component={AddItemsGeneral} />
           <Stack.Screen name="SectionItem" component={FoodPicScreenGeneral} />
-          <Stack.Screen name="AddItemSection" component={AddItemSection} />
         </Stack.Navigator>
       </NavigationContainer></>
   );

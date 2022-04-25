@@ -12,8 +12,7 @@ function selectBatch(sectionID, sortBy) {
     let isUnfin = true;
     db.transaction((tx) => {
       tx.executeSql(
-
-        'select * from Product where sectionID = ? ORDER BY ? ASC;;',
+        'select * from Product where sectionID = ? ORDER BY ? ASC;',
         [sectionID, sortBy],
         (tx, results) => {
           if (isUnfin) {
@@ -23,7 +22,6 @@ function selectBatch(sectionID, sortBy) {
             }
             setItems(temp);
           }
-
         }
         
       )
@@ -43,7 +41,6 @@ function selectBatch(sectionID, sortBy) {
  function FoodScreen({ route, navigation }) {
     const { sectionID } = route.params; //receive sectionID
     var items = selectBatch(sectionID, 'productID'); //query db for items in shelf
-
     const NoItemsInSection = ({ item, navigation }) => {
       return (
         <View>
@@ -80,11 +77,12 @@ function selectBatch(sectionID, sortBy) {
             renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
           />
         </View>
-        <TouchableOpacity
-          style={styles.addItem}
-          onPress={() => navigation.push('AddItemSection', {details: sectionID})}>
-          <Text style={styles.text} >Add Items</Text>
-        </TouchableOpacity>
+        <View style={styles.pantryButton}>
+          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('AddItemsGeneral', { sectionID: sectionID }) }}>
+            <Text style={styles.text}>ADD A NEW ITEM</Text>
+            <Image source={require("../assets/plusButton.png")} />
+          </TouchableOpacity>
+        </View>
         <FloatingButton //This button takes ther user to the homepage 
           style={styles.floatinBtn}
           onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
@@ -161,6 +159,25 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir',
     fontWeight: 'bold',
     color: 'black',
+},
+pantryButton: {
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center',
+  textAlign: 'center',
+},
+button: {
+  backgroundColor: '#859a9b',
+  borderRadius: 20,
+  padding: 10,
+  marginTop: 10,
+  marginBottom: 10,
+  shadowColor: '#303838',
+  shadowOffset: { width: 0, height: 5 },
+  shadowRadius: 10,
+  shadowOpacity: 0.35,
+  justifyContent: 'flex-end',
+  //marginBottom: 60, //originally was marginBottom20 with no marginTop and marginBottom 60 uncommented, feel free to revert
 },
 });
 export default FoodScreen;
