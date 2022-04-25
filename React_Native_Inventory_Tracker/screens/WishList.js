@@ -36,18 +36,34 @@ function deleteItem(productID){
     tx.executeSql(
       'delete from WishList where productID = ?;',
       [productID],
+      (tx, results) => {
+        if (results.rowsAffected>0){
+          console.log(results)
+          return(
+            Alert.alert(
+              "",
+              "Item has been deleted",
+              [{
+                text: "Ok",
+                onPress: console.log("Success!")
+              }]
+            )
+          )
+        } else{
+            return (
+              Alert.alert(
+                "",
+                "Something went wrong",
+                [{
+                  text: "Ok",
+                  onPress: console.log("Failed!")
+                }]
+              )
+            )
+        }
+      } 
     )
-  });
-  return (
-    Alert.alert(
-      "", 
-      "Item has been deleted",
-      [{
-        text: "Ok",
-        onPress: console.log("Success!")
-      }]
-    )
-  )
+  }); 
   
 }
 
@@ -94,7 +110,28 @@ function WishList({ navigation }) {
           ListEmptyComponent={NoItemsInList}
           keyExtractor={(item, index) => index}
           renderItem={({ item, index, separators }) =>
-            <TouchableOpacity onPress={()=> deleteItem(item.productID)}>
+            <TouchableOpacity onPress={()=> Alert.alert(
+              "Are you sure you want to delete this item?",
+              "You cannot undo this action.",
+              [
+                {
+                  text: "No",
+                },
+                {
+                  text: "Yes",
+                  onPress: () =>
+                    Alert.alert(
+                      "Are you REALLY sure?",
+                      "There is no going back from this.",
+                      [
+                        {
+                          text: "Wait, take me back!",
+                        },
+                        {
+                          text: "Yes",
+                          onPress: () => deleteItem(item.productID) //NOTE/TODO: atm if you do this from foodscreen it will refresh but not canning
+                        }])
+                }])}>
               <Text style={styles.item}>{item.product}</Text>
             </TouchableOpacity>
           }
