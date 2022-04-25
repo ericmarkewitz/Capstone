@@ -276,11 +276,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     canningList: {
-        flex: 1.8,
+        flex: 2.4,
     },
     canningRow: {
         top: 15,
-        //padding: -50,
+        paddingBottom: 15,
         flex: 0.4,
         flexDirection: "row",
         ...Platform.select({
@@ -310,7 +310,8 @@ const styles = StyleSheet.create({
         width: 300,
     },
     canningAllButtons: {
-        flex: 1,
+        paddingTop: 20,
+        flex: 0.3,
         alignItems: 'center',
         //justifyContent: 'center',
         textAlign: 'center',
@@ -326,7 +327,7 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
         shadowOpacity: 0.35,
         justifyContent: 'flex-end',
-        marginBottom: 50,
+        marginBottom: 15,
     },
     
     canningButton: {
