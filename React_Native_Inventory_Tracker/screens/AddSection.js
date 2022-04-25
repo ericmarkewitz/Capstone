@@ -4,6 +4,7 @@ import FloatingButton from '../FloatingButton';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 import { Asset } from 'expo-asset';
 import * as SQLite from 'expo-sqlite';
+import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 
 const db = SQLite.openDatabase('db');
 
@@ -116,7 +117,6 @@ function AddSection({ navigation }) {
             onPress={() => { insertSection(sectionName, image) }}>
             <Text style={styles.text} >Add New Secction</Text>
           </TouchableOpacity>
-  
         </View>
         <FloatingButton //This button takes ther user to the homepage 
           style={styles.floatinBtn}
@@ -131,7 +131,7 @@ const toggleStyles = StyleSheet.create({
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 50,
+      marginBottom: 150,
     },
     
 });
@@ -178,6 +178,7 @@ const styles = StyleSheet.create({
         padding: 10,
         justifyContent: 'flex-end',
         marginBottom: 70,
+        marginTop: 25,
     },
     AddSection: {
         backgroundColor: '#859a9b',
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
         shadowOpacity: 0.35,
         justifyContent: 'flex-end',
-        top: 80,
+        top: 20,
         width: "50%",
         left: 10,
     },

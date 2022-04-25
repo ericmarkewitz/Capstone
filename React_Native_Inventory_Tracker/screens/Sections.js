@@ -6,29 +6,41 @@ import * as SQLite from 'expo-sqlite';
 
 const db = SQLite.openDatabase('db');
 
-function removeSection(sectionID) {
-  console.log("removing section")
-  console.log(sectionID)
+function removeSection(sectionID){
   db.transaction((tx) => {
     tx.executeSql(
       'delete from Section where sectionID = ?;',
       [sectionID],
+      (tx, results) => {
+        if (results.rowsAffected>0){
+          console.log(results)
+          return(
+            Alert.alert(
+              "",
+              "Section has been deleted",
+              [{
+                text: "Ok",
+                onPress: console.log("Success!")
+              }]
+            )
+          )
+        } else{
+            return (
+              Alert.alert(
+                "",
+                "Something went wrong",
+                [{
+                  text: "Ok",
+                  onPress: console.log("Failed!")
+                }]
+              )
+            )
+        }
+      } 
     )
-    console.log("Deleting")
-  });
-  return (
-    Alert.alert(
-      "",
-      "Section has been deleted",
-      [{
-        text: "Ok",
-        onPress: console.log("Success!")
-      }]
-    )
-  )
+  }); 
   
 }
-
 
 function getSection() {
   let [sections, setSection] = useState([]);

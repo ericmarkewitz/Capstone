@@ -30,7 +30,6 @@ import BatchLocation from './screens/BatchLocation';
 import ViewLocation from './screens/ViewLocation';
 import AddItemsGeneral from './screens/AddItemsGeneral';
 import FoodPicScreenGeneral from "./screens/FoodPicScreenGeneral";
-import AddItemSection from "./screens/AddItemSection";
 
 
 const db = SQLite.openDatabase('db'); //if app wont load after a reload change the name of the db (no clue why this happens)
@@ -208,7 +207,6 @@ export default function App() {
           <Stack.Screen name="WishList" component={WishList} />
           <Stack.Screen name="AddItemsGeneral" component={AddItemsGeneral} />
           <Stack.Screen name="SectionItem" component={FoodPicScreenGeneral} />
-          <Stack.Screen name="AddItemSection" component={AddItemSection} />
         </Stack.Navigator>
       </NavigationContainer></>
   );
