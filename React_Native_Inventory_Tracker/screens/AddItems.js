@@ -6,6 +6,7 @@ import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-pick
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Asset } from 'expo-asset';
 import * as SQLite from 'expo-sqlite';
+import * as Calendar from 'expo-calendar';
 
 
 
@@ -13,68 +14,22 @@ const db = SQLite.openDatabase('db');
 
 const defaultPic = Asset.fromModule(require('../assets/default.jpg')).uri;
 
-
-function addItem(product, expDate, shelfID, quantity, notes, imagePath) {
-  var datePlaced = dateToStr(new Date());
-  if (quantity === '') { quantity = 0; }
-
-  console.log('product: ' + product + '\ndatePlaced: ' + datePlaced + '\nexpDate: ' + expDate + '\nshelfID: ' + shelfID + '\nquantity: ' + quantity + '\nnotes: ' + notes + '\nimagePath: ' + imagePath);
-
-  if (product != '') {
-    db.transaction(tx => {
-      tx.executeSql('insert into Batch (product, datePlaced, expDate, shelfID, quantity, notes, imagePath) values (?, ?, ?, ?, ?, ?, ?);',
-        [product, datePlaced, expDate, shelfID, quantity, notes, imagePath],
-      )
-    });
-    /* //making sure was actually added
-    db.transaction(tx => {
-      tx.executeSql('select * from Batch where product = ?;',
-      [product],
-      (tx, results) => {
-          console.log(results.rows.item(0))
-      }
-      )
-    });
-    */
-    return (
-      Alert.alert(
-        "Product added.",
-        "",
-        [
-          {
-            text: "OK",
-          }
-        ]
-      )
-    );
-  }
-  else {
-    return (
-      Alert.alert(
-        "Please enter an item name.",
-        "",
-        [
-          {
-            text: "OK",
-          }
-        ]
-      )
-    );
-  }
-}
-
-
-
 function AddItems({ navigation }) {
+  const [calId, setCalId] = useState(getCalendarId());
   const [nameOfItem, setText] = useState('');
   const [quantity, setTextQuan] = useState('');
   //const [expDate, setExpDate] = useState('');
   const [addntInfo, setaddntInfo] = useState('');
   const [isEnabled, setIsEnabled] = useState(false);
+  const [makeCalEvent, setMakeCalEvent] = useState(false);
   const toggleSwitch = () => {
     setIsEnabled(previousState => !previousState);
     toggleExpDate(isEnabled);
   }
+  const toggleMakeCalEvent = () => {
+    setMakeCalEvent(previousState => !previousState);
+  }
+
   //image handling
 
   const [image, setImage] = useState(defaultPic);
@@ -207,6 +162,25 @@ function AddItems({ navigation }) {
 
               {showiOS && !isEnabled && (<Text>N/A</Text>)}
             </View>
+            
+              {show && isEnabled &&(
+                <View style={{flexDirection: 'row'}}>
+                  <View style={{justifyContent: 'center'}}>
+                    <Text style={{justifyContent: 'center'}}>Add to Calendar</Text>
+                  </View>
+                  
+                  <Switch //toggle switch, if on then 
+                    style={styles.space}
+                    trackColor={{ false: "#767577", true: "#81b0ff" }}
+                    thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+                    ios_backgroundColor="#3e3e3e"
+                    onValueChange={toggleMakeCalEvent}
+                    value={makeCalEvent}
+                  />
+                </View>
+              )}
+           
+            
 
             <TextInput //stores additional info in addntInfo
               style={styles.textBox}
@@ -235,7 +209,15 @@ function AddItems({ navigation }) {
             <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
               style={styles.button}
               onPress={() => {
-                addItem(nameOfItem, realExpDate, 0, quantity, addntInfo, image)
+                addItem(nameOfItem, realExpDate, 0, quantity, addntInfo, image);
+                //console.log(realExpDate);
+                if((realExpDate !== 'N/A') && makeCalEvent) {
+                  //console.log("creating cal event");
+                  //console.log(realExpDate);
+                  createCalendarEvent(realExpDate, nameOfItem, addntInfo);
+                  
+                }
+
                 //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
               }}>
               <Text style={styles.textForAddItems}>ADD ITEM TO INVENTORY</Text>
@@ -252,6 +234,107 @@ function AddItems({ navigation }) {
     </ImageBackground>
   );
 }
+
+function addItem(product, expDate, shelfID, quantity, notes, imagePath) {
+  var datePlaced = dateToStr(new Date());
+  if (quantity === '') { quantity = 0; }
+
+  console.log('product: ' + product + '\ndatePlaced: ' + datePlaced + '\nexpDate: ' + expDate + '\nshelfID: ' + shelfID + '\nquantity: ' + quantity + '\nnotes: ' + notes + '\nimagePath: ' + imagePath);
+
+  if (product != '') {
+    db.transaction(tx => {
+      tx.executeSql('insert into Batch (product, datePlaced, expDate, shelfID, quantity, notes, imagePath) values (?, ?, ?, ?, ?, ?, ?);',
+        [product, datePlaced, expDate, shelfID, quantity, notes, imagePath],
+      )
+    });
+    /* //making sure was actually added
+    db.transaction(tx => {
+      tx.executeSql('select * from Batch where product = ?;',
+      [product],
+      (tx, results) => {
+          console.log(results.rows.item(0))
+      }
+      )
+    });
+    */
+    return (
+      Alert.alert(
+        "Product added.",
+        "",
+        [
+          {
+            text: "OK",
+          }
+        ]
+      )
+    );
+  }
+  else {
+    return (
+      Alert.alert(
+        "Please enter an item name.",
+        "",
+        [
+          {
+            text: "OK",
+          }
+        ]
+      )
+    );
+  }
+}
+
+
+async function createCalendarEvent(expDate, nameOfItem, note){
+  const firstAlarm = {relativeOffset: -2880};
+  const secondAlarm = {relativeOffset: -10080};
+  const eventName = nameOfItem + " expires";
+  
+  const calId = await getCalendarId();
+  console.log("calid", calId);
+  //console.log(expDate);
+  //const formatDate = expDate.replaceAll('/', '-');
+  const dateList = expDate.split('/');
+  const formatDate = '20'.concat(dateList[2], '-', dateList[0], '-', dateList[1]);
+  const startTime = Date.parse(formatDate) + 43200000 + 25200000 //turn it into seconds since 1970 plus 12 hours plus 5 hours
+  const endTime = startTime + 3600000 //Start time + 1 hour
+  const eventID = eventName.concat(' ', startTime);
+
+  console.log("format date", formatDate);
+  console.log("start time", startTime);
+  console.log("end time", endTime);
+  
+
+  const calEvent = await Calendar.createEventAsync(
+    calId, 
+    {
+      alarms: [firstAlarm, secondAlarm], 
+      allDay: false, 
+      availability: Calendar.Availability.FREE,
+      calendarId: calId, 
+      startDate: startTime, 
+      id: eventID,
+      endDate: endTime, 
+      title: eventName,
+      notes: note
+    }
+  );
+  console.log(calEvent);
+}
+
+async function getCalendarId(){
+  const { status } = await Calendar.requestCalendarPermissionsAsync();
+  if (status === 'granted') {
+    const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+    for(calendar of calendars){
+      if (calendar['title'] === 'Inventory Calendar'){
+        return calendar['id'];
+      }
+    }
+    return -1
+  }
+}
+
 
 /**
  * Returns a string in MM/DD/YY format for a given date 

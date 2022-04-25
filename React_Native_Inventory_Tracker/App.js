@@ -14,6 +14,7 @@ import FloatingButton from './FloatingButton';
 import * as ImagePicker from 'expo-image-picker'; //expo install expo-image-picker
 import { Asset } from 'expo-asset';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import * as Calendar from 'expo-calendar';
 
 import HomeScreen from "./screens/HomeScreen";
 import FoodScreen from "./screens/FoodScreen";
@@ -32,10 +33,46 @@ import FoodPicScreenGeneral from "./screens/FoodPicScreenGeneral";
 import AddItemSection from "./screens/AddItemSection";
 
 
-
 const db = SQLite.openDatabase('db'); //if app wont load after a reload change the name of the db (no clue why this happens)
 const Stack = createNativeStackNavigator();
 const defaultPic = Asset.fromModule(require('./assets/default.jpg')).uri;
+
+async function getDefaultCalendarSource() {
+  const defaultCalendar = await Calendar.getDefaultCalendarAsync();
+  return defaultCalendar.source;
+}
+
+async function setupCalendar(){
+  const defaultCalendarSource =
+    Platform.OS === 'ios'
+      ? await getDefaultCalendarSource()
+      : { isLocalAccount: true, name: 'Inventory Calendar' };
+  const newCalendarID = await Calendar.createCalendarAsync({
+    title: 'Inventory Calendar',
+    color: 'blue',
+    entityType: Calendar.EntityTypes.EVENT,
+    sourceId: defaultCalendarSource.id,
+    source: defaultCalendarSource,
+    name: 'internalCalendarName',
+    ownerAccount: 'personal',
+    accessLevel: Calendar.CalendarAccessLevel.OWNER,
+  });
+  console.log(`Your new calendar ID is: ${newCalendarID}`);
+}
+
+async function checkCalendar(){
+  const { status } = await Calendar.requestCalendarPermissionsAsync();
+  if (status === 'granted') {
+    const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+    for(calendar of calendars){
+      if (calendar['title'] === 'Inventory Calendar'){
+        return 1
+      }
+    }
+    return 0
+  }
+  return -1
+}
 
 function setupDB() {
   db.exec([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false, () =>
@@ -124,6 +161,11 @@ export default function App() {
           Avenir: require("./assets/fonts/Avenir.otf")
         });
         await setupDB();
+        const calendarExists = await checkCalendar();
+        console.log("Calendar Exists: ", calendarExists);
+        if(!calendarExists){
+          await setupCalendar();
+        }
         //await new Promise(resolve => setTimeout(resolve, 1500)); //force splash screen to stay on for 1.5 seconds
       } catch (e) {
         console.warn(e);

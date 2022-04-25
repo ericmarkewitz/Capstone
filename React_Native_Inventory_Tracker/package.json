@@ -32,7 +32,8 @@
     "react-native-navigation-container": "^1.0.6",
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-web": "0.17.1",
-    "react-navigation": "^4.4.4"
+    "react-navigation": "^4.4.4",
+    "expo-calendar": "~10.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"
