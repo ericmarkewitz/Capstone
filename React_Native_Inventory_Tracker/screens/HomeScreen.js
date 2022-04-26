@@ -33,7 +33,7 @@ const db = SQLite.openDatabase('db');
             </View>
   
             <View style={styles.pantryButton}>
-              <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Pantry', { sectionID: 0 }) }}>
+              <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Food', { sectionID: 0 }) }}>
                 <Text style={styles.text}>VIEW PANTRY</Text>
                 <Image source={require("../assets/pantry.png")} />
               </TouchableOpacity>

@@ -24,7 +24,6 @@ import Canning from "./screens/Canning";
 import WishList from "./screens/WishList";
 import AddItems from './screens/AddItems';
 import AddSection from './screens/AddSection';
-import Pantry from './screens/Pantry';
 import EmptyJar from './screens/EmptyJar';
 import BatchLocation from './screens/BatchLocation';
 import ViewLocation from './screens/ViewLocation';
@@ -197,7 +196,6 @@ export default function App() {
           <Stack.Screen name="Food" component={FoodScreen} />
           <Stack.Screen name="Item" component={FoodPicScreen} />
           <Stack.Screen name="AddItems" component={AddItems} />
-          <Stack.Screen name="Pantry" component={Pantry} />
           <Stack.Screen name="Canning" component={Canning} />
           <Stack.Screen name="AddSection" component={AddSection} />
           <Stack.Screen name="Sections" component={Sections} />
