@@ -36,7 +36,7 @@ function addItemGeneral(productName, expDate, sectionID, quantity, notes, imageP
       )
     });
     */
-    
+
     return (
       Alert.alert(
         "Product added.",
@@ -67,7 +67,7 @@ function addItemGeneral(productName, expDate, sectionID, quantity, notes, imageP
 
 
 function AddItemsGeneral({ route, navigation }) {
-  const {sectionID} = route.params;
+  const { sectionID } = route.params;
 
   const [nameOfItem, setText] = useState('');
   const [quantity, setTextQuan] = useState('');
@@ -148,6 +148,7 @@ function AddItemsGeneral({ route, navigation }) {
             <TextInput //stores the quantitiy of an item in quantity
               style={styles.input}
               placeholder="Add quantity"
+              keyboardType={'number-pad'}
               onChangeText={(quantity) => setTextQuan(quantity)}
               defaultValue={quantity}
             />
@@ -162,7 +163,7 @@ function AddItemsGeneral({ route, navigation }) {
               value={isEnabled}
             />
             <View style={styles.row}>
-              <Text>{'Expiration Date:\n'}</Text>
+              <Text>{'Expiration Date:'}</Text>
 
               {(showAndroid &&
                 <TouchableHighlight
@@ -175,7 +176,13 @@ function AddItemsGeneral({ route, navigation }) {
 
               {show && ((isEnabled && showiOS) || showAndroid) && (
                 <DateTimePicker
-                  style={{ width: '30%' }}
+                  style={{
+                    width: '25%',
+                    position: 'absolute',
+                    right: 5,
+                    top: 5,
+                    height: 50,
+                  }}
                   testID="dateTimePicker"
                   value={expDate}
                   mode={mode}
@@ -237,7 +244,7 @@ function AddItemsGeneral({ route, navigation }) {
  * @param {} param0 
  * @returns 
  */
- function dateToStr(date) {
+function dateToStr(date) {
   function addZeroes(str) { //adds 0s to month and date to fit schema format
     if (str.length < 2) { return "0" + str; }
     else return str;
@@ -306,6 +313,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
+    paddingBottom: 40,
   },
   button: {
     backgroundColor: '#859a9b',

@@ -103,22 +103,21 @@ function AddItems({ navigation }) {
               keyboardAppearance={'dark'}
               keyboardType={'number-pad'}
               placeholder="Add quantity"
-              onChangeText={(quantity) => 
-                {
-                  setTextQuan(quantity)
-                  if(quantity > 0 && quantity !== null){
-                    //toggle add cans page
-                    
-                  }
-                  else{
-                    //dont need to toggle the cans page
-                    
-                  }
-                }}
+              onChangeText={(quantity) => {
+                setTextQuan(quantity)
+                if (quantity > 0 && quantity !== null) {
+                  //toggle add cans page
+
+                }
+                else {
+                  //dont need to toggle the cans page
+
+                }
+              }}
               defaultValue={quantity}
             />
-            <View style={{flexDirection: 'row'}}>
-              <View style={{justifyContent: 'center'}}>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ justifyContent: 'center' }}>
                 <Text style={styles.textAddExpiration}>Would you like to add</Text>
                 <Text style={styles.textAddExpiration}> an expiration date?</Text>
               </View>
@@ -131,14 +130,14 @@ function AddItems({ navigation }) {
                 value={isEnabled}
               />
             </View>
-            
+
             <View style={styles.row}>
-              <View style={{flexDirection: 'row'}}>
-                <View style={{justifyContent: 'center'}}>
+              <View style={{ flexDirection: 'row' }}>
+                <View style={{ justifyContent: 'center' }}>
                   <Text>{'Expiration Date:'}</Text>
                 </View>
               </View>
-              
+
               {(showAndroid &&
                 <TouchableHighlight
                   onPress={showDatePicker}
@@ -150,7 +149,13 @@ function AddItems({ navigation }) {
 
               {show && ((isEnabled && showiOS) || showAndroid) && (
                 <DateTimePicker
-                  style={{ width: '30%' }}
+                  style={{
+                    width: '25%',
+                    position: 'absolute',
+                    right: 5,
+                    top: 5,
+                    height: 50,
+                  }}
                   testID="dateTimePicker"
                   value={expDate}
                   mode={mode}
@@ -162,25 +167,25 @@ function AddItems({ navigation }) {
 
               {showiOS && !isEnabled && (<Text>N/A</Text>)}
             </View>
-            
-              {show && isEnabled &&(
-                <View style={{flexDirection: 'row'}}>
-                  <View style={{justifyContent: 'center'}}>
-                    <Text style={{justifyContent: 'center'}}>Add to Calendar</Text>
-                  </View>
-                  
-                  <Switch //toggle switch, if on then 
-                    style={styles.space}
-                    trackColor={{ false: "#767577", true: "#81b0ff" }}
-                    thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-                    ios_backgroundColor="#3e3e3e"
-                    onValueChange={toggleMakeCalEvent}
-                    value={makeCalEvent}
-                  />
+
+            {show && isEnabled && (
+              <View style={{ flexDirection: 'row' }}>
+                <View style={{ justifyContent: 'center' }}>
+                  <Text style={{ justifyContent: 'center' }}>Add to Calendar</Text>
                 </View>
-              )}
-           
-            
+
+                <Switch //toggle switch, if on then 
+                  style={styles.space}
+                  trackColor={{ false: "#767577", true: "#81b0ff" }}
+                  thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={toggleMakeCalEvent}
+                  value={makeCalEvent}
+                />
+              </View>
+            )}
+
+
 
             <TextInput //stores additional info in addntInfo
               style={styles.textBox}
@@ -211,11 +216,11 @@ function AddItems({ navigation }) {
               onPress={() => {
                 addItem(nameOfItem, realExpDate, 0, quantity, addntInfo, image);
                 //console.log(realExpDate);
-                if((realExpDate !== 'N/A') && makeCalEvent) {
+                if ((realExpDate !== 'N/A') && makeCalEvent) {
                   //console.log("creating cal event");
                   //console.log(realExpDate);
                   createCalendarEvent(realExpDate, nameOfItem, addntInfo);
-                  
+
                 }
 
                 //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
@@ -285,11 +290,11 @@ function addItem(product, expDate, shelfID, quantity, notes, imagePath) {
 }
 
 
-async function createCalendarEvent(expDate, nameOfItem, note){
-  const firstAlarm = {relativeOffset: -2880};
-  const secondAlarm = {relativeOffset: -10080};
+async function createCalendarEvent(expDate, nameOfItem, note) {
+  const firstAlarm = { relativeOffset: -2880 };
+  const secondAlarm = { relativeOffset: -10080 };
   const eventName = nameOfItem + " expires";
-  
+
   const calId = await getCalendarId();
   console.log("calid", calId);
   //console.log(expDate);
@@ -303,18 +308,18 @@ async function createCalendarEvent(expDate, nameOfItem, note){
   console.log("format date", formatDate);
   console.log("start time", startTime);
   console.log("end time", endTime);
-  
+
 
   const calEvent = await Calendar.createEventAsync(
-    calId, 
+    calId,
     {
-      alarms: [firstAlarm, secondAlarm], 
-      allDay: false, 
+      alarms: [firstAlarm, secondAlarm],
+      allDay: false,
       availability: Calendar.Availability.FREE,
-      calendarId: calId, 
-      startDate: startTime, 
+      calendarId: calId,
+      startDate: startTime,
       id: eventID,
-      endDate: endTime, 
+      endDate: endTime,
       title: eventName,
       notes: note
     }
@@ -322,12 +327,12 @@ async function createCalendarEvent(expDate, nameOfItem, note){
   console.log(calEvent);
 }
 
-async function getCalendarId(){
+async function getCalendarId() {
   const { status } = await Calendar.requestCalendarPermissionsAsync();
   if (status === 'granted') {
     const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-    for(calendar of calendars){
-      if (calendar['title'] === 'Inventory Calendar'){
+    for (calendar of calendars) {
+      if (calendar['title'] === 'Inventory Calendar') {
         return calendar['id'];
       }
     }
@@ -341,7 +346,7 @@ async function getCalendarId(){
  * @param {} param0 
  * @returns 
  */
- function dateToStr(date) {
+function dateToStr(date) {
   function addZeroes(str) { //adds 0s to month and date to fit schema format
     if (str.length < 2) { return "0" + str; }
     else return str;
@@ -410,6 +415,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
+    paddingBottom: 20,
   },
   button: {
     backgroundColor: '#859a9b',
