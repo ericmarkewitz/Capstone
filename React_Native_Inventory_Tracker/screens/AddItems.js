@@ -205,6 +205,10 @@ function AddItems({ navigation }) {
               >
                 <Text style={styles.textForAddItems}>ADD IMAGE</Text>
               </TouchableOpacity>
+              {image && <Image
+                  source={{ uri: image }}
+                  style={{ width: 45, height: 60, borderRadius: 5 }}
+                />}
 
             </View>
 
@@ -415,7 +419,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    paddingBottom: 20,
+    paddingBottom: 0.5,
   },
   button: {
     backgroundColor: '#859a9b',

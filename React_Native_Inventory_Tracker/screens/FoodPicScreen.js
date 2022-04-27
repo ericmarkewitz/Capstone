@@ -206,7 +206,6 @@ function updateImagePath(image, batchID) {
                 <Text style={styles.borderText} onChange={updateExpDate(dateToStr(date), details.batchID)} >{dateToStr(date)}</Text>
               </TouchableHighlight>)}
 
-            <Text>selected: {date.toLocaleString()}</Text>
 
           </KeyboardAwareScrollView>
 
@@ -253,8 +252,7 @@ function updateImagePath(image, batchID) {
             style={styles.floatinBtn}
             onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
           />
-          <Text>selected: {date.toLocaleString()//there was another datetimepicker right after this that I deleted (was getting in the way), lmk what it was for if it was needed
-          }</Text>
+
 
         </KeyboardAwareScrollView >
       </KeyboardAwareScrollView>

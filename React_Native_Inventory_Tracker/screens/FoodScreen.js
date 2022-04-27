@@ -31,6 +31,28 @@ function selectBatch(sectionID, sortBy) {
   return items;
 }
 
+//Returns sectionName
+function getSectionName(sectionID){
+  let [secName, setsecName] = useState('Section');
+
+  useEffect(() => {
+    let isUnfin = true;
+    db.transaction((tx) => {
+      tx.executeSql(
+        'select sectionName from Section where sectionID = ?;',
+        [sectionID],
+        (tx, results) => {
+          if (isUnfin) {
+            setsecName(results.rows.item(0).sectionName);
+          }
+        }
+      )
+    });
+    return () => isUnfin = false;
+  });
+  return secName;
+}
+
 
 /**
  * The foodScreen shows the user a list of all the items that are shownin the database. The list is sorted
@@ -40,6 +62,7 @@ function selectBatch(sectionID, sortBy) {
  */
 function FoodScreen({ route, navigation }) {
   const { sectionID } = route.params; //receive sectionID
+  var sectionName = getSectionName(sectionID);
   var items = selectBatch(sectionID, 'productID'); //query db for items in shelf
   const NoItemsInSection = ({ item, navigation }) => {
     return (
@@ -57,7 +80,7 @@ function FoodScreen({ route, navigation }) {
     >
       <View style={styles.container}>
         <View styel={styles.pantryButton}>
-          <Text style={styles.textHead}>ITEMS IN YOUR SECTION:</Text>
+          <Text style={styles.textHead}>ITEMS IN {sectionName.toUpperCase()}</Text>
         </View>
         <FlatList
           data={items}
@@ -78,7 +101,7 @@ function FoodScreen({ route, navigation }) {
         />
       </View>
       <View style={styles.pantryButton}>
-        <TouchableOpacity style={styles.button} onPress={() => { navigation.push('AddItemsGeneral', { sectionID: sectionID }) }}>
+        <TouchableOpacity style={styles.button} onPress={() => { navigation.push('AddItemsGeneral', { sectionID: sectionID, sectionName: sectionName }) }}>
           <Text style={styles.text}>ADD A NEW ITEM</Text>
           <Image source={require("../assets/plusButton.png")} />
         </TouchableOpacity>

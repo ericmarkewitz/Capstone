@@ -67,7 +67,7 @@ function addItemGeneral(productName, expDate, sectionID, quantity, notes, imageP
 
 
 function AddItemsGeneral({ route, navigation }) {
-  const { sectionID } = route.params;
+  const { sectionID, sectionName } = route.params;
 
   const [nameOfItem, setText] = useState('');
   const [quantity, setTextQuan] = useState('');
@@ -134,7 +134,7 @@ function AddItemsGeneral({ route, navigation }) {
       <KeyboardAwareScrollView>
         <View style={styles.container}>
           <View style={styles.pantryButton}>
-            <Text style={styles.textHead}>ADD ITEMS TO YOUR PANTRY</Text>
+            <Text style={styles.textHead}>ADD ITEMS TO {sectionName.toUpperCase()}</Text>
           </View>
           <Text></Text>
           <Text></Text>
@@ -212,6 +212,10 @@ function AddItemsGeneral({ route, navigation }) {
               >
                 <Text style={styles.textForAddItems}>ADD IMAGE</Text>
               </TouchableOpacity>
+              {image && <Image
+                  source={{ uri: image }}
+                  style={{ width: 45, height: 60, borderRadius: 5 }}
+                />}
 
             </View>
 
@@ -224,7 +228,7 @@ function AddItemsGeneral({ route, navigation }) {
                 addItemGeneral(nameOfItem, realExpDate, sectionID, quantity, addntInfo, image)
                 //console.log('adding' + nameOfItem + ' with a quantity of ' + quantity + ' expiring on ' + expDate + ' with Additional info of:\n' + addntInfo) 
               }}>
-              <Text style={styles.textForAddItems}>ADD ITEM TO INVENTORY</Text>
+              <Text style={styles.textForAddItems}>ADD ITEM TO {sectionName.toUpperCase()}</Text>
             </TouchableOpacity>
           </View>
 
@@ -288,7 +292,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     justifyContent: 'flex-end',
-    marginBottom: 30,
+    marginBottom: 5,
   },
   textAddExpiration: {
     textAlignVertical: 'top',
@@ -313,7 +317,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    paddingBottom: 40,
+    paddingBottom: 0.5,
   },
   button: {
     backgroundColor: '#859a9b',
