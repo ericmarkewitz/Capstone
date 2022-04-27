@@ -23,7 +23,7 @@ function selectBatch(sectionID, sortBy) {
             setItems(temp);
           }
         }
-        
+
       )
     });
     return () => isUnfin = false;
@@ -38,107 +38,107 @@ function selectBatch(sectionID, sortBy) {
  * @param {} param0 
  * @returns 
  */
- function FoodScreen({ route, navigation }) {
-    const { sectionID } = route.params; //receive sectionID
-    var items = selectBatch(sectionID, 'productID'); //query db for items in shelf
-    const NoItemsInSection = ({ item, navigation }) => {
-      return (
-        <View>
-          <Text style={styles.emptyList}>
-            This Section is Empty
-          </Text>
-        </View>
-      );
-    };
+function FoodScreen({ route, navigation }) {
+  const { sectionID } = route.params; //receive sectionID
+  var items = selectBatch(sectionID, 'productID'); //query db for items in shelf
+  const NoItemsInSection = ({ item, navigation }) => {
     return (
-      <ImageBackground
-        source={require('../assets/cart.jpg')}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <View style={styles.container}>
-          <View styel={styles.pantryButton}>
-            <Text style={styles.textHead}>YOUR SECTION {sectionID}:</Text>
-          </View>
-          <FlatList
-            data={items}
-            ListEmptyComponent={NoItemsInSection}
-            keyExtractor={(item, index) => index}
-            renderItem={({ item, index, separators }) =>
-              <TouchableHighlight
-                activeOpacity={0.6}
-                underlayColor={"#DDDDDD"}
-                onPress={() => navigation.push('SectionItem', { details: item })}
-              >
-                <View>
-                  <Text style={styles.item} > {item.productName} </Text>
-                </View>
-              </TouchableHighlight>
-            }
-            renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
-          />
+      <View>
+        <Text style={styles.emptyList}>
+          This Section is Empty
+        </Text>
+      </View>
+    );
+  };
+  return (
+    <ImageBackground
+      source={require('../assets/cart.jpg')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <View style={styles.container}>
+        <View styel={styles.pantryButton}>
+          <Text style={styles.textHead}>ITEMS IN YOUR SECTION:</Text>
         </View>
-        <View style={styles.pantryButton}>
-          <TouchableOpacity style={styles.button} onPress={() => { navigation.push('AddItemsGeneral', { sectionID: sectionID }) }}>
-            <Text style={styles.text}>ADD A NEW ITEM</Text>
-            <Image source={require("../assets/plusButton.png")} />
-          </TouchableOpacity>
-        </View>
-        <FloatingButton //This button takes ther user to the homepage 
-          style={styles.floatinBtn}
-          onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+        <FlatList
+          data={items}
+          ListEmptyComponent={NoItemsInSection}
+          keyExtractor={(item, index) => index}
+          renderItem={({ item, index, separators }) =>
+            <TouchableHighlight
+              activeOpacity={0.6}
+              underlayColor={"#DDDDDD"}
+              onPress={() => navigation.push('SectionItem', { details: item })}
+            >
+              <View>
+                <Text style={styles.item} > {item.productName} </Text>
+              </View>
+            </TouchableHighlight>
+          }
+          renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
         />
-      </ImageBackground>
-    )
+      </View>
+      <View style={styles.pantryButton}>
+        <TouchableOpacity style={styles.button} onPress={() => { navigation.push('AddItemsGeneral', { sectionID: sectionID }) }}>
+          <Text style={styles.text}>ADD A NEW ITEM</Text>
+          <Image source={require("../assets/plusButton.png")} />
+        </TouchableOpacity>
+      </View>
+      <FloatingButton //This button takes ther user to the homepage 
+        style={styles.floatinBtn}
+        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
+      />
+    </ImageBackground>
+  )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    pantryButton: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-    },
-    textHead: {
-        textAlign: 'center',
-        fontSize: 30,
-        fontFamily: 'Avenir',
-        fontWeight: 'bold',
-        color: 'black',
-    },
-    item: {
-        textAlign: "auto",
-        borderWidth: 5,
-        borderColor: "darkgrey",
-        fontSize: 30,
-        color: "black",
-        height: 75,
-        width: 300,
-    },
-    sectionHeader: {
-        textAlign: "center",
-        fontWeight: 'bold',
-        backgroundColor: 'rgba(153,204,255,1.0)',
-        fontSize: 30,
-        borderWidth: 1,
-        borderColor: "darkgrey",
-    },
-    floatinBtn: {
-        color: 'grey',
-        position: 'absolute',
-        bottom: 10,
-        right: 10,
-    },
-    emptyList: {
-      top: 200,
-      padding: 10,
-      fontSize: 18,
-      textAlign: "center",
-      fontWeight: "bold",
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pantryButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+  textHead: {
+    textAlign: 'center',
+    fontSize: 30,
+    fontFamily: 'Avenir',
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  item: {
+    textAlign: "auto",
+    borderWidth: 5,
+    borderColor: "darkgrey",
+    fontSize: 30,
+    color: "black",
+    height: 75,
+    width: 300,
+  },
+  sectionHeader: {
+    textAlign: "center",
+    fontWeight: 'bold',
+    backgroundColor: 'rgba(153,204,255,1.0)',
+    fontSize: 30,
+    borderWidth: 1,
+    borderColor: "darkgrey",
+  },
+  floatinBtn: {
+    color: 'grey',
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+  },
+  emptyList: {
+    top: 200,
+    padding: 10,
+    fontSize: 18,
+    textAlign: "center",
+    fontWeight: "bold",
   },
   addItem: {
     backgroundColor: '#859a9b',
@@ -159,25 +159,25 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir',
     fontWeight: 'bold',
     color: 'black',
-},
-pantryButton: {
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-  textAlign: 'center',
-},
-button: {
-  backgroundColor: '#859a9b',
-  borderRadius: 20,
-  padding: 10,
-  marginTop: 10,
-  marginBottom: 10,
-  shadowColor: '#303838',
-  shadowOffset: { width: 0, height: 5 },
-  shadowRadius: 10,
-  shadowOpacity: 0.35,
-  justifyContent: 'flex-end',
-  //marginBottom: 60, //originally was marginBottom20 with no marginTop and marginBottom 60 uncommented, feel free to revert
-},
+  },
+  pantryButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+  button: {
+    backgroundColor: '#859a9b',
+    borderRadius: 20,
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 10,
+    shadowColor: '#303838',
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    justifyContent: 'flex-end',
+    //marginBottom: 60, //originally was marginBottom20 with no marginTop and marginBottom 60 uncommented, feel free to revert
+  },
 });
 export default FoodScreen;
