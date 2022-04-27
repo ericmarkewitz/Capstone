@@ -79,7 +79,6 @@ function setupDB() {
 
   db.transaction(tx => {
 
-    
     tx.executeSql('drop table if exists Stock;');
     tx.executeSql('drop table if exists Expiration;');
     tx.executeSql('drop table if exists WishList;');
@@ -92,7 +91,11 @@ function setupDB() {
     tx.executeSql('drop table if exists Shelves;');
     tx.executeSql('drop table if exists Storage;');
     
+  });
 
+  //Create tables
+  db.transaction(tx => {
+    //Canning db
     tx.executeSql('create table if not exists Storage(locationID integer primary key,locationName text);');
     tx.executeSql('create table if not exists Shelves(shelfID integer primary key,locationID integer,shelfName text,foreign key (locationID) references Storage (locationID));');
     tx.executeSql('create table if not exists Batch(batchID integer primary key,product text,datePlaced text check (datePlaced glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),expDate text check (expDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expDate glob \'N/A\'),shelfID integer, quantity integer check (quantity >= 0), notes text, imagePath text, foreign key (shelfID) references Shelves(shelfID));');
@@ -105,13 +108,17 @@ function setupDB() {
     tx.executeSql('create table if not exists WishList(productID integer primary key, product text, foreign key (productID) references Product(productID));');
     tx.executeSql('create table if not exists Expiration(productID integer primary key, expirationDate text check (expirationDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expirationDate glob \'N/A\'),foreign key (productID) references Product (productID));');
     tx.executeSql('create table if not exists Stock(productID integer,shelfID integer,locationID integer,datePurchased text check (datePurchased glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),quantity integer check (quantity >= 0),primary key(productID,shelfID,locationID),foreign key (productID) references Product(productID),foreign key (shelfID, locationID) references Shelf(shelfID,locationID));');
+  });
 
-    //Table setup
+  //Storage setup
+  db.transaction(tx => {
     tx.executeSql('insert into Storage values (?,?);', [0, 'Pantry']);
     tx.executeSql('insert into Shelves values (?,?,?);', [0, 0, 'Shelf A']);
     tx.executeSql('insert into Section values (?,?,?);',[0, 'Pantry', defaultPic]);
+  });
 
-    //dummy data
+  //dummy data
+  db.transaction(tx => {
 
     tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);',[0, 'Pickles', '02/18/22','05/27/22', 0, 4,'Green',defaultPic]);
     tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);',[1, 'Peas', '01/17/22','03/18/23', 0, 12,'Also green',defaultPic]);
@@ -119,33 +126,45 @@ function setupDB() {
     tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);',[3, 'Peanuts', '12/04/21','03/04/22', 0, 456, '', defaultPic]);
     tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);',[4, 'Non perishable', '12/25/19','N/A', 0, 9999, '', defaultPic]);
 
+  });
+
+  db.transaction(tx => {
+
     tx.executeSql('insert into Jars values (?,?,?);',[0, '16oz', 'regular']);
     tx.executeSql('insert into Jars values (?,?,?);',[1, '20oz', 'wide']);
     tx.executeSql('insert into Jars values (?,?,?);',[2, '48oz', 'regular']);
     tx.executeSql('insert into Jars values (?,?,?);',[3, '12oz', 'wide']);
 
-    //tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);',[0, 'test', '02/18/22','05/27/22', 0, 4,'definitely not green',defaultPic]);
-  
-    tx.executeSql('insert into WishList values (?,?);', [0,'Walnuts']);
-    tx.executeSql('insert into WishList values (?,?);', [1,'Medicine']);
+  });
+
+  db.transaction(tx => {
+
     tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);',[0, 'Pickles', '02/18/22','05/27/22', 0, 4,'Green',defaultPic]);
     tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);',[1, 'Peas', '01/17/22','03/18/23', 0, 12,'Also green',defaultPic]);
 
+  });
 
+  /* //Does not work because of the productID foreign key
+  db.transaction(tx => {
+  
+    tx.executeSql('insert into WishList values (?,?);', [0,'Walnuts']);
+    tx.executeSql('insert into WishList values (?,?);', [1,'Medicine']);
+  });
+  */
 
+  /*
+  db.transaction(tx => {
+    tx.executeSql('insert into CannedGoods values (0, 0);');
+    tx.executeSql('insert into CannedGoods values (1, 1);');
+    tx.executeSql('insert into CannedGoods values (2, 2);');
+    tx.executeSql('insert into CannedGoods values (3, 3);');
 
-
-    //tx.executeSql('insert into CannedGoods values (0, 0);');
-    //tx.executeSql('insert into CannedGoods values (1, 1);');
-    //tx.executeSql('insert into CannedGoods values (2, 2);');
-    //tx.executeSql('insert into CannedGoods values (3, 3);');
-
-    //tx.executeSql('insert into CannedGoods values (2, 0);');
-    //tx.executeSql('insert into CannedGoods values (0, 1);');
-    //tx.executeSql('insert into CannedGoods values (0, 2);');
-    //tx.executeSql('insert into CannedGoods values (0, 3);');
-  })
-
+    tx.executeSql('insert into CannedGoods values (2, 0);');
+    tx.executeSql('insert into CannedGoods values (0, 1);');
+    tx.executeSql('insert into CannedGoods values (0, 2);');
+    tx.executeSql('insert into CannedGoods values (0, 3);');
+  });
+  */
 }
 
 export default function App() {
