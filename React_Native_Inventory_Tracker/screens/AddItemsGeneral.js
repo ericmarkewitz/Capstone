@@ -163,7 +163,7 @@ function AddItemsGeneral({ route, navigation }) {
               value={isEnabled}
             />
             <View style={styles.row}>
-              <Text>{'Expiration Date:'}</Text>
+              <Text style = {{paddingRight: 5}}>{'Expiration Date:'}</Text>
 
               {(showAndroid &&
                 <TouchableHighlight
@@ -178,9 +178,7 @@ function AddItemsGeneral({ route, navigation }) {
                 <DateTimePicker
                   style={{
                     width: '25%',
-                    position: 'absolute',
-                    right: 5,
-                    top: 5,
+                    top: -15,
                     height: 50,
                   }}
                   testID="dateTimePicker"
@@ -292,7 +290,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     justifyContent: 'flex-end',
-    marginBottom: 5,
+    marginBottom: 30,
   },
   textAddExpiration: {
     textAlignVertical: 'top',
