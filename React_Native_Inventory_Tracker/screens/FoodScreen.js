@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, SafeAreaView, Button, SectionList, FlatList, TouchableOpacity, TouchableHighlight, TextInput, Switch, ImageBackground, Alert, Platform, TouchableWithoutFeedback, ScrollView } from "react-native";
 import FloatingButton from '../FloatingButton';
 import * as SQLite from 'expo-sqlite';
+import { Asset } from 'expo-asset';
+import * as ImagePicker from 'expo-image-picker';
 
 const db = SQLite.openDatabase('db');
 
@@ -54,8 +56,20 @@ function getSectionName(sectionID){
 }
 
 
+
+//updates imagePath field
+function updateImagePath(image, sectionID) {
+  db.transaction((tx) => {
+    tx.executeSql(
+      'update Section set imagePath = ? where sectionID = ?;',
+      [image, sectionID],
+    )
+  });
+}
+
+
 /**
- * The foodScreen shows the user a list of all the items that are shownin the database. The list is sorted
+ * The foodScreen shows the user a list of all the items that are shown in the database. The list is sorted
  * in alphabetical order and displayed. When the user clicks on an item it displays the information about the item
  * @param {} param0 
  * @returns 
@@ -63,6 +77,49 @@ function getSectionName(sectionID){
 function FoodScreen({ route, navigation }) {
   const { sectionID } = route.params; //receive sectionID
   var sectionName = getSectionName(sectionID);
+  const {show, setShow}= useState(false);
+
+  //Returns imagePath
+  const getImagePath = () => {
+    useEffect(() => {
+      let isUnfin = true;
+      
+      db.transaction((tx) => {
+        tx.executeSql(
+          'select imagePath from Section where sectionID = ?;',
+          [sectionID],
+          (tx, results) => {
+            if (isUnfin) {
+              setImage(results.rows.item(0).imagePath);
+            }
+          }
+        )
+      });
+      return () => isUnfin = false;
+    });
+    //setShow(true);
+  };
+
+
+
+  const [image, setImage] = useState(getImagePath(sectionID));
+
+  const pickImage = async () => {
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [3, 4],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      updateImagePath(result.uri, sectionID);
+      setImage(result.uri);
+
+    }
+  };
+
   var items = selectBatch(sectionID, 'productID'); //query db for items in shelf
   const NoItemsInSection = ({ item, navigation }) => {
     return (
@@ -99,8 +156,17 @@ function FoodScreen({ route, navigation }) {
           }
           renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}> {section.title} </Text>}
         />
+
       </View>
+
       <View style={styles.pantryButton}>
+        <TouchableHighlight onPress={ pickImage }>
+          <Image
+              source={{ uri: image }}
+              style={{ width: 75, height: 100, position: 'relative', borderRadius: 5 }}
+          />
+        </TouchableHighlight>
+
         <TouchableOpacity style={styles.button} onPress={() => { navigation.push('AddItemsGeneral', { sectionID: sectionID, sectionName: sectionName }) }}>
           <Text style={styles.text}>ADD A NEW ITEM</Text>
           <Image source={require("../assets/plusButton.png")} />

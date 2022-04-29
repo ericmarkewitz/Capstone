@@ -77,6 +77,7 @@ function setupDB() {
     console.log('Foreign keys turned on')
   );
 
+  /*
   db.transaction(tx => {
 
     tx.executeSql('drop table if exists Stock;');
@@ -92,6 +93,7 @@ function setupDB() {
     tx.executeSql('drop table if exists Storage;');
     
   });
+  */
 
   //Create tables
   db.transaction(tx => {
