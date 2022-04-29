@@ -163,7 +163,7 @@ function AddItemsGeneral({ route, navigation }) {
               value={isEnabled}
             />
             <View style={styles.row}>
-              <Text style = {{paddingRight: 5}}>{'Expiration Date:'}</Text>
+              <Text style={{ paddingRight: 5 }}>{'Expiration Date:'}</Text>
 
               {(showAndroid &&
                 <TouchableHighlight
@@ -211,9 +211,9 @@ function AddItemsGeneral({ route, navigation }) {
                 <Text style={styles.textForAddItems}>ADD IMAGE</Text>
               </TouchableOpacity>
               {image && <Image
-                  source={{ uri: image }}
-                  style={{ width: 45, height: 60, borderRadius: 5 }}
-                />}
+                source={{ uri: image }}
+                style={{ width: 45, height: 60, borderRadius: 5 }}
+              />}
 
             </View>
 
@@ -232,9 +232,10 @@ function AddItemsGeneral({ route, navigation }) {
 
         </View>
       </KeyboardAwareScrollView>
+
       <FloatingButton //This button takes ther user to the homepage 
         style={styles.floatinBtn}
-        onPress={() => navigation.navigate('INVENTORY TRACKING')}
+        onPress={() => navigation.navigate('INVENTORY TRACKING APP')}
       />
 
     </ImageBackground>

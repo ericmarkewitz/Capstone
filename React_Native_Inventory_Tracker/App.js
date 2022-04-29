@@ -40,7 +40,7 @@ async function getDefaultCalendarSource() {
   return defaultCalendar.source;
 }
 
-async function setupCalendar(){
+async function setupCalendar() {
   const defaultCalendarSource =
     Platform.OS === 'ios'
       ? await getDefaultCalendarSource()
@@ -58,12 +58,12 @@ async function setupCalendar(){
   console.log(`Your new calendar ID is: ${newCalendarID}`);
 }
 
-async function checkCalendar(){
+async function checkCalendar() {
   const { status } = await Calendar.requestCalendarPermissionsAsync();
   if (status === 'granted') {
     const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-    for(calendar of calendars){
-      if (calendar['title'] === 'Inventory Calendar'){
+    for (calendar of calendars) {
+      if (calendar['title'] === 'Inventory Calendar') {
         return 1
       }
     }
@@ -116,33 +116,33 @@ function setupDB() {
   db.transaction(tx => {
     tx.executeSql('insert into Storage values (?,?);', [0, 'Pantry']);
     tx.executeSql('insert into Shelves values (?,?,?);', [0, 0, 'Shelf A']);
-    tx.executeSql('insert into Section values (?,?,?);',[0, 'Pantry', defaultPic]);
+    tx.executeSql('insert into Section values (?,?,?);', [0, 'Pantry', defaultPic]);
   });
 
   //dummy data
   db.transaction(tx => {
 
-    tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);',[0, 'Pickles', '02/18/22','05/27/22', 0, 4,'Green',defaultPic]);
-    tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);',[1, 'Peas', '01/17/22','03/18/23', 0, 12,'Also green',defaultPic]);
-    tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);',[2, 'Walnuts', '01/11/22','03/23/22', 0, 123, 'Not green', defaultPic]);
-    tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);',[3, 'Peanuts', '12/04/21','03/04/22', 0, 456, '', defaultPic]);
-    tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);',[4, 'Non perishable', '12/25/19','N/A', 0, 9999, '', defaultPic]);
+    tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);', [0, 'Pickles', '02/18/22', '05/27/22', 0, 4, 'Green', defaultPic]);
+    tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);', [1, 'Peas', '01/17/22', '03/18/23', 0, 12, 'Also green', defaultPic]);
+    tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);', [2, 'Walnuts', '01/11/22', '03/23/22', 0, 123, 'Not green', defaultPic]);
+    tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);', [3, 'Peanuts', '12/04/21', '03/04/22', 0, 456, '', defaultPic]);
+    tx.executeSql('insert into Batch values (?,?,?,?,?,?,?,?);', [4, 'Non perishable', '12/25/19', 'N/A', 0, 9999, '', defaultPic]);
 
   });
 
   db.transaction(tx => {
 
-    tx.executeSql('insert into Jars values (?,?,?);',[0, '16oz', 'regular']);
-    tx.executeSql('insert into Jars values (?,?,?);',[1, '20oz', 'wide']);
-    tx.executeSql('insert into Jars values (?,?,?);',[2, '48oz', 'regular']);
-    tx.executeSql('insert into Jars values (?,?,?);',[3, '12oz', 'wide']);
+    tx.executeSql('insert into Jars values (?,?,?);', [0, '16oz', 'regular']);
+    tx.executeSql('insert into Jars values (?,?,?);', [1, '20oz', 'wide']);
+    tx.executeSql('insert into Jars values (?,?,?);', [2, '48oz', 'regular']);
+    tx.executeSql('insert into Jars values (?,?,?);', [3, '12oz', 'wide']);
 
   });
 
   db.transaction(tx => {
 
-    tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);',[0, 'Pickles', '02/18/22','05/27/22', 0, 4,'Green',defaultPic]);
-    tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);',[1, 'Peas', '01/17/22','03/18/23', 0, 12,'Also green',defaultPic]);
+    tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);', [0, 'Pickles', '02/18/22', '05/27/22', 0, 4, 'Green', defaultPic]);
+    tx.executeSql('insert into Product values (?,?,?,?,?,?,?,?);', [1, 'Peas', '01/17/22', '03/18/23', 0, 12, 'Also green', defaultPic]);
 
   });
 
@@ -182,7 +182,7 @@ export default function App() {
         await setupDB();
         const calendarExists = await checkCalendar();
         console.log("Calendar Exists: ", calendarExists);
-        if(!calendarExists){
+        if (!calendarExists) {
           await setupCalendar();
         }
         //await new Promise(resolve => setTimeout(resolve, 1500)); //force splash screen to stay on for 1.5 seconds

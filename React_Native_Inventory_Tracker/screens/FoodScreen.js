@@ -34,7 +34,7 @@ function selectBatch(sectionID, sortBy) {
 }
 
 //Returns sectionName
-function getSectionName(sectionID){
+function getSectionName(sectionID) {
   let [secName, setsecName] = useState('Section');
 
   useEffect(() => {
@@ -77,13 +77,13 @@ function updateImagePath(image, sectionID) {
 function FoodScreen({ route, navigation }) {
   const { sectionID } = route.params; //receive sectionID
   var sectionName = getSectionName(sectionID);
-  const {show, setShow}= useState(false);
+  const { show, setShow } = useState(false);
 
   //Returns imagePath
   const getImagePath = () => {
     useEffect(() => {
       let isUnfin = true;
-      
+
       db.transaction((tx) => {
         tx.executeSql(
           'select imagePath from Section where sectionID = ?;',
@@ -160,10 +160,10 @@ function FoodScreen({ route, navigation }) {
       </View>
 
       <View style={styles.pantryButton}>
-        <TouchableHighlight onPress={ pickImage }>
+        <TouchableHighlight onPress={pickImage}>
           <Image
-              source={{ uri: image }}
-              style={{ width: 75, height: 100, position: 'relative', borderRadius: 5 }}
+            source={{ uri: image }}
+            style={{ width: 75, height: 100, position: 'relative', borderRadius: 5 }}
           />
         </TouchableHighlight>
 
