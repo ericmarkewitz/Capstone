@@ -33,18 +33,14 @@ function HomeScreen({ navigation }) {
           </View>
 
           <View style={styles.pantryButton}>
-            <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Food', { sectionID: 0 }) }}>
-              <Text style={styles.text}>VIEW PANTRY</Text>
-              <Image source={require("../assets/pantry.png")} />
-            </TouchableOpacity>
           </View>
           <View>
-            {sections.slice(1).map(sections => {
+            {sections.map(sections => {
               return (
                 <View key={sections.sectionID}>
                   <TouchableOpacity style={styles.button} onPress={() => { navigation.push('Food', { sectionID: sections.sectionID }) }}>
                     <Text style={styles.text}>{sections.sectionName}</Text>
-                    <Image source={require("../assets/newSection.png")} />
+                    <Image source={{uri: sections.imagePath}} style={{ width: 150, height: 150, borderRadius: 20}} />
                   </TouchableOpacity>
                 </View>
               )

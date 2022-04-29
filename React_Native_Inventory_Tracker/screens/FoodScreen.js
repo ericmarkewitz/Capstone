@@ -6,6 +6,8 @@ import { Asset } from 'expo-asset';
 import * as ImagePicker from 'expo-image-picker';
 
 const db = SQLite.openDatabase('db');
+const pantryIcon = Asset.fromModule(require('../assets/pantry.png')).uri;
+const sectionIcon = Asset.fromModule(require('../assets/newSection.png')).uri;
 
 //Returns items in a given shelf
 function selectBatch(sectionID, sortBy) {
@@ -67,6 +69,19 @@ function updateImagePath(image, sectionID) {
   });
 }
 
+function imageChangedAlert(){
+    return (
+      Alert.alert(
+        "Image changed.",
+        "",
+        [{
+          text: "OK",
+        }]
+      )
+    );
+}
+
+
 
 /**
  * The foodScreen shows the user a list of all the items that are shown in the database. The list is sorted
@@ -100,6 +115,37 @@ function FoodScreen({ route, navigation }) {
     //setShow(true);
   };
 
+  const revertImage = () => {
+    if (sectionID === 0){ //if pantry
+      db.transaction((tx) => {
+        tx.executeSql(
+          'update Section set imagePath = ? where sectionID = ?;',
+          [pantryIcon, sectionID],
+        )
+      });
+      setImage(pantryIcon);
+    }
+    else {
+      db.transaction((tx) => {
+        tx.executeSql(
+          'update Section set imagePath = ? where sectionID = ?;',
+          [sectionIcon, sectionID],
+        )
+      });
+      setImage(sectionIcon);
+    }
+    return (
+      Alert.alert(
+        "Image reverted.",
+        "",
+        [{
+          text: "OK",
+        }]
+      )
+    );
+  
+  }
+
 
 
   const [image, setImage] = useState(getImagePath(sectionID));
@@ -109,13 +155,14 @@ function FoodScreen({ route, navigation }) {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [3, 4],
+      aspect: [4, 4],
       quality: 1,
     });
 
     if (!result.cancelled) {
       updateImagePath(result.uri, sectionID);
       setImage(result.uri);
+      imageChangedAlert();
 
     }
   };
@@ -160,12 +207,36 @@ function FoodScreen({ route, navigation }) {
       </View>
 
       <View style={styles.pantryButton}>
-        <TouchableHighlight onPress={pickImage}>
-          <Image
-            source={{ uri: image }}
-            style={{ width: 75, height: 100, position: 'relative', borderRadius: 5 }}
-          />
-        </TouchableHighlight>
+
+        <View style = {styles.row}>
+          <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
+                style={styles.button}
+                onPress={pickImage} 
+              >
+                <Text style={styles.text}>REPLACE IMAGE</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored
+                style={styles.button}
+
+                onPress={() =>
+                  Alert.alert(
+                    "Are you sure you want to restore this image to its default?",
+                    "You cannot undo this action.",
+                    [
+                      { text: "No" },
+                      {
+                        text: "Yes",
+                        onPress: revertImage
+                      }
+                    ])}
+
+              >
+                <Text style={styles.text}>REVERT IMAGE</Text>
+          </TouchableOpacity>
+          
+        </View>
+
 
         <TouchableOpacity style={styles.button} onPress={() => { navigation.push('AddItemsGeneral', { sectionID: sectionID, sectionName: sectionName }) }}>
           <Text style={styles.text}>ADD A NEW ITEM</Text>
@@ -207,6 +278,10 @@ const styles = StyleSheet.create({
     color: "black",
     height: 75,
     width: 300,
+  },
+  row: {
+    flexDirection: "row",
+    paddingBottom: 0.5,
   },
   sectionHeader: {
     textAlign: "center",
@@ -261,6 +336,8 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: 10,
     marginBottom: 10,
+    marginRight: 5,
+    marginLeft: 5,
     shadowColor: '#303838',
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,

@@ -8,7 +8,7 @@ import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 
 const db = SQLite.openDatabase('db');
 
-const defaultPic = Asset.fromModule(require('../assets/default.jpg')).uri;
+const defaultPic = Asset.fromModule(require('../assets/newSection.png')).uri;
 
 function insertSection(sectionName, imagePath) {
   let sectionID = 0
@@ -70,7 +70,7 @@ function AddSection({ navigation }) {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [3, 4],
+      aspect: [4, 4],
       quality: 1,
     });
 
@@ -93,7 +93,7 @@ function AddSection({ navigation }) {
 
         {image && <Image
           source={{ uri: image }}
-          style={{ width: 90, height: 120 }}
+          style={{ width: 150, height: 150, borderRadius: 20 }}
         />}
 
         <TouchableOpacity //Add the items into the database from here! check if the expiration date should be stored

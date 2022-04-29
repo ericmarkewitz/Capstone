@@ -22,11 +22,11 @@ function dateToStr(date) {
   else { return ((addZeroes((date.getMonth() + 1).toString())) + '/' + (addZeroes(date.getDate().toString())) + '/' + (date.getFullYear().toString().substring(2))); }
 }
 
-function addToWishList(batchID, product) {
+function addToWishList(product) {
   db.transaction(tx => {
     tx.executeSql(
-      'insert into WishList (batchID, product) values (?,?);',
-      [batchID, product]
+      'insert into WishList (product) values (?);',
+      [product]
     )
   });
   return (
@@ -247,7 +247,7 @@ function updateImagePath(image, batchID) {
                   }])}>
             <Text style={styles.textForAddItems}>DELETE</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.addToWishListbtn} onPress={() => addToWishList(details.batchID, details.product)}><Image style={styles.addItemToWLPic} source={require("../assets/wishList.png")} /></TouchableOpacity>
+          <TouchableOpacity style={styles.addToWishListbtn} onPress={() => addToWishList(details.product)}><Image style={styles.addItemToWLPic} source={require("../assets/wishList.png")} /></TouchableOpacity>
           <FloatingButton //This button takes ther user to the homepage 
             style={styles.floatinBtn}
             onPress={() => navigation.navigate('INVENTORY TRACKING APP')}

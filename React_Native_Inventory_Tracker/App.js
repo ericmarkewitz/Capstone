@@ -34,6 +34,8 @@ import FoodPicScreenGeneral from "./screens/FoodPicScreenGeneral";
 const db = SQLite.openDatabase('db'); //if app wont load after a reload change the name of the db (no clue why this happens)
 const Stack = createNativeStackNavigator();
 const defaultPic = Asset.fromModule(require('./assets/default.jpg')).uri;
+const pantryIcon = Asset.fromModule(require('./assets/pantry.png')).uri;
+const sectionIcon = Asset.fromModule(require('./assets/newSection.png')).uri;
 
 async function getDefaultCalendarSource() {
   const defaultCalendar = await Calendar.getDefaultCalendarAsync();
@@ -77,9 +79,9 @@ function setupDB() {
     console.log('Foreign keys turned on')
   );
 
-  /*
+  
   db.transaction(tx => {
-
+    /*
     tx.executeSql('drop table if exists Stock;');
     tx.executeSql('drop table if exists Expiration;');
     tx.executeSql('drop table if exists WishList;');
@@ -107,7 +109,7 @@ function setupDB() {
     //General db
     tx.executeSql('create table if not exists Section(sectionID integer primary key, sectionName text, imagePath text);');
     tx.executeSql('create table if not exists Product(productID integer primary key,productName text,datePlaced text check (datePlaced glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),expDate text check (expDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expDate glob \'N/A\'),sectionID integer, quantity integer check (quantity >= 0), notes text, imagePath text, foreign key (sectionID) references Section(sectionID)););');
-    tx.executeSql('create table if not exists WishList(productID integer primary key, product text, foreign key (productID) references Product(productID));');
+    tx.executeSql('create table if not exists WishList(productID integer primary key, product text);');
     tx.executeSql('create table if not exists Expiration(productID integer primary key, expirationDate text check (expirationDate glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\' or expirationDate glob \'N/A\'),foreign key (productID) references Product (productID));');
     tx.executeSql('create table if not exists Stock(productID integer,shelfID integer,locationID integer,datePurchased text check (datePurchased glob \'[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\'),quantity integer check (quantity >= 0),primary key(productID,shelfID,locationID),foreign key (productID) references Product(productID),foreign key (shelfID, locationID) references Shelf(shelfID,locationID));');
   });
@@ -116,7 +118,7 @@ function setupDB() {
   db.transaction(tx => {
     tx.executeSql('insert into Storage values (?,?);', [0, 'Pantry']);
     tx.executeSql('insert into Shelves values (?,?,?);', [0, 0, 'Shelf A']);
-    tx.executeSql('insert into Section values (?,?,?);', [0, 'Pantry', defaultPic]);
+    tx.executeSql('insert into Section values (?,?,?);', [0, 'PANTRY', pantryIcon]);
   });
 
   //dummy data
