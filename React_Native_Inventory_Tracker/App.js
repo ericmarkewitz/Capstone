@@ -79,9 +79,9 @@ function setupDB() {
     console.log('Foreign keys turned on')
   );
 
-  
+  /*
   db.transaction(tx => {
-    /*
+    
     tx.executeSql('drop table if exists Stock;');
     tx.executeSql('drop table if exists Expiration;');
     tx.executeSql('drop table if exists WishList;');
